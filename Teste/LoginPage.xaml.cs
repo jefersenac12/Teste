@@ -1,9 +1,8 @@
-using System.Net.Http;
+
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Microsoft.Maui.Controls;
+
 
 namespace Teste
 {
@@ -117,12 +116,5 @@ namespace Teste
         {
             await Navigation.PushAsync(new CadastroFamiliaPage());
         }
-    }
-
-    public class Usuario
-    {
-        public string Nome { get; set; }
-        public string Telefone { get; set; }
-        public string CNPJ { get; set; }
     }
 }

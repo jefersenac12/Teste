@@ -1,5 +1,4 @@
-// ReservasAtivasPage.xaml.cs
-using Microsoft.Maui.Controls;
+
 
 namespace Teste
 {
