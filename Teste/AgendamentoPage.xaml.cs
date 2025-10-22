@@ -2,10 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
-using System.Linq;
-using Microsoft.Maui.Controls;
-using Teste.Models;
-using Teste.ViewModels;
+
 
 namespace Teste
 {
