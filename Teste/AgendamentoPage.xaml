@@ -1,0 +1,132 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" x:Class="Teste.AgendamentoPage" xmlns:local="clr-namespace:Teste" BackgroundColor="#F6EEE7" Title="Agendamento">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Color x:Key="PrimaryColor">#891633</Color>
+            <Color x:Key="WhiteColor">#FFFFFF</Color>
+            <Color x:Key="LightGrayColor">#E0E0E0</Color>
+            <Style x:Key="NavButton" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="Transparent" />
+                <Setter Property="TextColor" Value="{StaticResource PrimaryColor}" />
+                <Setter Property="FontSize" Value="18" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="WidthRequest" Value="36" />
+                <Setter Property="HeightRequest" Value="36" />
+                <Setter Property="Padding" Value="0" />
+            </Style>
+            <Style x:Key="TitleLabel" TargetType="Label">
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="TextColor" Value="{StaticResource PrimaryColor}" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="HorizontalOptions" Value="Center" />
+                <Setter Property="VerticalOptions" Value="Center" />
+            </Style>
+            <Style x:Key="CardContainer" TargetType="Border">
+                <Setter Property="StrokeShape" Value="RoundRectangle 16" />
+                <Setter Property="Background" Value="#FFFFFF" />
+                <Setter Property="Padding" Value="16" />
+                <Setter Property="Shadow">
+                    <Setter.Value>
+                        <Shadow Brush="#20000000" Opacity="0.3" Radius="8" />
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style x:Key="FruitItem" TargetType="Border">
+                <Setter Property="StrokeShape" Value="RoundRectangle 12" />
+                <Setter Property="Background" Value="#F7EFE8" />
+                <Setter Property="Padding" Value="12" />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <ScrollView>
+        <VerticalStackLayout Spacing="24" Padding="16" HorizontalOptions="Center">
+            <!-- Cabeçalho principal -->
+            <Label Text="Selecione a data" Style="{StaticResource TitleLabel}" FontSize="24" HorizontalOptions="Start" />
+            <!-- Cartão do calendário -->
+            <Border Style="{StaticResource CardContainer}" WidthRequest="304">
+                <VerticalStackLayout Spacing="10">
+                    <HorizontalStackLayout Spacing="12" HorizontalOptions="Center">
+                        <Button Text="&lt;" Style="{StaticResource NavButton}" Clicked="OnMesAnteriorClicked"/>
+                        <Label x:Name="MesLabel" Text="Julho 2024" Style="{StaticResource TitleLabel}" FontSize="20"/>
+                        <Button Text=">" Style="{StaticResource NavButton}" Clicked="OnProximoMesClicked"/>
+                    </HorizontalStackLayout>
+                    <!-- Cabeçalho de dias da semana -->
+                    <Grid ColumnDefinitions="*,*,*,*,*,*" Padding="2,0,4,7" HorizontalOptions="Center" WidthRequest="300">
+                        <Label Text="D" Grid.Column="0" HorizontalOptions="Center" TextColor="#8B8B8B" FontSize="12"/>
+                        <Label Text="S" Grid.Column="1" HorizontalOptions="Center" TextColor="#8B8B8B" FontSize="12"/>
+                        <Label Text="T" Grid.Column="2" HorizontalOptions="Center" TextColor="#8B8B8B" FontSize="12"/>
+                        <Label Text="Q" Grid.Column="3" HorizontalOptions="Center" TextColor="#8B8B8B" FontSize="12"/>
+                        <Label Text="Q" Grid.Column="4" HorizontalOptions="Center" TextColor="#8B8B8B" FontSize="12"/>
+                        <Label Text="S" Grid.Column="5" HorizontalOptions="Center" TextColor="#8B8B8B" FontSize="12"/>
+                        <Label Text="S" Grid.Column="6" HorizontalOptions="Center" TextColor="#8B8B8B" FontSize="12"/>
+                    </Grid>
+                    <!-- Dias do calendário -->
+                    <CollectionView x:Name="DiasCollectionView" SelectionMode="Single" SelectionChanged="OnDiaSelecionado" Background="Transparent" HorizontalOptions="Center" WidthRequest="280" ItemSizingStrategy="MeasureAllItems">
+                        <CollectionView.ItemsLayout>
+                            <GridItemsLayout Orientation="Vertical" Span="5" HorizontalItemSpacing="6" VerticalItemSpacing="6"/>
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="local:DiaCalendario">
+                                <Border x:Name="DayBorder" StrokeShape="RoundRectangle 6" BackgroundColor="#FFFFFF" StrokeThickness="1" Stroke="#E0D5CC" HeightRequest="38" WidthRequest="38" Padding="0" HorizontalOptions="Center" VerticalOptions="Center">
+                                    <Label Text="{Binding Numero}" TextColor="#891633" FontSize="13" FontAttributes="Bold" LineBreakMode="NoWrap" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" HorizontalOptions="Center" VerticalOptions="Center">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" Binding="{Binding Numero}" Value="0">
+                                                <Setter Property="IsVisible" Value="False" />
+                                            </DataTrigger>
+                                            <DataTrigger TargetType="Label" Binding="{Binding IsFromCurrentMonth}" Value="False">
+                                                <Setter Property="TextColor" Value="#D0C0B0" />
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
+                                    <Border.Triggers>
+                                        <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                            <Setter Property="BackgroundColor" Value="#C48E6B" />
+                                            <Setter Property="Stroke" Value="#C48E6B" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Border" Binding="{Binding IsFromCurrentMonth}" Value="False">
+                                            <Setter Property="Opacity" Value="0.3" />
+                                        </DataTrigger>
+                                    </Border.Triggers>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+            </Border>
+            <!-- Frutas da temporada -->
+            <Label Text="Frutas da Temporada" Style="{StaticResource TitleLabel}" FontSize="24" HorizontalOptions="Start"/>
+            <Border Style="{StaticResource CardContainer}" WidthRequest="304">
+                <VerticalStackLayout Spacing="12">
+                    <HorizontalStackLayout Spacing="8" Padding="4,0,0,0">
+                        <Label Text="🗓️" FontSize="16" VerticalOptions="Center"/>
+                        <Label Text="Julho 2024" FontAttributes="Bold" TextColor="#891633" />
+                    </HorizontalStackLayout>
+                    <VerticalStackLayout x:Name="FrutasList" BindableLayout.ItemsSource="{Binding Frutas}" Spacing="8">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <Border Style="{StaticResource FruitItem}">
+                                    <HorizontalStackLayout Spacing="12">
+                                        <Label Text="🍓"/>
+                                        <Label Text="{Binding .}" TextColor="#98694C"/>
+                                    </HorizontalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+            <!-- Estado vazio -->
+            <Border Style="{StaticResource CardContainer}" WidthRequest="304">
+                <VerticalStackLayout Spacing="8" HorizontalOptions="Center" x:Name="EmptyState">
+                    <Label Text="🌱" FontSize="28" HorizontalOptions="Center"/>
+                    <Label x:Name="NoFruitsLabel" Text="Nenhuma fruta em safra esse mês" IsVisible="False" HorizontalOptions="Center" TextColor="#8B6B61" FontSize="14"/>
+                </VerticalStackLayout>
+            </Border>
+            <!-- Barra inferior com botão principal -->
+            <Grid ColumnDefinitions="56,*" WidthRequest="304">
+                <Button Grid.ColumnSpan="2" BackgroundColor="#891633" TextColor="#FFFFFF" FontAttributes="Bold" HeightRequest="52" CornerRadius="12" HorizontalOptions="Fill" Clicked="OnContinuarClicked" Padding="0" FontSize="16" >
+                    <Button.Text>&#x1F4C5; Continuar Para Atividade</Button.Text>
+                </Button>
+            </Grid>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Teste.CadastroFamiliaPage"
+             BackgroundColor="#FFF8F0"
+             Padding="24">
+
+    <VerticalStackLayout Spacing="16"
+                         VerticalOptions="Center"
+                         HorizontalOptions="Center">
+
+        <!-- Logo -->
+        <Image Source="logo_villagio.png"
+               WidthRequest="120"
+               HeightRequest="120"
+               HorizontalOptions="Center" />
+
+        <!-- Abas -->
+        <HorizontalStackLayout Spacing="12"
+                               HorizontalOptions="Center">
+            <!-- Aba Entrar -->
+            <VerticalStackLayout>
+                <Button Text="Entrar"
+                        BackgroundColor="Transparent"
+                        TextColor="#891633"
+                        FontAttributes="Bold"
+                        WidthRequest="120"
+                        HeightRequest="40"
+                        Clicked="OnEntrarClicked" />
+                <!-- Linha inativa -->
+                <BoxView HeightRequest="2"
+                         WidthRequest="120"
+                         BackgroundColor="#FAF6F3"
+                         HorizontalOptions="Center" />
+            </VerticalStackLayout>
+
+            <!-- Aba Cadastrar -->
+            <VerticalStackLayout>
+                <Button Text="Cadastrar"
+                        BackgroundColor="Transparent"
+                        TextColor="#891633"
+                        FontAttributes="Bold"
+                        WidthRequest="120"
+                        HeightRequest="40" />
+                <BoxView HeightRequest="2"
+                         WidthRequest="120"
+                         BackgroundColor="#891633"
+                         HorizontalOptions="Center" />
+            </VerticalStackLayout>
+        </HorizontalStackLayout>
+
+        <!-- Botões de escolha -->
+        <HorizontalStackLayout Spacing="12"
+                               HorizontalOptions="Center"
+                               Margin="0,16,0,0">
+            <Button Text="Família"
+                    BackgroundColor="#891633"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    WidthRequest="120"
+                    HeightRequest="40" />
+            <Button Text="Agência"
+                    BackgroundColor="#FAF6F3"
+                    TextColor="#98694C"
+                    FontAttributes="Bold"
+                    WidthRequest="120"
+                    HeightRequest="40"
+                    Clicked="OnAgenciaClicked" />
+        </HorizontalStackLayout>
+
+        <!-- Campo Nome -->
+        <VerticalStackLayout Spacing="4" WidthRequest="280" Margin="0,8,0,0">
+            <Label Text="Nome Completo"
+                   FontSize="14"
+                   TextColor="#98694C"
+                   FontAttributes="Bold" />
+            <Entry x:Name="nomeEntry"
+                   BackgroundColor="#FAF6F3"
+                   TextColor="#000"
+                   PlaceholderColor="#999"
+                   HeightRequest="45" />
+        </VerticalStackLayout>
+
+        <!-- Campo Telefone -->
+        <VerticalStackLayout Spacing="4" WidthRequest="280">
+            <Label Text="Telefone"
+                   FontSize="14"
+                   TextColor="#98694C"
+                   FontAttributes="Bold" />
+            <Entry x:Name="telefoneEntry"
+                   Keyboard="Telephone"
+                   BackgroundColor="#FAF6F3"
+                   TextColor="#000"
+                   PlaceholderColor="#999"
+                   HeightRequest="45" />
+        </VerticalStackLayout>
+
+        <!-- Campo Senha -->
+        <VerticalStackLayout Spacing="4" WidthRequest="280">
+            <Label Text="Senha"
+                   FontSize="14"
+                   TextColor="#98694C"
+                   FontAttributes="Bold" />
+            <Entry x:Name="senhaEntry"
+                   IsPassword="True"
+                   BackgroundColor="#FAF6F3"
+                   TextColor="#000"
+                   PlaceholderColor="#999"
+                   HeightRequest="45" />
+        </VerticalStackLayout>
+
+        <!-- Botão Cadastrar -->
+        <Button Text="Cadastrar"
+                BackgroundColor="#891633"
+                TextColor="White"
+                FontAttributes="Bold"
+                WidthRequest="280"
+                HeightRequest="50"
+                CornerRadius="10"
+                Margin="0,12,0,0"
+                Clicked="OnCadastrarFamiliaClicked" />
+
+    </VerticalStackLayout>
+</ContentPage>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Teste.LoginPage"
+             BackgroundColor="#FFF8F0"
+             Padding="24">
+
+    <VerticalStackLayout Spacing="16"
+                         VerticalOptions="Center"
+                         HorizontalOptions="Center">
+
+        <!-- Logo -->
+        <Image Source="logo_villagio.png"
+               WidthRequest="120"
+               HeightRequest="120"
+               HorizontalOptions="Center" />
+
+        <!-- Abas -->
+        <HorizontalStackLayout Spacing="0"
+                               HorizontalOptions="Center"
+                               Margin="0,12,0,0">
+            <!-- Aba Entrar -->
+            <VerticalStackLayout>
+                <Button Text="Entrar"
+                        BackgroundColor="Transparent"
+                        TextColor="#891633"
+                        FontAttributes="Bold"
+                        FontFamily="Canvas_Inline_Reg"
+                        WidthRequest="140"
+                        HeightRequest="40"
+                        FontSize="20"
+                        BorderWidth="0"
+                        CornerRadius="0" />
+                <BoxView HeightRequest="2"
+                         WidthRequest="140"
+                         Color="#891633"
+                         HorizontalOptions="Center" />
+            </VerticalStackLayout>
+
+            <!-- Aba Cadastrar -->
+            <VerticalStackLayout>
+                <Button Text="Cadastrar"
+                        BackgroundColor="Transparent"
+                        TextColor="#891633"
+                        FontFamily="Canvas_Inline_Reg"
+                        FontAttributes="Bold"
+                        WidthRequest="140"
+                        FontSize="20"
+                        HeightRequest="40"
+                        BorderWidth="0"
+                        CornerRadius="0"
+                        Clicked="OnCadastrarClicked" />
+                <BoxView HeightRequest="2"
+                         WidthRequest="140"
+                         Color="#98694C"
+                         HorizontalOptions="Center" />
+            </VerticalStackLayout>
+        </HorizontalStackLayout>
+
+        <!-- Campo Telefone -->
+        <VerticalStackLayout Spacing="4" WidthRequest="280" Margin="0,8,0,0">
+            <Label Text="Telefone"
+                   FontSize="14"
+                   TextColor="#98694C"
+                   FontAttributes="Bold"/>
+            <Entry x:Name="identificadorEntry"
+                   Keyboard="Telephone"
+                   BackgroundColor="#FAF6F3"
+                   TextColor="#000"
+                   PlaceholderColor="#999"
+                   HeightRequest="45"
+                   TextChanged="OnIdentificadorChanged" />
+        </VerticalStackLayout>
+
+        <!-- Campo Senha -->
+        <VerticalStackLayout Spacing="4" WidthRequest="280">
+            <Label Text="Senha"
+                   FontSize="14"
+                   TextColor="#98694C"
+                   FontAttributes="Bold"/>
+            <Entry x:Name="senhaEntry"
+                   IsPassword="True"
+                   BackgroundColor="#FAF6F3"
+                   TextColor="#000"
+                   PlaceholderColor="#999"
+                   HeightRequest="45" />
+        </VerticalStackLayout>
+
+        <!-- Botão Entrar -->
+        <Button x:Name="entrarButton"
+                Text="Entrar"
+                BackgroundColor="#891633"
+                TextColor="White"
+                FontAttributes="Bold"
+                WidthRequest="280"
+                HeightRequest="50"
+                CornerRadius="10"
+                Margin="0,12,0,0"
+                Clicked="OnEntrarClicked" />
+
+    </VerticalStackLayout>
+</ContentPage>

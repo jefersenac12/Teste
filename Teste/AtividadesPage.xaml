@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Teste.AtividadesPage"
+             Title="Escolha suas atividades"
+             BackgroundColor="#FFF8F0">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20,20,20,0" Spacing="20" HorizontalOptions="Center" WidthRequest="350">
+
+            <!-- Cabeçalho -->
+            <Grid ColumnDefinitions="Auto,*,Auto" VerticalOptions="Center" HeightRequest="40" WidthRequest="310">
+                <ImageButton Source="seta_voltar.png"
+                             WidthRequest="28"
+                             HeightRequest="28"
+                             BackgroundColor="Transparent"
+                             Clicked="BtnVoltar_Clicked" />
+
+                <Label Grid.Column="1"
+                       Text=""
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center" />
+
+                <ImageButton Grid.Column="2"
+                             Source="icone_perfil.png"
+                             WidthRequest="28"
+                             HeightRequest="28"
+                             BackgroundColor="Transparent" />
+            </Grid>
+
+            <!-- Título principal -->
+            <Label Text="Escolha suas atividades"
+                   FontSize="24"
+                   FontAttributes="Bold"
+                   TextColor="#891633"
+                   FontFamily="ComicNeue-Bold"
+                   HorizontalOptions="Center"
+                   Margin="0,0,0,10" />
+
+            <!-- Dropdown de atividade -->
+            <Label Text="Selecione uma atividade"
+                   FontSize="14"
+                   TextColor="#98694C"
+                   Margin="0,0,0,5" />
+
+
+            <!-- Opções de atividades -->
+            <VerticalStackLayout Spacing="10" HorizontalOptions="Center" WidthRequest="310">
+
+                <!-- Café da manhã Básico -->
+                <Border StrokeThickness="0" BackgroundColor="#ffffffff" Stroke="#FCEFE9" StrokeShape="RoundRectangle 12">
+                    <Grid Padding="10" ColumnDefinitions="Auto,*">
+                        <CheckBox x:Name="CheckBasico"
+                                  VerticalOptions="Center"
+                                  Color="#891633" />
+                        <VerticalStackLayout Grid.Column="1" Margin="10,0,0,0">
+                            <Label Text="Café da manhã Básico"
+                                   FontAttributes="Bold"
+                                   FontSize="15"
+                                   TextColor="#891633" />
+                            <Label Text="R$25,00 por pessoa"
+                                   FontSize="13"
+                                   TextColor="#A42D45" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+
+                <!-- Café da manhã Completo -->
+                <Border StrokeThickness="0" BackgroundColor="White" Stroke="#FCEFE9" StrokeShape="RoundRectangle 12">
+                    <Grid Padding="10" ColumnDefinitions="Auto,*">
+                        <CheckBox x:Name="CheckCompleto"
+                                  VerticalOptions="Center"
+                                  Color="#7A1C1C" />
+                        <VerticalStackLayout Grid.Column="1" Margin="10,0,0,0">
+                            <Label Text="Café da manhã Completo"
+                                   FontAttributes="Bold"
+                                   FontSize="15"
+                                   TextColor="#891633" />
+                            <Label Text="R$65,00 por pessoa"
+                                   FontSize="13"
+                                   TextColor="#A42D45" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+
+                <!-- Trezinho / Colha e Pague -->
+                <Border StrokeThickness="0" BackgroundColor="#ffffffff" Stroke="#FCEFE9" StrokeShape="RoundRectangle 12">
+                    <Grid Padding="10" ColumnDefinitions="Auto,*">
+                        <CheckBox x:Name="CheckTrezinho"
+                                  VerticalOptions="Center"
+                                  Color="#891633" />
+                        <VerticalStackLayout Grid.Column="1" Margin="10,0,0,0">
+                            <Label Text="Trezinho / Colha e Pague"
+                                   FontAttributes="Bold"
+                                   FontSize="15"
+                                   TextColor="#891633" />
+                            <Label Text="R$15,00 por pessoa"
+                                   FontSize="13"
+                                   TextColor="#A42D45" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Data fixa -->
+            <Label Text="Data:"
+                   FontSize="14"
+                   TextColor="#794325"
+                   FontAttributes="Bold"
+                   Margin="0,10,0,0"/>
+            <Border BackgroundColor="#ffffffff" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="12,10" WidthRequest="310">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Text="15/10/2025"
+                           TextColor="#891633"
+                           FontSize="15"
+HorizontalOptions="Center"
+                           VerticalOptions="Center" />
+                    <Image Source="icone_calendario.png"
+                           WidthRequest="20"
+                           HeightRequest="20"
+                           VerticalOptions="Center"
+                           Grid.Column="1" />
+                </Grid>
+            </Border>
+
+            <!-- Horário -->
+            <Label Text="Selecione um Horario que Preferir:"
+                   FontSize="14"
+                   TextColor="#794325"
+                   FontAttributes="Bold"
+                       />
+            <TimePicker x:Name="TimePickerHorario"
+                         PropertyChanged="TimePickerHorario_PropertyChanged"
+                         Format="HH:mm"
+                         BackgroundColor="#ffffff"
+                         HorizontalOptions="Fill"
+                         VerticalOptions="Center"
+                         TextColor="#891633"
+                         WidthRequest="310" />
+            <!-- Contador de adultos e crianças -->
+            <VerticalStackLayout Spacing="20" WidthRequest="310">
+
+                <!-- Adultos -->
+                <Grid ColumnDefinitions="*,150,*,Auto" VerticalOptions="Center" Padding="0,0,0,0">
+                    <Label Text="Adultos"
+               TextColor="#891633"
+               FontAttributes="Bold"
+               FontSize="15"
+               VerticalOptions="Center"
+               Grid.Column="0"
+               />
+                    <Button Text="−"
+                Clicked="BtnAdultoMenos_Clicked"
+                WidthRequest="36"
+                HeightRequest="36"
+                CornerRadius="18"
+                BorderColor="#B9805D"
+                BorderWidth="1"
+                BackgroundColor="Transparent"
+                TextColor="#7A1C1C"
+                HorizontalOptions="End"
+                Grid.Column="1"/>
+                    <Label x:Name="LblAdultos"
+               Text="0"
+               FontSize="16"
+               HorizontalOptions="Center"
+               VerticalOptions="Center"
+               TextColor="#891633"
+               Grid.Column="2"/>
+                    <Button Text="+"
+                Clicked="BtnAdultoMais_Clicked"
+                WidthRequest="36"
+                HeightRequest="36"
+                CornerRadius="18"
+                BorderColor="#B9805D"
+                BorderWidth="1"
+                BackgroundColor="Transparent"
+                TextColor="#7A1C1C"
+                HorizontalOptions="End"
+                Grid.Column="3"/>
+                </Grid>
+
+                <!-- Crianças 0 a 5 -->
+                <VerticalStackLayout>
+                    <Label Text="Crianças (0 a 5 anos)"
+               TextColor="#891633"
+               FontAttributes="Bold"
+               FontSize="15" />
+                    <Label Text="Crianças de 0 a 5 anos não pagam"
+               FontSize="12"
+Margin="0,0,0,20"
+               TextColor="#794325" />
+                    <Grid ColumnDefinitions="*,150,*,Auto" VerticalOptions="Center">
+                        <Label Text=""
+                   Grid.Column="0"/>
+                        <Button Text="−"
+                    Clicked="BtnCrianca0a5Menos_Clicked"
+                    WidthRequest="36"
+                    HeightRequest="36"
+                    CornerRadius="18"
+                    BorderColor="#B9805D"
+                    BorderWidth="1"
+                    BackgroundColor="Transparent"
+                    TextColor="#891633"
+                    HorizontalOptions="End"
+                    Grid.Column="1"/>
+                        <Label x:Name="LblCrianca0a5"
+                   Text="0"
+                   FontSize="16"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"
+                   TextColor="#891633"
+                   Grid.Column="2"/>
+                        <Button Text="+"
+                    Clicked="BtnCrianca0a5Mais_Clicked"
+                    WidthRequest="36"
+                    HeightRequest="36"
+                    CornerRadius="18"
+                    BorderColor="#B9805D"
+                    BorderWidth="1"
+                    BackgroundColor="Transparent"
+                    TextColor="#891633"
+                    HorizontalOptions="End"
+                    Grid.Column="3"/>
+                    </Grid>
+                </VerticalStackLayout>
+
+                <!-- Crianças 6 a 12 -->
+                <VerticalStackLayout>
+                    <Label Text="Crianças (6 a 12 anos)"
+               TextColor="#891633"
+               FontAttributes="Bold"
+               FontSize="15" />
+                    <Label Text="Crianças de 6 a 12 anos pagam meia entrada"
+               FontSize="12"
+                        Margin="0,0,0,20"
+               TextColor="#794325" />
+                    <Grid ColumnDefinitions="*,150,*,Auto" VerticalOptions="Center">
+                        <Label Text=""
+                   Grid.Column="0"/>
+                        <Button Text="−"
+                    Clicked="BtnCrianca6a12Menos_Clicked"
+                    WidthRequest="36"
+                    HeightRequest="36"
+                    CornerRadius="18"
+                    BorderColor="#794325"
+                    BorderWidth="1"
+                    BackgroundColor="Transparent"
+                    TextColor="#891633"
+                    HorizontalOptions="End"
+                    Grid.Column="1"/>
+                        <Label x:Name="LblCrianca6a12"
+                   Text="0"
+                   FontSize="16"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"
+                   TextColor="#891633"
+                   Grid.Column="2"/>
+                        <Button Text="+"
+                    Clicked="BtnCrianca6a12Mais_Clicked"
+                    WidthRequest="36"
+                    HeightRequest="36"
+                    CornerRadius="18"
+                    BorderColor="#B9805D"
+                    BorderWidth="1"
+                    BackgroundColor="Transparent"
+                    TextColor="#891633"
+                    HorizontalOptions="End"
+                    Grid.Column="3"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+            <!-- Total estimado -->
+            <Border BackgroundColor="#ffffffff"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12"
+                    Padding="15"
+                    Margin="0,10,0,0"
+                    WidthRequest="310">
+                <Label x:Name="LblTotalEstimado"
+                       Text="Total estimado: R$0,00"
+                       HorizontalOptions="Center"
+                       FontAttributes="Bold"
+                       FontSize="17"
+                       TextColor="#891633" />
+            </Border>
+
+            <!-- Botão continuar -->
+            <Button Text="💳 Continuar para pagamento"
+                    x:Name="BtnContinuar"
+                    Clicked="BtnContinuar_Clicked"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    CornerRadius="12"
+                    TextColor="White"
+                    BackgroundColor="#891633"
+                    HeightRequest="55"
+                    Margin="0,5,0,20"
+                    WidthRequest="310"/>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

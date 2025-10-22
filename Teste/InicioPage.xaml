@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Teste.MainPage"
+             BackgroundColor="#FFFFFF"
+             Padding="24">
+
+    <VerticalStackLayout Spacing="16"
+                         VerticalOptions="Center"
+                         HorizontalOptions="Center">
+
+        <!-- Botão Agência -->
+        <Button Text="Familia"
+                Clicked="OnFamiliaClicked"
+                BackgroundColor="#FAF6F3"
+                TextColor="#8B4513"
+                FontSize="20"
+                FontAttributes="Bold"
+                WidthRequest="280"
+                FontFamily="Canvas_Inline_Reg"
+                HeightRequest="120"
+                CornerRadius="12"
+                BorderWidth="0"
+                Padding="12"
+                ImageSource="casinha.png"
+                ContentLayout="Top,8" />
+
+
+        <!-- Botão Agência -->
+        <Button Text="Agência"
+                Clicked="OnAgenciaClicked"
+                BackgroundColor="#FAF6F3"
+                TextColor="#8B4513"
+                FontSize="20"
+                FontFamily="Canvas_Inline_Reg"
+                FontAttributes="Bold"
+                WidthRequest="280"
+                HeightRequest="120"
+                CornerRadius="12"
+                BorderWidth="0"
+                Padding="12"
+                ImageSource="predio.png"
+                ContentLayout="Top,8" />
+
+        <HorizontalStackLayout HorizontalOptions="Center"
+                               Margin="0,32,0,0"
+                               Spacing="4">
+            <Label Text="Já tenho uma conta – "
+                   FontSize="16"
+                   TextColor="#8B4513"
+                   VerticalOptions="Center"/>
+
+            <Button Text="Fazer login"
+                    FontSize="16"
+                    TextColor="#8B0000"
+                    FontAttributes="Bold"
+                    BackgroundColor="Transparent"
+                    Padding="0"
+                    Clicked="OnLoginClicked"/>
+        </HorizontalStackLayout>
+
+    </VerticalStackLayout>
+</ContentPage>

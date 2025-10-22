@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Teste.PerfilPage"
+             Title="Meu Perfil"
+             BackgroundColor="#FAF6F3"
+             Padding="0">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="0" Padding="0" HorizontalOptions="Fill">
+
+            <!-- Header -->
+            <Border  Padding="0">
+                <Grid HeightRequest="60" Padding="200,0" ColumnSpacing="0" HorizontalOptions="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0" 
+                            Text="←" 
+                            FontSize="20" 
+                            TextColor="#8B0000" 
+                            BackgroundColor="Transparent" 
+                            BorderWidth="0" 
+                            Padding="10" 
+                            WidthRequest="120"
+                            HeightRequest="44"
+                            HorizontalOptions="Start"
+                            VerticalOptions="Center"
+                            Clicked="OnBackClicked" />
+
+                    <Label Grid.Column="1" 
+                           Text="Meu Perfil" 
+                           FontSize="18" 
+                           FontAttributes="Bold" 
+                           TextColor="#8B0000" 
+                           HorizontalOptions="Center" 
+                           VerticalOptions="Center" />
+
+                    <Button Grid.Column="2" 
+                            Text="⋮" 
+                            FontSize="18" 
+                            TextColor="#8B0000" 
+                            BackgroundColor="Transparent" 
+                            BorderWidth="0" 
+                            Padding="8"
+                            WidthRequest="120"
+                            HeightRequest="40"
+                            HorizontalOptions="Fill"
+                            VerticalOptions="Center" />
+                </Grid>
+            </Border>
+
+            <!-- Profile Information -->
+            <VerticalStackLayout Spacing="0" Padding="0" HorizontalOptions="Fill">
+                <VerticalStackLayout Spacing="12" Padding="20" HorizontalOptions="Center">
+
+                    <!-- Profile Picture with Camera - CORRIGIDO -->
+                    <Grid HorizontalOptions="Center" WidthRequest="100" HeightRequest="100">
+                        <Border WidthRequest="100" 
+                               HeightRequest="100"
+                               BackgroundColor="Transparent"
+                               Stroke="#8B0000"
+                               StrokeThickness="3"
+                               StrokeShape="RoundRectangle 50,50,50,50"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center">
+                            <Image x:Name="ProfileImage"
+                                   Source="gatosiames.jpg"
+                                   WidthRequest="94"
+                                   HeightRequest="94"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center"
+                                   Aspect="AspectFill"/>
+                        </Border>
+
+                        <Border WidthRequest="30" 
+                               HeightRequest="30" 
+                               BackgroundColor="#8B0000" 
+                               StrokeShape="RoundRectangle 15,15,15,15"
+                               HorizontalOptions="End" 
+                               VerticalOptions="End" 
+                               Padding="0"
+                               Stroke="Transparent"
+                               StrokeThickness="0">
+                            <Label Text="📷" 
+                                   FontSize="14" 
+                                   TextColor="#FFFFFF" 
+                                   HorizontalOptions="Center" 
+                                   VerticalOptions="Center"/>
+                        </Border>
+                    </Grid>
+
+                    <!-- Name -->
+                    <Label x:Name="UserNameLabel" 
+                           Text="João Silva" 
+                           FontSize="18" 
+                           FontAttributes="Bold" 
+                           TextColor="#8B0000" 
+                           HorizontalOptions="Center" />
+
+                    <!-- Phone -->
+                    <Label x:Name="UserPhoneLabel" 
+                           Text="(12) 99999-9999" 
+                           FontSize="14" 
+                           TextColor="#8B0000" 
+                           HorizontalOptions="Center" />
+                </VerticalStackLayout>
+         
+            </VerticalStackLayout>
+
+            <!-- Histórico de Reservas Section -->
+            <VerticalStackLayout Spacing="0" Padding="0">
+                <VerticalStackLayout Spacing="12" Padding="20" HorizontalOptions="Center" WidthRequest="300">
+
+                    <!-- Section Header -->
+                    <HorizontalStackLayout Spacing="8" HorizontalOptions="FillAndExpand">
+                        <Label Text="Histórico de Reservas" 
+                               FontSize="16" 
+                               FontAttributes="Bold" 
+                               TextColor="#8B0000" 
+                               VerticalOptions="Center" />
+
+                        <Label Text="→" 
+                               FontSize="14" 
+                               TextColor="#8B0000" 
+                               VerticalOptions="Center" 
+                               HorizontalOptions="End" />
+                    </HorizontalStackLayout>
+
+                    <!-- Reservation Items -->
+                    <VerticalStackLayout x:Name="ReservationsList" Spacing="8">
+
+                        <!-- Reserva 1 - Confirmada -->
+                        <Border Stroke="#E0D5CC"
+                                BackgroundColor="#F5F5DC"
+                                Padding="12">
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                    <Label Text="Vilagio Michelin" 
+                                           FontSize="14" 
+                                           FontAttributes="Bold" 
+                                           TextColor="#8B0000" />
+                                    <Label Text="Café da Manha Completo" 
+                                           FontSize="12" 
+                                           TextColor="#8B0000" />
+                                    <Label Text="15 de Janeiro, 2025 - 19:30" 
+                                           FontSize="11" 
+                                           TextColor="#8B0000" />
+                                </VerticalStackLayout>
+
+                                <Border Grid.Column="1" 
+                                       BackgroundColor="#FFA500"
+                                       Padding="8,4"
+                                       VerticalOptions="Start">
+                                    <Label Text="Confirmada" 
+                                           FontSize="10" 
+                                           FontAttributes="Bold" 
+                                           TextColor="#FFFFFF"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center" />
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <!-- Reserva 2 - Pendente -->
+                        <Border Stroke="#E0D5CC"
+                                BackgroundColor="#F5F5DC"
+                                Padding="12">
+                            <Grid RowSpacing="8">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <Grid Grid.Row="0" ColumnSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                        <Label Text="Vilagio Michelin" 
+                                               FontSize="14" 
+                                               FontAttributes="Bold" 
+                                               TextColor="#8B0000" />
+                                        <Label Text="Café da Manha Basico" 
+                                               FontSize="12" 
+                                               TextColor="#8B0000" />
+                                        <Label Text="20 de Janeiro, 2025 - 14:00" 
+                                               FontSize="11" 
+                                               TextColor="#8B0000" />
+                                    </VerticalStackLayout>
+
+                                    <Border Grid.Column="1" 
+                                           BackgroundColor="#FFA500"
+                                           Padding="8,4"
+                                           VerticalOptions="Start">
+                                        <Label Text="Pendente" 
+                                               FontSize="10" 
+                                               FontAttributes="Bold" 
+                                               TextColor="#FFFFFF"
+                                               HorizontalOptions="Center"
+                                               VerticalOptions="Center" />
+                                    </Border>
+                                </Grid>
+
+                                <Button Grid.Row="1" 
+                                        Text="🗑️ Excluir" 
+                                        FontSize="11" 
+                                        FontAttributes="Bold" 
+                                        TextColor="#8B0000" 
+                                        BackgroundColor="Transparent" 
+                                        BorderColor="#8B0000" 
+                                        BorderWidth="1" 
+                                        CornerRadius="12" 
+                                        Padding="8,4" 
+                                        HeightRequest="32"
+                                        HorizontalOptions="Start" 
+                                        Clicked="OnDeleteReservationClicked" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Reserva 3 - Finalizada -->
+                        <Border Stroke="#E0D5CC"
+                                BackgroundColor="#F5F5DC"
+                                Padding="12">
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                    <Label Text="Vilagio Michelin" 
+                                           FontSize="14" 
+                                           FontAttributes="Bold" 
+                                           TextColor="#8B0000" />
+                                    <Label Text="Passeio De Trezinho" 
+                                           FontSize="12" 
+                                           TextColor="#8B0000" />
+                                    <Label Text="10 de Janeiro, 2025 - 20:00" 
+                                           FontSize="11" 
+                                           TextColor="#8B0000" />
+                                </VerticalStackLayout>
+
+                                <Border Grid.Column="1" 
+                                       BackgroundColor="#C41E3A"
+                                       Padding="8,4"
+                                       VerticalOptions="Start">
+                                    <Label Text="Finalizada" 
+                                           FontSize="10" 
+                                           FontAttributes="Bold" 
+                                           TextColor="#FFFFFF"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center" />
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Ver todas as reservas -->
+                    <HorizontalStackLayout Spacing="4" HorizontalOptions="Center">
+                        <Label Text="Ver todas as reservas" 
+                               FontSize="12" 
+                               TextColor="#8B0000" 
+                               VerticalOptions="Center" />
+                        <Label Text="↓" 
+                               FontSize="12" 
+                               TextColor="#8B0000" 
+                               VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+               
+            </VerticalStackLayout>
+
+            <!-- Histórico de Atividades Section -->
+            <VerticalStackLayout Spacing="0" Padding="0" HorizontalOptions="Fill">
+                <VerticalStackLayout Spacing="12" Padding="20" HorizontalOptions="Center" WidthRequest="300">
+                    <Border Stroke="#E0D5CC"
+                            BackgroundColor="#F5F5DC"
+                            Padding="12"
+                            HorizontalOptions="FillAndExpand">
+                        <HorizontalStackLayout Spacing="10" HorizontalOptions="FillAndExpand">
+                            <Label Text="🔄" FontSize="14" TextColor="#8B0000" VerticalOptions="Center" />
+                            <Label Text="Histórico de Atividades" 
+                                   FontSize="14" 
+                                   FontAttributes="Bold" 
+                                   TextColor="#8B0000" 
+                                   VerticalOptions="Center" />
+                            <Label Text="→" 
+                                   FontSize="14" 
+                                   TextColor="#8B0000" 
+                                   VerticalOptions="Center" 
+                                   HorizontalOptions="End" />
+                        </HorizontalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+              
+            </VerticalStackLayout>
+
+            <!-- Ações Rápidas Section -->
+            <VerticalStackLayout Spacing="0" Padding="0">
+                <VerticalStackLayout Spacing="12" Padding="20" HorizontalOptions="Center" WidthRequest="300">
+
+                    <Label Text="Ações Rápidas" 
+                           FontSize="16" 
+                           FontAttributes="Bold" 
+                           TextColor="#8B0000"
+                           HorizontalOptions="Start" />
+
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Suporte Button -->
+                        <Border Grid.Column="0" 
+                               Stroke="#E0D5CC"
+                               BackgroundColor="#FFFFFF"
+                               Padding="16">
+                            <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                                <Label Text="🎧" FontSize="20" TextColor="#8B0000" HorizontalOptions="Center" />
+                                <Label Text="Suporte" 
+                                       FontSize="12" 
+                                       FontAttributes="Bold" 
+                                       TextColor="#8B0000" 
+                                       HorizontalOptions="Center" />
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <!-- Notificações Button -->
+                        <Border Grid.Column="1" 
+                               Stroke="#E0D5CC"
+                               BackgroundColor="#FFFFFF"
+                               Padding="16">
+                            <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                                <Label Text="🔔" FontSize="20" TextColor="#8B0000" HorizontalOptions="Center" />
+                                <Label Text="Notificações" 
+                                       FontSize="12" 
+                                       FontAttributes="Bold" 
+                                       TextColor="#8B0000" 
+                                       HorizontalOptions="Center" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </Grid>
+                </VerticalStackLayout>
+   
+            </VerticalStackLayout>
+
+            <!-- Bottom Action Buttons -->
+            <VerticalStackLayout Spacing="10" Padding="20" HorizontalOptions="Center" WidthRequest="300">
+
+                <Button Text="👤✏️ Editar Perfil" 
+                        FontSize="14" 
+                        FontAttributes="Bold" 
+                        TextColor="#FFFFFF" 
+                        BackgroundColor="#8B0000" 
+                        CornerRadius="10" 
+                        HeightRequest="44" 
+                        Clicked="OnEditProfileClicked" />
+
+                <Button Text="→ Sair" 
+                        FontSize="14" 
+                        FontAttributes="Bold" 
+                        TextColor="#8B0000" 
+                        BackgroundColor="#FFFFFF" 
+                        BorderColor="#8B0000" 
+                        BorderWidth="2" 
+                        CornerRadius="10" 
+                        HeightRequest="44" 
+                        Clicked="OnLogoutClicked" />
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
