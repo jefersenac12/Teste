@@ -6,7 +6,9 @@ namespace Teste;
 public partial class CadastroAgenciaPage : ContentPage
 {
     private static readonly HttpClient client = new HttpClient();
+    //private readonly string apiUrl = "https://tiijeferson.runasp.net/api/Usuario/cadastrarAgencia";
     private readonly string apiUrl = "https://localhost:7064/api/Usuario/cadastrarAgencia";
+
 
     public CadastroAgenciaPage()
     {

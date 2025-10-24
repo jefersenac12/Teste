@@ -1,8 +1,7 @@
-using System;
+﻿using Microsoft.Maui.Storage;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
-
 
 namespace Teste
 {
@@ -45,8 +44,7 @@ namespace Teste
             Dias = new ObservableCollection<DiaCalendario>();
             Frutas = new ObservableCollection<string>();
 
-            _dataAtual = DateTime.Now; // Come�a no m�s atual
-
+            _dataAtual = DateTime.Now; // Mês atual
             DiasCollectionView.ItemsSource = Dias;
             BindableLayout.SetItemsSource(FrutasList, Frutas);
 
@@ -61,14 +59,12 @@ namespace Teste
 
             var primeiroDia = new DateTime(_dataAtual.Year, _dataAtual.Month, 1);
             var ultimoDia = primeiroDia.AddMonths(1).AddDays(-1);
-
-            // �ndice do primeiro dia da semana (0 = Domingo)
             int primeiroDiaSemana = (int)primeiroDia.DayOfWeek;
 
-            // Calcula dias do m�s anterior para preencher o in�cio
             var mesAnterior = _dataAtual.AddMonths(-1);
             int diasMesAnterior = DateTime.DaysInMonth(mesAnterior.Year, mesAnterior.Month);
 
+            // Dias do mês anterior para preencher o início do calendário
             for (int i = primeiroDiaSemana - 1; i >= 0; i--)
             {
                 int dia = diasMesAnterior - i;
@@ -80,7 +76,7 @@ namespace Teste
                 });
             }
 
-            // Adiciona os dias do m�s atual
+            // Dias do mês atual
             for (int i = 1; i <= ultimoDia.Day; i++)
             {
                 Dias.Add(new DiaCalendario
@@ -88,14 +84,14 @@ namespace Teste
                     Numero = i,
                     IsFromCurrentMonth = true,
                     Data = new DateTime(_dataAtual.Year, _dataAtual.Month, i),
-                    IsSelected = (i == _dataAtual.Day && _dataAtual.Month == DateTime.Now.Month)
+                    IsSelected = (i == DateTime.Now.Day && _dataAtual.Month == DateTime.Now.Month)
                 });
             }
 
-            // Preenche o fim com dias do pr�ximo m�s
+            // Dias do próximo mês para completar o grid
             var proximoMes = _dataAtual.AddMonths(1);
+            int totalNecessario = 42; // 6 semanas visuais (6 linhas x 7 colunas)
             int totalDias = Dias.Count;
-            int totalNecessario = 42; // 6 linhas x 7 colunas
 
             for (int i = 1; totalDias + i <= totalNecessario; i++)
             {
@@ -112,17 +108,26 @@ namespace Teste
         {
             Frutas.Clear();
 
-            // Exemplo de frutas por m�s
-            if (_dataAtual.Month == 10)
+            // Exemplo: frutas sazonais por mês
+            switch (_dataAtual.Month)
             {
-                Frutas.Add("?? Morango");
-                Frutas.Add("?? Laranja");
-                Frutas.Add("?? Uva");
-            }
-            else if (_dataAtual.Month == 11)
-            {
-                Frutas.Add("?? Manga");
-                Frutas.Add("?? Mel�o");
+                case 10:
+                    Frutas.Add("🍓 Morango");
+                    Frutas.Add("🍊 Laranja");
+                    Frutas.Add("🍇 Uva");
+                    break;
+                case 11:
+                    Frutas.Add("🥭 Manga");
+                    Frutas.Add("🍈 Melão");
+                    break;
+                case 12:
+                    Frutas.Add("🍉 Melancia");
+                    Frutas.Add("🍍 Abacaxi");
+                    break;
+                default:
+                    Frutas.Add("🍌 Banana");
+                    Frutas.Add("🍎 Maçã");
+                    break;
             }
 
             bool temFrutas = Frutas.Any();
@@ -154,7 +159,7 @@ namespace Teste
 
             diaSelecionado.IsSelected = true;
 
-            // Se o usu�rio clicar num dia de outro m�s, troca automaticamente o m�s
+            // Se o usuário clicar em um dia fora do mês atual, muda automaticamente o mês
             if (!diaSelecionado.IsFromCurrentMonth)
             {
                 _dataAtual = diaSelecionado.Data;
@@ -165,19 +170,24 @@ namespace Teste
 
         private async void OnContinuarClicked(object sender, EventArgs e)
         {
-            var diaSelecionado = Dias.FirstOrDefault(d => d.IsSelected);
+            var diaSelecionado = Dias.FirstOrDefault(d => d.IsSelected && d.IsFromCurrentMonth);
+
             if (diaSelecionado != null)
             {
+                // Salva a data selecionada para as próximas telas
+                Preferences.Set("DataAgendamento", diaSelecionado.Data.ToString("yyyy-MM-dd"));
+
                 await DisplayAlert("Agendamento",
                     $"Data selecionada: {diaSelecionado.Data:dd/MM/yyyy}", "OK");
 
+                // Chama a tela de atividades e passa a data
                 var atividadesPage = new AtividadesPage();
                 atividadesPage.SetData(diaSelecionado.Data);
                 await Navigation.PushAsync(atividadesPage);
             }
             else
             {
-                await DisplayAlert("Erro", "Por favor, selecione um dia.", "OK");
+                await DisplayAlert("Erro", "Por favor, selecione um dia válido.", "OK");
             }
         }
     }
