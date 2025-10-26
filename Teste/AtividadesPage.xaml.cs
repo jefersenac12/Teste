@@ -1,11 +1,12 @@
-using Microsoft.Maui.Storage;
+Ôªøusing Microsoft.Maui.Storage;
 using System;
+using System.Collections.Generic;
 
 namespace Teste
 {
     public partial class AtividadesPage : ContentPage
     {
-        private int adultos = 0;
+        private int adultos = 1;
         private int criancas0a5 = 0;
         private int criancas6a12 = 0;
 
@@ -20,8 +21,8 @@ namespace Teste
         public AtividadesPage()
         {
             InitializeComponent();
+            LblAdultos.Text = adultos.ToString();
 
-            // Recupera data salva
             if (Preferences.ContainsKey("DataAgendamento"))
             {
                 string dataStr = Preferences.Get("DataAgendamento", "");
@@ -37,7 +38,6 @@ namespace Teste
 
             AtualizarDataNaTela();
 
-            // Eventos para atualizar total quando atividades mudam
             CheckBasico.CheckedChanged += OnAtividadeChanged;
             CheckCompleto.CheckedChanged += OnAtividadeChanged;
             CheckTrezinho.CheckedChanged += OnAtividadeChanged;
@@ -47,11 +47,8 @@ namespace Teste
 
         private void AtualizarDataNaTela()
         {
-            var dataLabel = (this.Content as ScrollView)?
-                .Content.FindByName<Label>("LblDataSelecionada");
-
-            if (dataLabel != null)
-                dataLabel.Text = dataSelecionada.ToString("dd/MM/yyyy");
+            if (LblDataSelecionada != null)
+                LblDataSelecionada.Text = dataSelecionada.ToString("dd/MM/yyyy");
         }
 
         private void BtnVoltar_Clicked(object? sender, EventArgs e)
@@ -67,16 +64,13 @@ namespace Teste
         private void TimePickerHorario_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(TimePicker.Time))
-            {
                 horarioSelecionado = TimePickerHorario.Time;
-                DisplayAlert("Hor·rio selecionado", $"{horarioSelecionado:hh\\:mm}", "OK");
-            }
         }
 
-        // =============== CONTADORES ===============
+        // ========== CONTADORES ==========
         private void BtnAdultoMenos_Clicked(object? sender, EventArgs e)
         {
-            if (adultos > 0) adultos--;
+            if (adultos > 1) adultos--;
             LblAdultos.Text = adultos.ToString();
             AtualizarTotal();
         }
@@ -116,12 +110,11 @@ namespace Teste
             AtualizarTotal();
         }
 
-        // =============== C¡LCULO TOTAL ===============
+        // ========== C√ÅLCULO TOTAL ==========
         private void AtualizarTotal()
         {
             double total = 0;
 
-            // Soma todas as atividades escolhidas para adultos
             if (CheckBasico.IsChecked)
                 total += adultos * precoBasico;
 
@@ -131,65 +124,61 @@ namespace Teste
             if (CheckTrezinho.IsChecked)
                 total += adultos * precoTrezinho;
 
-            // CrianÁas 6 a 12 anos
             total += criancas6a12 * precoCrianca6a12;
-
-            // CrianÁas 0 a 5 anos (gr·tis)
-            // Se quiser cobrar algo, adicione aqui:
-            // total += criancas0a5 * precoCrianca0a5;
 
             LblTotalEstimado.Text = $"Total estimado: R${total:F2}";
         }
 
-        // =============== BOT√O CONTINUAR ===============
+        // ========== BOT√ÉO CONTINUAR ==========
         private async void BtnContinuar_Clicked(object? sender, EventArgs e)
         {
-            // Valida atividades
-            string atividades = "";
-            if (CheckBasico.IsChecked) atividades += "CafÈ da manh„ B·sico, ";
-            if (CheckCompleto.IsChecked) atividades += "CafÈ da manh„ Completo, ";
-            if (CheckTrezinho.IsChecked) atividades += "Trezinho / Colha e Pague";
+            if (horarioSelecionado == null)
+            {
+                await DisplayAlert("Aviso", "Por favor, selecione um hor√°rio.", "OK");
+                return;
+            }
 
-            atividades = atividades.Trim().TrimEnd(',');
-
-            if (string.IsNullOrEmpty(atividades))
+            if (!CheckBasico.IsChecked && !CheckCompleto.IsChecked && !CheckTrezinho.IsChecked)
             {
                 await DisplayAlert("Aviso", "Selecione pelo menos uma atividade.", "OK");
                 return;
             }
 
-            // Valida hor·rio
-            if (horarioSelecionado == null)
-            {
-                await DisplayAlert("Aviso", "Selecione um hor·rio.", "OK");
-                return;
-            }
+            AtualizarTotal();
 
-            string horario = horarioSelecionado.Value.ToString(@"hh\:mm");
+            // Monta a lista de atividades escolhidas
+            List<string> atividadesSelecionadas = new List<string>();
+            if (CheckBasico.IsChecked) atividadesSelecionadas.Add("Caf√© da manh√£ B√°sico");
+            if (CheckCompleto.IsChecked) atividadesSelecionadas.Add("Caf√© da manh√£ Completo");
+            if (CheckTrezinho.IsChecked) atividadesSelecionadas.Add("Trezinho / Colha e Pague");
 
-            // Salva dados
-            Preferences.Set("AtividadesSelecionadas", atividades);
+            string atividadesTexto = string.Join(", ", atividadesSelecionadas);
+
+            string totalStr = LblTotalEstimado.Text.Replace("Total estimado: R$", "").Trim();
+
+            Preferences.Set("AtividadesSelecionadas", atividadesTexto);
             Preferences.Set("QtdAdultos", adultos);
             Preferences.Set("QtdCriancas0a5", criancas0a5);
             Preferences.Set("QtdCriancas6a12", criancas6a12);
-            Preferences.Set("TotalEstimado", LblTotalEstimado.Text.Replace("Total estimado: R$", "").Trim());
+            Preferences.Set("TotalEstimado", totalStr);
             Preferences.Set("DataAgendamento", dataSelecionada.ToString("yyyy-MM-dd"));
-            Preferences.Set("HorarioSelecionado", horario);
+            Preferences.Set("HorarioSelecionado", horarioSelecionado.Value.ToString(@"hh\:mm"));
 
+            // Agora o resumo mostra as atividades selecionadas corretamente
             await DisplayAlert("Resumo da reserva",
-                $"Atividades: {atividades}\n" +
+                $"Atividades: {atividadesTexto}\n\n" +
                 $"Data: {dataSelecionada:dd/MM/yyyy}\n" +
-                $"Hor·rio: {horario}\n" +
+                $"Hor√°rio: {horarioSelecionado.Value:hh\\:mm}\n" +
                 $"Adultos: {adultos}\n" +
-                $"CrianÁas (0ñ5): {criancas0a5}\n" +
-                $"CrianÁas (6ñ12): {criancas6a12}\n\n" +
+                $"Crian√ßas (0‚Äì5): {criancas0a5}\n" +
+                $"Crian√ßas (6‚Äì12): {criancas6a12}\n\n" +
                 $"{LblTotalEstimado.Text}",
                 "OK");
 
             await Navigation.PushAsync(new PagamentoPage());
         }
 
-        // =============== SET DATA ===============
+        // ========== SET DATA ==========
         public void SetData(DateTime data)
         {
             dataSelecionada = data;
@@ -198,3 +187,4 @@ namespace Teste
         }
     }
 }
+
