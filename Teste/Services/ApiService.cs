@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Teste.Services;
 
-public class ApiService
+public class ApiService : IDisposable
 {
     private readonly HttpClient _httpClient;
     private readonly string _baseUrl;
@@ -20,21 +20,30 @@ public class ApiService
         defaultUrl = "http://tiijeferson.runasp.net/";
 #else
 #if DEBUG
-        // Desenvolvimento local (Windows/macOS)
-        defaultUrl = "https://localhost:7064/"; // ajuste a porta conforme sua API local
+        // Desenvolvimento local (Windows/macOS) - também sem certificado para testes
+        defaultUrl = "http://localhost:7064/"; // HTTP para evitar problemas de certificado
 #else
-        // Produção (runasp.net)
-        defaultUrl = "https://tiijeferson.runasp.net/";
+        // Produção - HTTP sem certificado
+        defaultUrl = "http://tiijeferson.runasp.net/";
 #endif
 #endif
 
         _baseUrl = overrideBaseUrl ?? defaultUrl;
 
+        // Configuração do HttpClientHandler para ignorar certificados SSL
         var handler = new HttpClientHandler();
+        
+        // Ignora erros de certificado SSL (apenas para desenvolvimento/teste)
+        handler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true;
+
         _httpClient = new HttpClient(handler)
         {
-            BaseAddress = new Uri(_baseUrl)
+            BaseAddress = new Uri(_baseUrl),
+            Timeout = TimeSpan.FromSeconds(30) // Timeout de 30 segundos
         };
+
+        // Headers padrão
+        _httpClient.DefaultRequestHeaders.Add("User-Agent", "TesteApp/1.0");
     }
 
     public async Task<HttpResponseMessage> PostAsync(string relativePath, HttpContent content, CancellationToken cancellationToken = default)
