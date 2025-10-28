@@ -60,6 +60,18 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <AndroidJavaSource Remove="Models\**" />
+	  <AndroidLibrary Remove="Models\**" />
+	  <AndroidNativeLibrary Remove="Models\**" />
+	  <Compile Remove="Models\**" />
+	  <EmbeddedResource Remove="Models\**" />
+	  <JavaSourceJar Remove="Models\**" />
+	  <None Remove="Models\**" />
+	  <ProguardConfiguration Remove="Models\**" />
+	  <TransformFile Remove="Models\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
 	</ItemGroup>
@@ -101,10 +113,6 @@
 	  <MauiXaml Update="ReservasAtivasPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Models\" />
 	</ItemGroup>
 
 </Project>

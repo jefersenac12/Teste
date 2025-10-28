@@ -105,7 +105,6 @@
                             <DataTemplate x:DataType="x:String">
                                 <Border Style="{StaticResource FruitItem}">
                                     <HorizontalStackLayout Spacing="12">
-                                        <Label Text="🍓"/>
                                         <Label Text="{Binding .}" TextColor="#98694C"/>
                                     </HorizontalStackLayout>
                                 </Border>
