@@ -196,11 +196,22 @@ namespace Teste
             if (CheckCompleto.IsChecked) atividadesSelecionadas.Add("Café da manhã Completo");
             if (CheckTrezinho.IsChecked) atividadesSelecionadas.Add("Trezinho / Colha e Pague");
 
+            // Mapeia as atividades selecionadas para seus IDs
+            // Assumimos os seguintes IDs no backend:
+            // 1 = Café da manhã Básico
+            // 2 = Café da manhã Completo
+            // 3 = Trezinho / Colha e Pague
+            List<int> atividadeIds = new List<int>();
+            if (CheckBasico.IsChecked) atividadeIds.Add(1);
+            if (CheckCompleto.IsChecked) atividadeIds.Add(2);
+            if (CheckTrezinho.IsChecked) atividadeIds.Add(3);
+
             string atividadesTexto = string.Join(", ", atividadesSelecionadas);
             string totalStr = LblTotalEstimado.Text.Replace("Total estimado: R$", "").Trim();
 
             // Salva dados no Preferences
             Preferences.Set("AtividadesSelecionadas", atividadesTexto);
+            Preferences.Set("AtividadeIds", string.Join(",", atividadeIds));
             Preferences.Set("QtdAdultos", adultos);
             Preferences.Set("QtdCriancas0a5", criancas0a5);
             Preferences.Set("QtdCriancas6a12", criancas6a12);

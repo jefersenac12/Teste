@@ -76,15 +76,30 @@ namespace Teste
                         .Where(v => v > 0)
                         .ToList();
                 }
+                else if (!string.IsNullOrWhiteSpace(atividades))
+                {
+                    // Fallback: mapear nomes para IDs quando não veio nada salvo
+                    var nomes = atividades.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (var nome in nomes)
+                    {
+                        var id = MapearNomeParaId(nome.Trim());
+                        if (id.HasValue) atividadeIds.Add(id.Value);
+                    }
+                    if (atividadeIds.Any())
+                    {
+                        Preferences.Set("AtividadeIds", string.Join(",", atividadeIds));
+                    }
+                }
 
                 // Preencher labels (garantir que os controles existam no XAML)
                 LblDataHorario.Text = $"{dataSelecionada:dd/MM/yyyy} - {horario:hh\\:mm}";
                 LblPessoas.Text = $"{adultos} Adultos, {criancas0a5} Crianças (0–5), {criancas6a12} Crianças (6–12)";
                 LblAtividades.Text = string.IsNullOrWhiteSpace(atividades) ? "Nenhuma atividade selecionada" : atividades;
 
-                // Adiciona safra e frutas
+                // Adiciona safra e frutas (evita duplicação de "Safra")
                 var frutasTexto = frutasSafra.Any() ? string.Join(", ", frutasSafra) : "Nenhuma fruta definida";
-                LblAtividades.Text += $"\n\nSafra: {safraNome}\nFrutas da Safra: {frutasTexto}";
+                var tituloSafra = NormalizarTituloSafra(safraNome);
+                LblAtividades.Text += $"\n\nSafra: {tituloSafra}\nFrutas da Safra: {frutasTexto}";
 
                 // Mostrar total
                 LblTotal.Text = $"R${totalStr}";
@@ -105,6 +120,31 @@ namespace Teste
                 // Não propagar exceção direta; exibir mensagem amigável
                 DisplayAlert("Erro", $"Não foi possível carregar os dados da reserva: {ex.Message}", "OK");
             }
+        }
+
+        // Remove prefixos "Safra" do nome quando já usamos o rótulo "Safra:" na UI
+        private static string NormalizarTituloSafra(string safraNome)
+        {
+            if (string.IsNullOrWhiteSpace(safraNome)) return string.Empty;
+            var t = safraNome.Trim();
+            var prefixo1 = "Safra de ";
+            var prefixo2 = "Safra ";
+            if (t.StartsWith(prefixo1, StringComparison.OrdinalIgnoreCase))
+                return t.Substring(prefixo1.Length);
+            if (t.StartsWith(prefixo2, StringComparison.OrdinalIgnoreCase))
+                return t.Substring(prefixo2.Length);
+            return t;
+        }
+
+        // Mapeia nomes de atividades para IDs esperados pelo backend
+        private static int? MapearNomeParaId(string nome)
+        {
+            if (string.IsNullOrWhiteSpace(nome)) return null;
+            var n = nome.Trim();
+            if (n.Contains("Básico", StringComparison.OrdinalIgnoreCase) || n.Contains("Basico", StringComparison.OrdinalIgnoreCase)) return 1;
+            if (n.Contains("Completo", StringComparison.OrdinalIgnoreCase)) return 2;
+            if (n.Contains("Trezinho", StringComparison.OrdinalIgnoreCase) || n.Contains("Colha e Pague", StringComparison.OrdinalIgnoreCase)) return 3;
+            return null;
         }
 
         private async void OnCopyPixKeyClicked(object sender, EventArgs e)
