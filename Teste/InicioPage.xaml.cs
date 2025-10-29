@@ -10,16 +10,17 @@
 
         private void OnAgenciaClicked(object sender, EventArgs e)
         {
-
+            Navigation.PushAsync(new CadastroAgenciaPage());
         }
 
         private void OnFamiliaClicked(object sender, EventArgs e)
         {
-            Navigation.PushAsync(new LoginPage());
+            Navigation.PushAsync(new CadastroFamiliaPage());
         }
 
         private void OnLoginClicked(object sender, EventArgs e)
         {
+            Navigation.PushAsync(new LoginPage());
 
         }
 

@@ -55,4 +55,9 @@ public partial class CadastroFamiliaPage : ContentPage
     {
         Navigation.PushAsync(new LoginPage());
     }
+
+    private void OnCadastrarClicked(object sender, EventArgs e)
+    {
+
+    }
 }

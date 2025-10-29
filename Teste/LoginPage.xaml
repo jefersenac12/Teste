@@ -88,6 +88,8 @@
 
         <!-- Botão Entrar -->
         <Button x:Name="entrarButton"
+                FontFamily="Canvas_Inline_Reg"
+                FontSize="20"
                 Text="Entrar"
                 BackgroundColor="#891633"
                 TextColor="White"

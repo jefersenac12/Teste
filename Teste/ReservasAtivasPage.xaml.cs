@@ -1,16 +1,52 @@
-
-
+using System;
 using System.Net.Http;
 using System.Text.Json;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Storage;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Teste
 {
+    // =========================================================================
+    // CLASSES DE MODELO (MODELOS PARA DESSERIALIZAÇÃO)
+    // =========================================================================
+
+    public class Reserva
+    {
+        public int Id { get; set; }
+        public int AgendaId { get; set; }
+        public int UsuarioId { get; set; }
+        public DateTime DataReserva { get; set; }
+        public int Quantidade { get; set; }
+        public int NPEntrada { get; set; }
+        public int MeiaEntrada { get; set; }
+        public int InteiraEntrada { get; set; }
+        public decimal ValorTotal { get; set; }
+        public string Status { get; set; }
+    }
+
+    public class Agenda
+    {
+        public int Id { get; set; }
+        public int AtividadeId { get; set; }
+        public string DataHora { get; set; }
+        // Adicione outras propriedades da Agenda que você precisa
+    }
+    
+    // =========================================================================
+    // CLASSE DA PÁGINA (CORRIGIDA)
+    // * Não contém a declaração redundante de ListaReservasAtivas *
+    // =========================================================================
+
     public partial class ReservasAtivasPage : ContentPage
     {
+        // URLs das APIs
         private readonly string apiUrlReserva = "http://tiijeferson.runasp.net/api/Reserva";
         private readonly string apiUrlAgenda = "http://tiijeferson.runasp.net/api/Agenda";
+        
+        // O campo 'ListaReservasAtivas' será automaticamente criado pelo InitializeComponent
+        // a partir da declaração 'x:Name' no seu XAML.
 
         public ReservasAtivasPage()
         {
@@ -25,17 +61,24 @@ namespace Teste
 
         private async Task CarregarReservasAtivasAsync()
         {
+            // O componente ListaReservasAtivas é inicializado via XAML/InitializeComponent.
+            if (ListaReservasAtivas == null) 
+            {
+                await DisplayAlert("Erro de Componente", "O componente ListaReservasAtivas não foi inicializado. Verifique seu XAML.", "OK");
+                return;
+            }
+            ListaReservasAtivas.Children.Clear();
+
             try
             {
-                if (ListaReservasAtivas == null) return;
-                ListaReservasAtivas.Children.Clear();
-
-                int usuarioId = Preferences.ContainsKey("UsuarioId")
-                    ? Preferences.Get("UsuarioId", 1)
-                    : Preferences.Get("ClienteId", 1);
+                // Tenta obter UsuarioId, se não existir, tenta ClienteId, com default 1
+                int usuarioId = Preferences.Get("UsuarioId", Preferences.Get("ClienteId", 1));
 
                 using var client = new HttpClient();
-                // Tenta padrões de endpoint
+                // Opções para desserialização (ignora case)
+                var opts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+                // 1. Tenta padrões de endpoint para buscar reservas do usuário
                 HttpResponseMessage resp = await client.GetAsync($"{apiUrlReserva}/usuario/{usuarioId}");
                 if (!resp.IsSuccessStatusCode)
                 {
@@ -49,71 +92,87 @@ namespace Teste
                 }
 
                 var json = await resp.Content.ReadAsStringAsync();
-                var opts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                var arr = JsonSerializer.Deserialize<JsonElement>(json);
-                if (arr.ValueKind != JsonValueKind.Array)
+                
+                // Desserialização direta para a lista de objetos Reserva
+                var reservas = JsonSerializer.Deserialize<List<Reserva>>(json, opts);
+                
+                if (reservas == null || reservas.Count == 0)
                 {
-                    await DisplayAlert("Aviso", "Resposta inesperada ao listar reservas.", "OK");
+                    ListaReservasAtivas.Children.Add(new Label { Text = "Nenhuma reserva ativa encontrada.", HorizontalOptions = LayoutOptions.Center, Margin = new Thickness(0, 20) });
                     return;
                 }
 
-                foreach (var el in arr.EnumerateArray())
+                // 2. Itera sobre cada reserva carregada
+                foreach (var reserva in reservas)
                 {
-                    int id = TryGetInt(el, "Id");
-                    int agendaId = TryGetInt(el, "AgendaId");
-                    int inteira = TryGetInt(el, "InteiraEntrada");
-                    int meia = TryGetInt(el, "MeiaEntrada");
-                    int npen = TryGetInt(el, "NPEntrada");
-                    decimal valorTotal = TryGetDecimal(el, "ValorTotal");
+                    // Determina o status e filtra para manter apenas ativas (PENDENTE e PAGO)
+                    string statusTexto = reserva.Status?.ToUpperInvariant() ?? "PENDENTE";
+                    
+                    if (statusTexto != "PENDENTE" && statusTexto != "PAGO")
+                        continue; // Pula reservas canceladas, concluídas, etc.
 
-                    string atividadeNome = $"Reserva #{id}";
+                    string atividadeNome = $"Reserva #{reserva.Id}";
                     string dataTexto = "";
-                    string statusTexto = "PENDENTE";
 
-                    // Tenta buscar detalhes de Agenda
-                    if (agendaId > 0)
+                    // 3. Tenta buscar detalhes de Agenda/Atividade (se o AgendaId for válido)
+                    if (reserva.AgendaId > 0)
                     {
                         try
                         {
-                            var rAgenda = await client.GetAsync($"{apiUrlAgenda}/{agendaId}");
+                            var rAgenda = await client.GetAsync($"{apiUrlAgenda}/{reserva.AgendaId}");
                             if (rAgenda.IsSuccessStatusCode)
                             {
                                 var jAg = await rAgenda.Content.ReadAsStringAsync();
-                                var ag = JsonSerializer.Deserialize<JsonElement>(jAg, opts);
-                                var dataHoraStr = TryGetString(ag, "DataHora");
-                                if (!string.IsNullOrWhiteSpace(dataHoraStr) && DateTime.TryParse(dataHoraStr, out var dh))
+                                var agenda = JsonSerializer.Deserialize<Agenda>(jAg, opts);
+                                
+                                if (agenda != null)
                                 {
-                                    dataTexto = dh.ToString("dd/MM/yyyy - HH:mm");
-                                }
-                                int atividadeId = TryGetInt(ag, "AtividadeId");
-                                if (atividadeId > 0)
-                                {
-                                    atividadeNome = $"Atividade #{atividadeId}";
+                                    // Formata DataHora
+                                    if (!string.IsNullOrWhiteSpace(agenda.DataHora) && DateTime.TryParse(agenda.DataHora, out var dh))
+                                    {
+                                        dataTexto = dh.ToString("dd/MM/yyyy - HH:mm");
+                                    }
+                                    
+                                    if (agenda.AtividadeId > 0)
+                                    {
+                                        // Substituir esta linha pela busca do nome da atividade, se necessário
+                                        atividadeNome = $"Atividade #{agenda.AtividadeId}"; 
+                                    }
                                 }
                             }
                         }
-                        catch { }
+                        catch (Exception ex) 
+                        { 
+                            System.Diagnostics.Debug.WriteLine($"Erro ao buscar Agenda {reserva.AgendaId}: {ex.Message}");
+                        }
                     }
 
-                    // Filtro simples para "ativas": mantemos PENDENTE/PAGO
-                    var statusReserva = TryGetString(el, "Status");
-                    if (!string.IsNullOrWhiteSpace(statusReserva))
-                        statusTexto = statusReserva;
-
-                    if (statusTexto != "PENDENTE" && statusTexto != "PAGO")
-                        continue;
-
-                    // Monta card
-                    var card = MontarCardReserva(atividadeNome, dataTexto,
-                        inteira, meia, npen, valorTotal, statusTexto);
+                    // 4. Monta e adiciona o card
+                    var card = MontarCardReserva(
+                        atividadeNome, 
+                        dataTexto,
+                        reserva.InteiraEntrada, 
+                        reserva.MeiaEntrada, 
+                        reserva.NPEntrada, 
+                        reserva.ValorTotal, 
+                        statusTexto
+                    );
                     ListaReservasAtivas.Children.Add(card);
                 }
             }
+            catch (JsonException jEx)
+            {
+                await DisplayAlert("Erro de Dados", $"Erro ao processar dados de reservas. Verifique a estrutura do JSON. Detalhes: {jEx.Message}", "OK");
+            }
             catch (Exception ex)
             {
-                await DisplayAlert("Erro", $"Erro ao carregar reservas: {ex.Message}", "OK");
+                await DisplayAlert("Erro", $"Erro geral ao carregar reservas: {ex.Message}", "OK");
             }
         }
+
+        // =========================================================================
+        // MÉTODOS AUXILIARES E EVENTOS
+        // =========================================================================
 
         private static View MontarCardReserva(string atividade, string dataTexto,
             int inteira, int meia, int npen, decimal valorTotal, string status)
@@ -157,15 +216,16 @@ namespace Teste
                 VerticalOptions = LayoutOptions.Center
             }, 0, 0);
 
+            var statusUpper = status.ToUpperInvariant();
             var statusBorder = new Border
             {
-                BackgroundColor = status == "PAGO" ? Color.FromArgb("#4CAF50") : Color.FromArgb("#F68F55"),
+                BackgroundColor = statusUpper == "PAGO" ? Color.FromArgb("#4CAF50") : Color.FromArgb("#F68F55"),
                 //StrokeShape = new RoundRectangle { CornerRadius = 12 },
                 Padding = new Thickness(16, 6)
             };
             statusBorder.Content = new Label
             {
-                Text = status == "PAGO" ? "Pago" : "Pendente",
+                Text = statusUpper == "PAGO" ? "Pago" : "Pendente",
                 TextColor = Colors.White,
                 FontSize = 13,
                 FontAttributes = FontAttributes.Bold
@@ -177,63 +237,30 @@ namespace Teste
             return border;
         }
 
-        private static int TryGetInt(JsonElement el, string name)
-        {
-            if (el.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.Number)
-                return v.GetInt32();
-            // tenta variações de nome
-            if (el.TryGetProperty(name.ToLowerInvariant(), out v) && v.ValueKind == JsonValueKind.Number)
-                return v.GetInt32();
-            return 0;
-        }
-
-        private static decimal TryGetDecimal(JsonElement el, string name)
-        {
-            if (el.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.Number)
-                return v.GetDecimal();
-            if (el.TryGetProperty(name.ToLowerInvariant(), out v) && v.ValueKind == JsonValueKind.Number)
-                return v.GetDecimal();
-            if (el.TryGetProperty(name, out v) && v.ValueKind == JsonValueKind.String && decimal.TryParse(v.GetString(), out var d))
-                return d;
-            return 0m;
-        }
-
-        private static string TryGetString(JsonElement el, string name)
-        {
-            if (el.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String)
-                return v.GetString() ?? string.Empty;
-            if (el.TryGetProperty(name.ToLowerInvariant(), out v) && v.ValueKind == JsonValueKind.String)
-                return v.GetString() ?? string.Empty;
-            return string.Empty;
-        }
-
-        // Navegar para Anteriores
         private async void OnAnterioresClicked(object sender, EventArgs e)
         {
             await Navigation.PushAsync(new ReservasAnterioresPage());
         }
 
-        // Voltar
         private async void OnVoltarClicked(object sender, EventArgs e)
         {
             await Navigation.PopAsync();
         }
 
-        // Menu
         private async void OnMenuClicked(object sender, EventArgs e)
         {
             string action = await DisplayActionSheet(
                 "Menu",
                 "Cancelar",
                 null,
-                "Configura��es",
+                "Configurações", 
                 "Ajuda",
                 "Sobre"
             );
 
-            if (action == "Configura��es")
+            if (action == "Configurações")
             {
-                await DisplayAlert("Configura��es", "Abrindo configura��es...", "OK");
+                await DisplayAlert("Configurações", "Abrindo configurações...", "OK");
             }
             else if (action == "Ajuda")
             {
@@ -241,132 +268,67 @@ namespace Teste
             }
             else if (action == "Sobre")
             {
-                await DisplayAlert("Sobre", "App de Reservas - Vers�o 1.0", "OK");
+                await DisplayAlert("Sobre", "App de Reservas - Versão 1.0", "OK");
             }
-        }
-
-        // Anteriores (permanece na p�gina)
-        //private void OnAnterioresClicked(object sender, EventArgs e)
-        //{
-        //    // J� est� na p�gina anteriores, n�o faz nada
-        //}
-
-        // Menu
-        //private async void OnMenuClicked(object sender, EventArgs e)
-        //{
-        //    string action = await DisplayActionSheet(
-        //        "Menu",
-        //        "Cancelar",
-        //        null,
-        //        "Configura��es",
-        //        "Ajuda",
-        //        "Sobre"
-        //    );
-
-        //    if (action == "Configura��es")
-        //    {
-        //        await DisplayAlert("Configura��es", "Abrindo configura��es...", "OK");
-        //    }
-        //    else if (action == "Ajuda")
-        //    {
-        //        await DisplayAlert("Ajuda", "Abrindo central de ajuda...", "OK");
-        //    }
-        //    else if (action == "Sobre")
-        //    {
-        //        await DisplayAlert("Sobre", "App de Reservas - Vers�o 1.0", "OK");
-        //    }
-        //}
-
-        //// Ativas (permanece na p�gina)
-        //private void OnAtivasClicked(object sender, EventArgs e)
-        //{
-        //    // J� est� na p�gina ativa, n�o faz nada
-        //}
-
-        //// Excluir reserva
-        //private async void OnExcluirClicked(object sender, EventArgs e)
-        //{
-        //    bool answer = await DisplayAlert(
-        //        "Confirmar Exclus�o",
-        //        "Deseja realmente excluir esta reserva?",
-        //        "Sim",
-        //        "N�o"
-        //    );
-
-        //    if (answer)
-        //    {
-        //        await DisplayAlert("Sucesso", "Reserva exclu�da com sucesso!", "OK");
-        //        // Aqui voc� pode adicionar a l�gica para remover a reserva do backend
-        //    }
-        //}
-
-        // Sair (logout ou voltar para tela inicial)
-        private async void OnSairClicked(object sender, EventArgs e)
-        {
-            bool answer = await DisplayAlert(
-                "Confirmar Sa�da",
-                "Deseja realmente sair?",
-                "Sim",
-                "N�o"
-            );
-
-            if (answer)
-            {
-                // Navegar para a p�gina de login ou p�gina inicial
-                await Navigation.PopToRootAsync();
-                // Ou se quiser ir para uma p�gina espec�fica:
-                // Application.Current.MainPage = new NavigationPage(new LoginPage());
-            }
-        }
-
-        // Ver todas as reservas
-        private async void OnVerTodasClicked(object sender, EventArgs e)
-        {
-            await DisplayAlert("Todas as Reservas", "Carregando todas as reservas...", "OK");
-            // Aqui voc� pode carregar mais reservas ou expandir a lista
-        }
-
-        // Ver detalhes da reserva
-        private async void OnVerDetalhesClicked(object sender, EventArgs e)
-        {
-            // Voc� pode passar o ID da reserva para a p�gina de detalhes
-            await DisplayAlert("Detalhes", "Abrindo detalhes da reserva...", "OK");
-           
-        }
-
-        // Clique no card da reserva
-        private async void OnCardClicked(object sender, EventArgs e)
-        {
-            await DisplayAlert("Reserva", "Abrindo detalhes da reserva...", "OK");
-         
-        }
-
-        // Buscar reservas
-        private void OnSearchTextChanged(object sender, TextChangedEventArgs e)
-        {
-            string searchText = e.NewTextValue;
-           
         }
 
         private void OnAtivasClicked(object sender, EventArgs e)
         {
-
+            // Já está na página ativa
         }
 
         private async void OnExcluirClicked(object sender, EventArgs e)
         {
             bool answer = await DisplayAlert(
-                "Confirmar Exclus�o",
+                "Confirmar Exclusão", 
                 "Deseja realmente excluir esta reserva?",
                 "Sim",
-                "N�o"
+                "Não"
             );
 
             if (answer)
             {
-                await DisplayAlert("Sucesso", "Reserva exclu�da com sucesso!", "OK");
-                // Aqui voc� pode adicionar a l�gica para remover a reserva do backend
+                // Adicione a lógica de DELETE/CANCELAMENTO de reserva no backend aqui
+                await DisplayAlert("Sucesso", "Reserva excluída com sucesso!", "OK");
+                // Após a exclusão, recarregue a lista:
+                // await CarregarReservasAtivasAsync(); 
             }
+        }
+
+        private async void OnSairClicked(object sender, EventArgs e)
+        {
+            bool answer = await DisplayAlert(
+                "Confirmar Saída",
+                "Deseja realmente sair?",
+                "Sim",
+                "Não"
+            );
+
+            if (answer)
+            {
+                await Navigation.PopToRootAsync();
+            }
+        }
+
+        private async void OnVerTodasClicked(object sender, EventArgs e)
+        {
+            await DisplayAlert("Todas as Reservas", "Carregando todas as reservas...", "OK");
+        }
+
+        private async void OnVerDetalhesClicked(object sender, EventArgs e)
+        {
+            await DisplayAlert("Detalhes", "Abrindo detalhes da reserva...", "OK");
+        }
+
+        private async void OnCardClicked(object sender, EventArgs e)
+        {
+            await DisplayAlert("Reserva", "Abrindo detalhes da reserva...", "OK");
+        }
+
+        private void OnSearchTextChanged(object sender, TextChangedEventArgs e)
+        {
+            string searchText = e.NewTextValue;
+            // Lógica de filtro local com base no texto
         }
     }
 }

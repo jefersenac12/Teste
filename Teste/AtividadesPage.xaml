@@ -5,10 +5,29 @@
              Title="Escolha suas atividades"
              BackgroundColor="#FFF8F0">
 
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Style TargetType="Label" x:Key="BodyText">
+                <Setter Property="FontFamily" Value="SourceSansPro" />
+            </Style>
+            <Style TargetType="TimePicker" x:Key="BodyInput">
+                <Setter Property="FontFamily" Value="SourceSansPro" />
+            </Style>
+            <Style TargetType="Button" x:Key="BodyButton">
+                <Setter Property="FontFamily" Value="SourceSansPro" />
+            </Style>
+            <Style TargetType="Label" x:Key="TitleMain" BasedOn="{StaticResource BodyText}">
+                <Setter Property="FontFamily" Value="Canvas_Inline_Reg" />
+                <Setter Property="FontSize" Value="20" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="TextColor" Value="#891633" />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
     <ScrollView>
         <VerticalStackLayout Padding="20,20,20,0" Spacing="20" HorizontalOptions="Center" WidthRequest="350">
 
-            <!-- Cabeçalho -->
             <Grid ColumnDefinitions="Auto,*,Auto" VerticalOptions="Center" HeightRequest="40" WidthRequest="310">
                 <ImageButton Source="seta_voltar.png"
                              WidthRequest="28"
@@ -28,25 +47,19 @@
                              BackgroundColor="Transparent" />
             </Grid>
 
-            <!-- Título principal -->
             <Label Text="Escolha suas atividades"
-                   FontSize="24"
-                   FontAttributes="Bold"
-                   TextColor="#891633"
-                   FontFamily="ComicNeue-Bold"
+                   Style="{StaticResource TitleMain}"
                    HorizontalOptions="Center"
                    Margin="0,0,0,10" />
 
-            <!-- Dropdown de atividade -->
             <Label Text="Selecione uma atividade"
                    FontSize="14"
                    TextColor="#98694C"
-                   Margin="0,0,0,5" />
+                   Margin="0,0,0,5"
+                   Style="{StaticResource BodyText}" />
 
-            <!-- Opções de atividades -->
             <VerticalStackLayout Spacing="10" HorizontalOptions="Center" WidthRequest="310">
 
-                <!-- Café da manhã Básico -->
                 <Border StrokeThickness="0" BackgroundColor="#ffffffff" Stroke="#FCEFE9" StrokeShape="RoundRectangle 12">
                     <Grid Padding="10" ColumnDefinitions="Auto,*">
                         <CheckBox x:Name="CheckBasico"
@@ -56,15 +69,16 @@
                             <Label Text="Café da manhã Básico"
                                    FontAttributes="Bold"
                                    FontSize="15"
-                                   TextColor="#891633" />
+                                   TextColor="#891633"
+                                   Style="{StaticResource BodyText}" />
                             <Label Text="R$25,00 por pessoa"
                                    FontSize="13"
-                                   TextColor="#A42D45" />
+                                   TextColor="#A42D45"
+                                   Style="{StaticResource BodyText}" />
                         </VerticalStackLayout>
                     </Grid>
                 </Border>
 
-                <!-- Café da manhã Completo -->
                 <Border StrokeThickness="0" BackgroundColor="White" Stroke="#FCEFE9" StrokeShape="RoundRectangle 12">
                     <Grid Padding="10" ColumnDefinitions="Auto,*">
                         <CheckBox x:Name="CheckCompleto"
@@ -74,15 +88,16 @@
                             <Label Text="Café da manhã Completo"
                                    FontAttributes="Bold"
                                    FontSize="15"
-                                   TextColor="#891633" />
+                                   TextColor="#891633"
+                                   Style="{StaticResource BodyText}" />
                             <Label Text="R$65,00 por pessoa"
                                    FontSize="13"
-                                   TextColor="#A42D45" />
+                                   TextColor="#A42D45"
+                                   Style="{StaticResource BodyText}" />
                         </VerticalStackLayout>
                     </Grid>
                 </Border>
 
-                <!-- Trezinho / Colha e Pague -->
                 <Border StrokeThickness="0" BackgroundColor="#ffffffff" Stroke="#FCEFE9" StrokeShape="RoundRectangle 12">
                     <Grid Padding="10" ColumnDefinitions="Auto,*">
                         <CheckBox x:Name="CheckTrezinho"
@@ -92,30 +107,32 @@
                             <Label Text="Trezinho / Colha e Pague"
                                    FontAttributes="Bold"
                                    FontSize="15"
-                                   TextColor="#891633" />
+                                   TextColor="#891633"
+                                   Style="{StaticResource BodyText}" />
                             <Label Text="R$15,00 por pessoa"
                                    FontSize="13"
-                                   TextColor="#A42D45" />
+                                   TextColor="#A42D45"
+                                   Style="{StaticResource BodyText}" />
                         </VerticalStackLayout>
                     </Grid>
                 </Border>
             </VerticalStackLayout>
 
-            <!-- Data fixa -->
             <Label Text="Data:"
                    FontSize="14"
                    TextColor="#794325"
                    FontAttributes="Bold"
-                   Margin="0,10,0,0"/>
+                   Margin="0,10,0,0"
+                   Style="{StaticResource BodyText}"/>
             <Border BackgroundColor="#ffffffff" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="12,10" WidthRequest="310">
                 <Grid ColumnDefinitions="*,Auto">
-                    <!-- 👇 Apenas essa linha foi modificada -->
                     <Label x:Name="LblDataSelecionada"
                            Text="15/10/2025"
                            TextColor="#891633"
                            FontSize="15"
                            HorizontalOptions="Center"
-                           VerticalOptions="Center" />
+                           VerticalOptions="Center"
+                           Style="{StaticResource BodyText}" />
                     <Image Source="icone_calendario.png"
                            WidthRequest="20"
                            HeightRequest="20"
@@ -123,32 +140,32 @@
                            Grid.Column="1" />
                 </Grid>
             </Border>
-            <!-- Horário -->
             <Label Text="Selecione um Horário que Preferir:"
-       FontSize="14"
-       TextColor="#794325"
-       FontAttributes="Bold" />
+                   FontSize="14"
+                   TextColor="#794325"
+                   FontAttributes="Bold"
+                   Style="{StaticResource BodyText}" />
 
             <TimePicker x:Name="TimePickerHorario"
-            PropertyChanged="TimePickerHorario_PropertyChanged"
-            Format="HH:mm"
-            BackgroundColor="#ffffff"
-            HorizontalOptions="Fill"
-            VerticalOptions="Center"
-            TextColor="#891633"
-            WidthRequest="310" />
-            
-            <!-- Contador de adultos e crianças -->
+                        PropertyChanged="TimePickerHorario_PropertyChanged"
+                        Format="HH:mm"
+                        BackgroundColor="#ffffff"
+                        HorizontalOptions="Fill"
+                        VerticalOptions="Center"
+                        TextColor="#891633"
+                        WidthRequest="310"
+                        Style="{StaticResource BodyInput}"/>
+
             <VerticalStackLayout Spacing="20" WidthRequest="310">
 
-                <!-- Adultos -->
                 <Grid ColumnDefinitions="*,150,*,Auto" VerticalOptions="Center" Padding="0,0,0,0">
                     <Label Text="Adultos"
                            TextColor="#891633"
                            FontAttributes="Bold"
                            FontSize="15"
                            VerticalOptions="Center"
-                           Grid.Column="0" />
+                           Grid.Column="0"
+                           Style="{StaticResource BodyText}" />
                     <Button Text="−"
                             Clicked="BtnAdultoMenos_Clicked"
                             WidthRequest="36"
@@ -159,14 +176,16 @@
                             BackgroundColor="Transparent"
                             TextColor="#7A1C1C"
                             HorizontalOptions="End"
-                            Grid.Column="1"/>
+                            Grid.Column="1"
+                            Style="{StaticResource BodyButton}"/>
                     <Label x:Name="LblAdultos"
                            Text="0"
                            FontSize="16"
                            HorizontalOptions="Center"
                            VerticalOptions="Center"
                            TextColor="#891633"
-                           Grid.Column="2"/>
+                           Grid.Column="2"
+                           Style="{StaticResource BodyText}"/>
                     <Button Text="+"
                             Clicked="BtnAdultoMais_Clicked"
                             WidthRequest="36"
@@ -177,19 +196,21 @@
                             BackgroundColor="Transparent"
                             TextColor="#7A1C1C"
                             HorizontalOptions="End"
-                            Grid.Column="3"/>
+                            Grid.Column="3"
+                            Style="{StaticResource BodyButton}"/>
                 </Grid>
 
-                <!-- Crianças 0 a 5 -->
                 <VerticalStackLayout>
                     <Label Text="Crianças (0 a 5 anos)"
                            TextColor="#891633"
                            FontAttributes="Bold"
-                           FontSize="15" />
+                           FontSize="15"
+                           Style="{StaticResource BodyText}" />
                     <Label Text="Crianças de 0 a 5 anos não pagam"
                            FontSize="12"
                            Margin="0,0,0,20"
-                           TextColor="#794325" />
+                           TextColor="#794325"
+                           Style="{StaticResource BodyText}" />
                     <Grid ColumnDefinitions="*,150,*,Auto" VerticalOptions="Center">
                         <Label Text="" Grid.Column="0"/>
                         <Button Text="−"
@@ -202,14 +223,16 @@
                                 BackgroundColor="Transparent"
                                 TextColor="#891633"
                                 HorizontalOptions="End"
-                                Grid.Column="1"/>
+                                Grid.Column="1"
+                                Style="{StaticResource BodyButton}"/>
                         <Label x:Name="LblCrianca0a5"
                                Text="0"
                                FontSize="16"
                                HorizontalOptions="Center"
                                VerticalOptions="Center"
                                TextColor="#891633"
-                               Grid.Column="2"/>
+                               Grid.Column="2"
+                               Style="{StaticResource BodyText}"/>
                         <Button Text="+"
                                 Clicked="BtnCrianca0a5Mais_Clicked"
                                 WidthRequest="36"
@@ -220,20 +243,22 @@
                                 BackgroundColor="Transparent"
                                 TextColor="#891633"
                                 HorizontalOptions="End"
-                                Grid.Column="3"/>
+                                Grid.Column="3"
+                                Style="{StaticResource BodyButton}"/>
                     </Grid>
                 </VerticalStackLayout>
 
-                <!-- Crianças 6 a 12 -->
                 <VerticalStackLayout>
                     <Label Text="Crianças (6 a 12 anos)"
                            TextColor="#891633"
                            FontAttributes="Bold"
-                           FontSize="15" />
+                           FontSize="15"
+                           Style="{StaticResource BodyText}" />
                     <Label Text="Crianças de 6 a 12 anos pagam meia entrada"
                            FontSize="12"
                            Margin="0,0,0,20"
-                           TextColor="#794325" />
+                           TextColor="#794325"
+                           Style="{StaticResource BodyText}" />
                     <Grid ColumnDefinitions="*,150,*,Auto" VerticalOptions="Center">
                         <Label Text="" Grid.Column="0"/>
                         <Button Text="−"
@@ -246,14 +271,16 @@
                                 BackgroundColor="Transparent"
                                 TextColor="#891633"
                                 HorizontalOptions="End"
-                                Grid.Column="1"/>
+                                Grid.Column="1"
+                                Style="{StaticResource BodyButton}"/>
                         <Label x:Name="LblCrianca6a12"
                                Text="0"
                                FontSize="16"
                                HorizontalOptions="Center"
                                VerticalOptions="Center"
                                TextColor="#891633"
-                               Grid.Column="2"/>
+                               Grid.Column="2"
+                               Style="{StaticResource BodyText}"/>
                         <Button Text="+"
                                 Clicked="BtnCrianca6a12Mais_Clicked"
                                 WidthRequest="36"
@@ -264,12 +291,12 @@
                                 BackgroundColor="Transparent"
                                 TextColor="#891633"
                                 HorizontalOptions="End"
-                                Grid.Column="3"/>
+                                Grid.Column="3"
+                                Style="{StaticResource BodyButton}"/>
                     </Grid>
                 </VerticalStackLayout>
             </VerticalStackLayout>
 
-            <!-- Total estimado -->
             <Border BackgroundColor="#ffffffff"
                     StrokeThickness="0"
                     StrokeShape="RoundRectangle 12"
@@ -281,10 +308,10 @@
                        HorizontalOptions="Center"
                        FontAttributes="Bold"
                        FontSize="17"
-                       TextColor="#891633" />
+                       TextColor="#891633"
+                       Style="{StaticResource BodyText}" />
             </Border>
 
-            <!-- Botão continuar -->
             <Button Text="💳 Continuar para pagamento"
                     x:Name="BtnContinuar"
                     Clicked="BtnContinuar_Clicked"
@@ -295,7 +322,8 @@
                     BackgroundColor="#891633"
                     HeightRequest="55"
                     Margin="0,5,0,20"
-                    WidthRequest="310"/>
+                    WidthRequest="310"
+                    FontFamily="Canvas_Inline_Reg" />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

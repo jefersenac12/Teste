@@ -39,17 +39,26 @@
     </ContentPage.Resources>
     <ScrollView>
         <VerticalStackLayout Spacing="24" Padding="16" HorizontalOptions="Center">
-            <!-- Cabeçalho principal -->
-            <Label Text="Selecione a data" Style="{StaticResource TitleLabel}" FontSize="24" HorizontalOptions="Start" />
-            <!-- Cartão do calendário -->
+            <Label Text="Selecione uma data" 
+                    Style="{StaticResource TitleLabel}" 
+                    FontSize="20" 
+                    HorizontalOptions="Start" 
+                    FontFamily="Canvas_Inline_Reg" 
+                    FontAttributes="Bold" />
+
             <Border Style="{StaticResource CardContainer}" WidthRequest="304">
                 <VerticalStackLayout Spacing="10">
                     <HorizontalStackLayout Spacing="12" HorizontalOptions="Center">
                         <Button Text="&lt;" Style="{StaticResource NavButton}" Clicked="OnMesAnteriorClicked"/>
-                        <Label x:Name="MesLabel" Text="Julho 2024" Style="{StaticResource TitleLabel}" FontSize="20"/>
+                        <Label x:Name="MesLabel" 
+                                Text="Julho 2024" 
+                                Style="{StaticResource TitleLabel}" 
+                                FontSize="20" 
+                                FontFamily="SourceSansPro" 
+                                FontAttributes="Bold"/>
                         <Button Text=">" Style="{StaticResource NavButton}" Clicked="OnProximoMesClicked"/>
                     </HorizontalStackLayout>
-                    <!-- Cabeçalho de dias da semana -->
+
                     <Grid ColumnDefinitions="*,*,*,*,*,*" Padding="2,0,4,7" HorizontalOptions="Center" WidthRequest="300">
                         <Label Text="D" Grid.Column="0" HorizontalOptions="Center" TextColor="#8B8B8B" FontSize="12"/>
                         <Label Text="S" Grid.Column="1" HorizontalOptions="Center" TextColor="#8B8B8B" FontSize="12"/>
@@ -59,7 +68,7 @@
                         <Label Text="S" Grid.Column="5" HorizontalOptions="Center" TextColor="#8B8B8B" FontSize="12"/>
                         <Label Text="S" Grid.Column="6" HorizontalOptions="Center" TextColor="#8B8B8B" FontSize="12"/>
                     </Grid>
-                    <!-- Dias do calendário -->
+
                     <CollectionView x:Name="DiasCollectionView" SelectionMode="Single" SelectionChanged="OnDiaSelecionado" Background="Transparent" HorizontalOptions="Center" WidthRequest="280" ItemSizingStrategy="MeasureAllItems">
                         <CollectionView.ItemsLayout>
                             <GridItemsLayout Orientation="Vertical" Span="5" HorizontalItemSpacing="6" VerticalItemSpacing="6"/>
@@ -92,20 +101,32 @@
                     </CollectionView>
                 </VerticalStackLayout>
             </Border>
-            <!-- Frutas da temporada -->
-            <Label Text="Frutas da Temporada" Style="{StaticResource TitleLabel}" FontSize="24" HorizontalOptions="Start"/>
+
+            <Label Text="Frutas da Temporada"
+                    Style="{StaticResource TitleLabel}" 
+                    FontSize="24" 
+                    HorizontalOptions="Start"
+                    FontFamily="Canvas_Inline_Reg" 
+                    FontAttributes="Bold" />
+
             <Border Style="{StaticResource CardContainer}" WidthRequest="304">
                 <VerticalStackLayout Spacing="12">
                     <HorizontalStackLayout Spacing="8" Padding="4,0,0,0">
                         <Label Text="🗓️" FontSize="16" VerticalOptions="Center"/>
-                        <Label Text="Julho 2024" FontAttributes="Bold" TextColor="#891633" />
+                        <Label Text="Julho 2024" 
+                                FontAttributes="Bold" 
+                                TextColor="#891633"
+                                FontFamily="SourceSansPro" />
                     </HorizontalStackLayout>
                     <VerticalStackLayout x:Name="FrutasList" BindableLayout.ItemsSource="{Binding Frutas}" Spacing="8">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="x:String">
                                 <Border Style="{StaticResource FruitItem}">
                                     <HorizontalStackLayout Spacing="12">
-                                        <Label Text="{Binding .}" TextColor="#98694C"/>
+                                        <Label Text="{Binding .}" 
+                                                TextColor="#98694C"
+                                                FontFamily="SourceSansPro" 
+                                                FontAttributes="Bold"/>
                                     </HorizontalStackLayout>
                                 </Border>
                             </DataTemplate>
@@ -113,16 +134,26 @@
                     </VerticalStackLayout>
                 </VerticalStackLayout>
             </Border>
-            <!-- Estado vazio -->
+
             <Border Style="{StaticResource CardContainer}" WidthRequest="304">
                 <VerticalStackLayout Spacing="8" HorizontalOptions="Center" x:Name="EmptyState">
                     <Label Text="🌱" FontSize="28" HorizontalOptions="Center"/>
                     <Label x:Name="NoFruitsLabel" Text="Nenhuma fruta em safra esse mês" IsVisible="False" HorizontalOptions="Center" TextColor="#8B6B61" FontSize="14"/>
                 </VerticalStackLayout>
             </Border>
-            <!-- Barra inferior com botão principal -->
+
             <Grid ColumnDefinitions="56,*" WidthRequest="304">
-                <Button Grid.ColumnSpan="2" BackgroundColor="#891633" TextColor="#FFFFFF" FontAttributes="Bold" HeightRequest="52" CornerRadius="12" HorizontalOptions="Fill" Clicked="OnContinuarClicked" Padding="0" FontSize="16" >
+                <Button Grid.ColumnSpan="2" 
+                        BackgroundColor="#891633" 
+                        TextColor="#FFFFFF" 
+                        FontAttributes="Bold" 
+                        HeightRequest="52" 
+                        CornerRadius="12" 
+                        HorizontalOptions="Fill" 
+                        Clicked="OnContinuarClicked" 
+                        Padding="0" 
+                        FontSize="16"  
+                        FontFamily="Canvas_Inline_Reg">
                     <Button.Text>&#x1F4C5; Continuar Para Atividade</Button.Text>
                 </Button>
             </Grid>

@@ -1,16 +1,81 @@
-﻿
-using Microsoft.Maui.Storage;
+﻿using Microsoft.Maui.Storage;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Text.Json;
 using System.Text;
+using Microsoft.Maui.Controls;
+using System.Linq; // Necessário para .Any(), .Where(), .Select(), etc.
 
 namespace Teste
 {
+    // ===================================
+    // 1. NOVO CONCEITO OOP: CLASSE FRUTAPERIODO
+    // ===================================
+    public class FrutaPeriodo
+    {
+        public string Nome { get; set; }
+        public string Emoji { get; set; }
+        // Armazena Mês e Dia de Início/Fim do ciclo ANUAL
+        public (int Mes, int Dia) InicioAnual { get; set; }
+        public (int Mes, int Dia) FimAnual { get; set; }
+
+        public FrutaPeriodo(string nome, string emoji, int mesInicio, int diaInicio, int mesFim, int diaFim)
+        {
+            Nome = nome;
+            Emoji = emoji;
+            InicioAnual = (mesInicio, diaInicio);
+            FimAnual = (mesFim, diaFim);
+        }
+
+        // Método que verifica se uma data ESPECÍFICA está no período de safra da fruta.
+        public bool EstaEmSafra(DateTime data)
+        {
+            int mes = data.Month;
+            int dia = data.Day;
+
+            // Cria um valor numérico que representa o dia do ano (1 a 366) para comparação
+            // (Ignora o ano para tratar safras anuais, mas é menos propenso a erro do que só o mês)
+            int diaDoAnoSelecionado = data.DayOfYear;
+
+            // Safra Cruzada (Ex: Dezembro (12) a Março (3))
+            if (FimAnual.Mes < InicioAnual.Mes)
+            {
+                // Para safras que cruzam o ano, o início e o fim estão no mesmo ano para o cálculo
+                // Início do ciclo no ano (ex: 10/12)
+                DateTime inicioData = new DateTime(data.Year, InicioAnual.Mes, InicioAnual.Dia);
+                // Fim do ciclo no ano (ex: 31/03 do PRÓXIMO ano - ajustamos para o ano de comparação)
+                DateTime fimData = new DateTime(data.Year, FimAnual.Mes, FimAnual.Dia);
+
+                // Se a data selecionada for no início do ano (mes <= FimAnual.Mes), compara com o ano anterior
+                if (mes <= FimAnual.Mes)
+                {
+                    inicioData = new DateTime(data.Year - 1, InicioAnual.Mes, InicioAnual.Dia);
+                }
+                // Se a data selecionada for no final do ano (mes >= InicioAnual.Mes), compara com o próximo ano
+                else if (mes >= InicioAnual.Mes)
+                {
+                    fimData = new DateTime(data.Year + 1, FimAnual.Mes, FimAnual.Dia);
+                }
+
+                return data.Date >= inicioData.Date && data.Date <= fimData.Date;
+            }
+            else
+            {
+                // Safra simples (Ex: Maio a Julho)
+                DateTime inicioData = new DateTime(data.Year, InicioAnual.Mes, InicioAnual.Dia);
+                DateTime fimData = new DateTime(data.Year, FimAnual.Mes, FimAnual.Dia);
+
+                return data.Date >= inicioData.Date && data.Date <= fimData.Date;
+            }
+        }
+    }
+
+
     // Modelo do dia
     public class DiaCalendario : INotifyPropertyChanged
     {
+        // ... (Corpo do DiaCalendario mantido inalterado) ...
         public int Numero { get; set; }
         public bool IsFromCurrentMonth { get; set; }
         public DateTime Data { get; set; }
@@ -34,7 +99,7 @@ namespace Teste
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
-    // Modelo de Safra
+    // Modelo de Safra (da API)
     public class Safra
     {
         public int Id { get; set; }
@@ -48,11 +113,37 @@ namespace Teste
     {
         private static readonly HttpClient client = new HttpClient();
         private readonly string apiUrlSafras = "http://tiijeferson.runasp.net/api/Safra/ativas";
-        private readonly string apiUrlTodasSafras = "http://tiijeferson.runasp.net/api/Safra"; // Nova URL para todas as safras
+        private readonly string apiUrlTodasSafras = "http://tiijeferson.runasp.net/api/Safra";
+
+        // ===================================
+        // 2. CRONOGRAMA DE SAFRA POR FRUTA (Lista de FrutaPeriodo)
+        // ===================================
+        private static readonly List<FrutaPeriodo> FrutaCronograma = new List<FrutaPeriodo>
+        {
+            // Janeiro - uva, goiaba, morango, lichia
+            // Fevereiro - uva, goiaba, morango
+            // Março - uva, goiaba
+            new FrutaPeriodo("Uva", "🍇", 12, 1, 7, 31),      // Dezembro (01) a Julho (31)
+            new FrutaPeriodo("Goiaba", "🍈", 1, 1, 7, 31),    // Janeiro (01) a Julho (31)
+            new FrutaPeriodo("Morango", "🍓", 1, 1, 7, 31),   // Janeiro (01) a Julho (31)
+            new FrutaPeriodo("Lichia", "🍒", 12, 1, 1, 31),   // Dezembro (01) a Janeiro (31) - CRUZA O ANO
+
+            // Agosto - morango (Continuação)
+            // Setembro - morango (Continuação)
+            new FrutaPeriodo("Morango", "🍓", 8, 1, 9, 30),   // Agosto (01) a Setembro (30)
+
+            // Outubro - pêssego, morango, goiaba
+            // Novembro - pêssego, morango, goiaba
+            // Dezembro - uva, goiaba, morango, lichia
+            new FrutaPeriodo("Pêssego", "🍑", 10, 1, 11, 30), // Outubro (01) a Novembro (30)
+            new FrutaPeriodo("Morango", "🍓", 10, 1, 12, 31), // Outubro (01) a Dezembro (31)
+            new FrutaPeriodo("Goiaba", "🍈", 10, 1, 12, 31),  // Outubro (01) a Dezembro (31)
+        };
+
 
         private DateTime _dataAtual;
         private Safra? _safraAtiva;
-        private List<Safra> _todasSafras = new List<Safra>(); // Lista de todas as safras
+        private List<Safra> _todasSafras = new List<Safra>();
         public ObservableCollection<DiaCalendario> Dias { get; set; }
         public ObservableCollection<string> Frutas { get; set; }
 
@@ -74,22 +165,22 @@ namespace Teste
         {
             try
             {
-                await CarregarTodasSafras(); // Carrega todas as safras primeiro
+                await CarregarTodasSafras();
                 await CarregarSafraAtiva();
             }
             catch (Exception ex)
             {
-                // Em caso de erro na inicialização, a safra de fallback já foi definida
                 await DisplayAlert("Erro Crítico", $"Não foi possível inicializar: {ex.Message}", "OK");
             }
             finally
             {
                 AtualizarCalendario();
-                AtualizarFrutas();
+                AtualizarFrutas(); // AGORA USA A LISTA DE FrutaCronograma
             }
         }
 
-        // Novo método para carregar todas as safras do banco
+        // --- MÉTODOS DE CARREGAMENTO (Mantidos inalterados) ---
+
         private async Task CarregarTodasSafras()
         {
             try
@@ -117,19 +208,17 @@ namespace Teste
             }
         }
 
-        // Método para encontrar safra por data
         private Safra? EncontrarSafraPorData(DateTime data)
         {
             if (_todasSafras?.Any() == true)
             {
-                return _todasSafras.FirstOrDefault(s => 
-                    data.Date >= s.DataInicio.Date && 
+                return _todasSafras.FirstOrDefault(s =>
+                    data.Date >= s.DataInicio.Date &&
                     data.Date <= s.DataFim.Date);
             }
             return null;
         }
 
-        // --- MÉTODO DE CARREGAMENTO (Sua versão, que é boa) ---
         private async Task CarregarSafraAtiva()
         {
             try
@@ -148,7 +237,6 @@ namespace Teste
 
                     if (_safraAtiva == null)
                     {
-                        // API retornou sucesso, mas sem dados. Usa fallback.
                         CarregarSafraFallback();
                         MainThread.BeginInvokeOnMainThread(async () =>
                         {
@@ -158,13 +246,11 @@ namespace Teste
                 }
                 else
                 {
-                    // API falhou. Usa fallback.
                     CarregarSafraFallback();
                 }
             }
             catch (Exception ex)
             {
-                // Erro de conexão. Usa fallback.
                 CarregarSafraFallback();
                 MainThread.BeginInvokeOnMainThread(async () =>
                 {
@@ -172,7 +258,6 @@ namespace Teste
                 });
             }
 
-            // Garante que a Safra (da API ou Fallback) seja salva
             if (_safraAtiva != null)
             {
                 Preferences.Set("SafraId", _safraAtiva.Id);
@@ -180,7 +265,6 @@ namespace Teste
             }
         }
 
-        // --- MÉTODO DE FALLBACK DINÂMICO ATUALIZADO PARA 2025 ---
         private void CarregarSafraFallback()
         {
             var dataAtual = DateTime.Now;
@@ -194,7 +278,6 @@ namespace Teste
                 DateTime inicio;
                 DateTime fim;
 
-                // Lógica de ano-virado (Ex: Dez 2025 -> Mar 2026)
                 if (mesAtual >= 12) // Dezembro
                 {
                     inicio = new DateTime(anoAtual, 12, 1);
@@ -241,7 +324,7 @@ namespace Teste
             }
         }
 
-        // --- ATUALIZAR CALENDÁRIO (Sem alterações) ---
+        // --- ATUALIZAR CALENDÁRIO (Mantido inalterado) ---
         private void AtualizarCalendario()
         {
             Dias.Clear();
@@ -275,7 +358,7 @@ namespace Teste
                     Numero = i,
                     IsFromCurrentMonth = true,
                     Data = dataDia,
-                    IsSelected = (dataDia.Date == DateTime.Now.Date) // Seleciona o dia de hoje
+                    IsSelected = (dataDia.Date == DateTime.Now.Date)
                 });
             }
 
@@ -295,79 +378,39 @@ namespace Teste
             }
         }
 
-        // --- ATUALIZAR FRUTAS (CORRIGIDO com emojis válidos) ---
+        // ===================================
+        // 3. MÉTODO ATUALIZAR FRUTAS (Usando FrutaCronograma)
+        // ===================================
         private void AtualizarFrutas()
         {
             Frutas.Clear();
 
-            // Define o emoji e o nome da fruta para o mês atual
-      
-            switch (_dataAtual.Month)
+            // Usa a data atual do calendário para verificar as frutas em safra
+            DateTime dataReferencia = new DateTime(_dataAtual.Year, _dataAtual.Month, 1);
+
+            // Filtra as frutas que estão em safra no mês/ano de referência
+            var frutasDoMes = FrutaCronograma
+                .Where(f => f.EstaEmSafra(dataReferencia))
+                .DistinctBy(f => f.Nome)
+                .Select(f => $"{f.Emoji} {f.Nome}")
+                .ToList();
+
+            foreach (var fruta in frutasDoMes)
             {
-                case 1: // Janeiro
-                    Frutas.Add("🍇 Uva");
-                    Frutas.Add("🍈 Goiaba"); 
-                    Frutas.Add("🍓 Morango");
-                    Frutas.Add("🍒 Lichia");
-                    break;
-                case 2: // Fevereiro
-                    Frutas.Add("🍇 Uva");
-                    Frutas.Add("🍈 Goiaba"); 
-                    Frutas.Add("🍓 Morango");
-                    break;
-                case 3: // Março
-                    Frutas.Add("🍇 Uva");
-                    Frutas.Add("🍈 Goiaba"); 
-                    break;
-                case 4: // Abril
-                    Frutas.Add("🍈 Goiaba");
-                    Frutas.Add("🍓 Morango");
-                    break;
-                case 5: // Maio
-                    Frutas.Add("🍇 Uva");
-                    Frutas.Add("🍈 Goiaba"); 
-                    Frutas.Add("🍓 Morango");
-                    break;
-                case 6: // Junho
-                    Frutas.Add("🍇 Uva");
-                    Frutas.Add("🍈 Goiaba");
-                    Frutas.Add("🍓 Morango");
-                    break;
-                case 7: // Julho
-                    Frutas.Add("🍇 Uva");
-                    Frutas.Add("🍈 Goiaba"); 
-                    Frutas.Add("🍓 Morango");
-                    break;
-                case 8: // Agosto
-                    Frutas.Add("🍓 Morango");
-                    break;
-                case 9: // Setembro
-                    Frutas.Add("🍓 Morango");
-                    break;
-                case 10: // Outubro
-                    Frutas.Add("🍑 Pêssego");
-                    Frutas.Add("🍓 Morango");
-                    Frutas.Add("🍈 Goiaba"); 
-                    break;
-                case 11: // Novembro
-                    Frutas.Add("🍑 Pêssego");
-                    Frutas.Add("🍓 Morango");
-                    Frutas.Add("🍈 Goiaba"); 
-                    break;
-                case 12: // Dezembro
-                    Frutas.Add("🍇 Uva");
-                    Frutas.Add("🍈 Goiaba");
-                    Frutas.Add("🍓 Morango");
-                    Frutas.Add("🍒 Lichia");
-                    break;
+                Frutas.Add(fruta);
             }
+
+            // Garante que o rótulo do mês no painel de frutas esteja correto (Assumindo que LblMesSafra exista no XAML)
+            // Para referência: O XAML usa um rótulo com o texto "Julho 2024"
+            // Você pode querer mudar para: 
+            // LblMesSafra.Text = _dataAtual.ToString("MMMM yyyy", new CultureInfo("pt-BR"));
 
             bool temFrutas = Frutas.Any();
             FrutasList.IsVisible = temFrutas;
             NoFruitsLabel.IsVisible = !temFrutas;
         }
 
-        // --- NAVEGAÇÃO E SELEÇÃO ---
+        // --- NAVEGAÇÃO E SELEÇÃO (Mantidos inalterados) ---
         private void OnMesAnteriorClicked(object sender, EventArgs e)
         {
             _dataAtual = _dataAtual.AddMonths(-1);
@@ -382,33 +425,27 @@ namespace Teste
             AtualizarFrutas();
         }
 
-        // --- LÓGICA DE SELEÇÃO (CORRIGIDA para maior eficiência) ---
         private void OnDiaSelecionado(object sender, SelectionChangedEventArgs e)
         {
             if (e.CurrentSelection.FirstOrDefault() is not DiaCalendario diaSelecionado)
                 return;
 
-            // CORREÇÃO: Lógica mais eficiente
-            // Desmarca todos os *outros* dias
             foreach (var dia in Dias.Where(d => d.IsSelected && d != diaSelecionado))
             {
                 dia.IsSelected = false;
             }
 
-            // Garante que o dia clicado esteja selecionado
             if (!diaSelecionado.IsSelected)
             {
                 diaSelecionado.IsSelected = true;
             }
 
-            // Se o dia selecionado NÃO for do mês atual, navega para o mês dele
             if (!diaSelecionado.IsFromCurrentMonth)
             {
                 _dataAtual = diaSelecionado.Data;
                 AtualizarCalendario();
                 AtualizarFrutas();
 
-                // Encontra e seleciona o dia correspondente no novo mês carregado
                 var diaNoNovoMes = Dias.FirstOrDefault(d => d.Data.Date == diaSelecionado.Data.Date);
                 if (diaNoNovoMes != null)
                 {
@@ -417,7 +454,9 @@ namespace Teste
             }
         }
 
-        // --- BOTÃO CONTINUAR (Verifique se 'AtividadesPage' e 'SetData' existem) ---
+        // ===================================
+        // 4. BOTÃO CONTINUAR (Com Verificação de Safra da Fruta)
+        // ===================================
         private async void OnContinuarClicked(object sender, EventArgs e)
         {
             var diaSelecionado = Dias.FirstOrDefault(d => d.IsSelected);
@@ -428,71 +467,40 @@ namespace Teste
                 return;
             }
 
-            // Se o usuário clicou tão rápido que o dia selecionado ainda é do mês anterior
-            if (!diaSelecionado.IsFromCurrentMonth)
+            // 1. Verifica se a data selecionada está dentro de QUALQUER período de safra de fruta
+            bool estaEmSafraDeFruta = FrutaCronograma.Any(f => f.EstaEmSafra(diaSelecionado.Data));
+
+            if (!estaEmSafraDeFruta)
             {
-                // A lógica do OnDiaSelecionado já deve ter corrigido isso,
-                // mas como defesa, pegamos o dia selecionado do *novo* mês
-                diaSelecionado = Dias.FirstOrDefault(d => d.IsSelected && d.IsFromCurrentMonth);
-                if (diaSelecionado == null)
-                {
-                    await DisplayAlert("Erro", "Por favor, selecione um dia válido do mês.", "OK");
-                    return;
-                }
+                // 2. Se a data NÃO estiver em safra por fruta, mostra o aviso.
+                Safra? safraEstacional = EncontrarSafraPorData(diaSelecionado.Data) ?? _safraAtiva;
+
+                string nomeSafra = safraEstacional?.Nome ?? "Indisponível";
+                DateTime dataInicioSafra = safraEstacional?.DataInicio ?? DateTime.MinValue;
+                DateTime dataFimSafra = safraEstacional?.DataFim ?? DateTime.MaxValue;
+
+                // Exibe o alerta com o formato da imagem fornecida
+                await DisplayAlert("Aviso",
+                    $"A data selecionada ({diaSelecionado.Data:dd/MM/yyyy}) não está dentro de nenhum período de safra de fruta disponível.\n\n" +
+                    $"Safra atual: {nomeSafra} ({dataInicioSafra:dd/MM/yyyy} a {dataFimSafra:dd/MM/yyyy})",
+                    "OK");
+                return;
             }
 
-            // Primeiro, tenta encontrar safra específica para a data selecionada
+            // 3. Atualiza a Safra Ativa e salva nos Preferences (usando o Safra do banco, se disponível)
             var safraParaData = EncontrarSafraPorData(diaSelecionado.Data);
-            
             if (safraParaData != null)
             {
-                // Usa a safra específica encontrada para a data
                 _safraAtiva = safraParaData;
                 Preferences.Set("SafraId", _safraAtiva.Id);
                 Preferences.Set("SafraNome", _safraAtiva.Nome);
             }
-            else if (_safraAtiva == null)
-            {
-                await DisplayAlert("Erro", "Aguarde, carregando dados da safra...", "OK");
-                // Tenta carregar de novo
-                await CarregarSafraAtiva();
-                if (_safraAtiva == null)
-                {
-                    await DisplayAlert("Erro", "Não foi possível carregar dados da safra. Tente novamente.", "OK");
-                    return;
-                }
-            }
 
-            // Verificar se a data está dentro da safra (agora dinâmica ou da API)
-            if (diaSelecionado.Data.Date < _safraAtiva.DataInicio.Date || diaSelecionado.Data.Date > _safraAtiva.DataFim.Date)
-            {
-                // Se não há safra específica para a data, mostra aviso mais informativo
-                if (safraParaData == null)
-                {
-                    await DisplayAlert("Aviso",
-                        $"A data selecionada ({diaSelecionado.Data:dd/MM/yyyy}) não está dentro de nenhum período de safra disponível.\n\n" +
-                        $"Safra atual: {_safraAtiva.Nome} ({_safraAtiva.DataInicio:dd/MM/yyyy} a {_safraAtiva.DataFim:dd/MM/yyyy})",
-                        "OK");
-                }
-                else
-                {
-                    await DisplayAlert("Aviso",
-                        $"A data selecionada está fora do período da safra ativa ({_safraAtiva.Nome}).",
-                        "OK");
-                }
-                return;
-            }
-
-            // Salvar dados para próxima tela
+            // Salvar dados e navegar
             Preferences.Set("DataAgendamento", diaSelecionado.Data.ToString("yyyy-MM-dd"));
-            // Preferences já foram setados no CarregarSafraAtiva ou acima
-            // Preferences.Set("SafraId", _safraAtiva.Id);
-            // Preferences.Set("SafraNome", _safraAtiva.Nome);
 
-            // Navega para AtividadesPage
-            // (Isto assume que você tem uma página 'AtividadesPage.cs' 
-            // e que ela tem um método público 'SetData')
             var atividadesPage = new AtividadesPage();
+            // Assumimos que AtividadesPage tem um método SetData(DateTime)
             atividadesPage.SetData(diaSelecionado.Data);
             await Navigation.PushAsync(atividadesPage);
         }

@@ -6,10 +6,44 @@
              BackgroundColor="#F9F3EF"
              Padding="0">
 
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Style TargetType="Label" x:Key="TitleMain">
+                <Setter Property="FontFamily" Value="Canvas_Inline_Reg" />
+                <Setter Property="FontSize" Value="20" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="TextColor" Value="#A42D45" />
+            </Style>
+
+            <Style TargetType="Label" x:Key="SectionTitle">
+                <Setter Property="FontFamily" Value="Canvas_Inline_Reg" />
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="TextColor" Value="#A42D45" />
+            </Style>
+
+            <Style TargetType="Label" x:Key="BodyText">
+                <Setter Property="FontFamily" Value="SourceSansPro" />
+                <Setter Property="TextColor" Value="#A42D45" />
+            </Style>
+
+            <Style TargetType="Button" x:Key="BodyButton" BasedOn="{StaticResource BodyText}">
+                <Setter Property="FontAttributes" Value="Bold" />
+            </Style>
+
+            <Style TargetType="Label" x:Key="MainButtonText">
+                <Setter Property="FontFamily" Value="Canvas_Inline_Reg" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="TextColor" Value="White" />
+            </Style>
+
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
     <ScrollView>
         <VerticalStackLayout Spacing="20" Padding="16,10,16,30" HorizontalOptions="Center">
 
-            <!-- ========== RESUMO DA RESERVA ========== -->
             <Border BackgroundColor="White"
                     StrokeShape="RoundRectangle 12"
                     Padding="16"
@@ -20,33 +54,31 @@
                     <HorizontalStackLayout Spacing="8">
                         <Label Text="📋" TextColor="#C48E6B" FontSize="14"/>
                         <Label Text="Resumo da Reserva" 
-                               TextColor="#A42D45" 
-                               FontAttributes="Bold" 
-                               FontSize="16"/>
+                               Style="{StaticResource SectionTitle}"/>
                     </HorizontalStackLayout>
 
                     <HorizontalStackLayout Spacing="8">
-                        <Label Text="📅" TextColor="#C48E6B" FontSize="12"/>
-                        <Label x:Name="LblDataHorario" Text="..." TextColor="#A42D45" FontSize="12"/>
+                        <Label Text="📅" TextColor="#C48E6B" FontSize="12" Style="{StaticResource BodyText}"/>
+                        <Label x:Name="LblDataHorario" Text="..." FontSize="12" Style="{StaticResource BodyText}"/>
                     </HorizontalStackLayout>
 
                     <HorizontalStackLayout Spacing="8">
-                        <Label Text="👥" TextColor="#C48E6B" FontSize="12"/>
-                        <Label x:Name="LblPessoas" Text="..." TextColor="#A42D45" FontSize="12"/>
+                        <Label Text="👥" TextColor="#C48E6B" FontSize="12" Style="{StaticResource BodyText}"/>
+                        <Label x:Name="LblPessoas" Text="..." FontSize="12" Style="{StaticResource BodyText}"/>
                     </HorizontalStackLayout>
 
                     <BoxView HeightRequest="1" Color="#F1E5E2" Margin="0,6,0,6"/>
 
                     <Label Text="Atividades selecionadas:" 
-                           TextColor="#A42D45" 
                            FontSize="14" 
-                           FontAttributes="Bold"/>
+                           FontAttributes="Bold"
+                           Style="{StaticResource BodyText}"/>
 
                     <Label x:Name="LblAtividades" 
                            Text="..." 
-                           TextColor="#A42D45" 
                            FontSize="12" 
-                           LineBreakMode="WordWrap"/>
+                           LineBreakMode="WordWrap"
+                           Style="{StaticResource BodyText}"/>
 
                     <BoxView HeightRequest="1" Color="#F1E5E2" Margin="0,8,0,6"/>
 
@@ -57,21 +89,20 @@
                         </Grid.ColumnDefinitions>
 
                         <Label Text="Total a Pagar:" 
-                               TextColor="#A42D45" 
                                FontSize="14" 
-                               FontAttributes="Bold"/>
+                               FontAttributes="Bold"
+                               Style="{StaticResource BodyText}"/>
 
                         <Label x:Name="LblTotal"
                                Grid.Column="1" 
                                Text="R$0,00" 
-                               TextColor="#A42D45" 
                                FontSize="14" 
-                               FontAttributes="Bold"/>
+                               FontAttributes="Bold"
+                               Style="{StaticResource BodyText}"/>
                     </Grid>
                 </VerticalStackLayout>
             </Border>
 
-            <!-- ========== FORMA DE PAGAMENTO ========== -->
             <Border BackgroundColor="White"
                     StrokeShape="RoundRectangle 12"
                     Padding="16"
@@ -81,9 +112,7 @@
                     <HorizontalStackLayout Spacing="8">
                         <Label Text="💳" TextColor="#C48E6B" FontSize="14"/>
                         <Label Text="Forma de pagamento" 
-                               TextColor="#A42D45" 
-                               FontAttributes="Bold" 
-                               FontSize="16"/>
+                               Style="{StaticResource SectionTitle}"/>
                     </HorizontalStackLayout>
 
                     <Border BackgroundColor="#F9F3EF"
@@ -92,13 +121,12 @@
                             Padding="12">
                         <HorizontalStackLayout Spacing="8">
                             <Ellipse WidthRequest="10" HeightRequest="10" Fill="#A42D45" VerticalOptions="Center"/>
-                            <Label Text="Pix" TextColor="#A42D45" FontSize="13"/>
+                            <Label Text="Pix" FontSize="13" Style="{StaticResource BodyText}"/>
                         </HorizontalStackLayout>
                     </Border>
                 </VerticalStackLayout>
             </Border>
 
-            <!-- ========== PAGAMENTO VIA PIX ========== -->
             <Border BackgroundColor="White"
                     StrokeShape="RoundRectangle 12"
                     Padding="16"
@@ -107,9 +135,7 @@
                     <HorizontalStackLayout Spacing="8">
                         <Label Text="📱" TextColor="#C48E6B" FontSize="14"/>
                         <Label Text="Pagamento via Pix" 
-                               TextColor="#A42D45" 
-                               FontAttributes="Bold" 
-                               FontSize="16"/>
+                               Style="{StaticResource SectionTitle}"/>
                     </HorizontalStackLayout>
 
                     <Image Source="qrcode.png"
@@ -119,8 +145,8 @@
                            Margin="0,12"/>
 
                     <HorizontalStackLayout Spacing="6" Margin="0,4,0,0">
-                        <Label Text="✉️" TextColor="#C48E6B" FontSize="12"/>
-                        <Label Text="Chave Pix (Copie e Cole)" TextColor="#A42D45" FontSize="12"/>
+                        <Label Text="✉️" TextColor="#C48E6B" FontSize="12" Style="{StaticResource BodyText}"/>
+                        <Label Text="Chave Pix (Copie e Cole)" FontSize="12" Style="{StaticResource BodyText}"/>
                     </HorizontalStackLayout>
 
                     <Grid ColumnSpacing="8" Margin="0,4,0,0">
@@ -130,7 +156,7 @@
                         </Grid.ColumnDefinitions>
 
                         <Border BackgroundColor="#F9F3EF" Padding="10" StrokeThickness="1" Stroke="#F1E5E2">
-                            <Label x:Name="LblPixKey" Text="fazenda.villaggio@pix.com.br" TextColor="#A42D45" FontSize="11"/>
+                            <Label x:Name="LblPixKey" Text="fazenda.villaggio@pix.com.br" FontSize="11" Style="{StaticResource BodyText}"/>
                         </Border>
 
                         <Button Grid.Column="1"
@@ -141,12 +167,12 @@
                                 CornerRadius="8"
                                 Padding="14,6"
                                 HeightRequest="40"
-                                Clicked="OnCopyPixKeyClicked"/>
+                                Clicked="OnCopyPixKeyClicked"
+                                Style="{StaticResource BodyButton}"/>
                     </Grid>
                 </VerticalStackLayout>
             </Border>
 
-            <!-- ========== ANEXAR COMPROVANTE ========== -->
             <Border BackgroundColor="White"
                     StrokeShape="RoundRectangle 12"
                     Padding="16"
@@ -155,9 +181,7 @@
                     <HorizontalStackLayout Spacing="8">
                         <Label Text="📎" TextColor="#C48E6B" FontSize="14"/>
                         <Label Text="Anexar comprovante" 
-                               TextColor="#A42D45" 
-                               FontAttributes="Bold" 
-                               FontSize="16"/>
+                               Style="{StaticResource SectionTitle}"/>
                     </HorizontalStackLayout>
 
                     <Border StrokeDashArray="2,2"
@@ -169,16 +193,17 @@
                         <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
                             <Label Text="☁️" TextColor="#C48E6B" FontSize="24" HorizontalOptions="Center"/>
                             <Label Text="Clique ou arraste o comprovante aqui" 
-                                   TextColor="#A42D45" 
                                    FontSize="12" 
-                                   HorizontalOptions="Center"/>
+                                   HorizontalOptions="Center"
+                                   Style="{StaticResource BodyText}"/>
                             <Button Text="Selecionar arquivo"
                                     FontSize="12"
                                     BackgroundColor="#A42D45"
                                     TextColor="White"
                                     CornerRadius="8"
                                     Padding="10,4"
-                                    Clicked="OnUploadProofClicked"/>
+                                    Clicked="OnUploadProofClicked"
+                                    Style="{StaticResource BodyButton}"/>
                             <Image x:Name="ImgComprovantePreview"
                                    IsVisible="False"
                                    HeightRequest="100"
@@ -189,7 +214,6 @@
                 </VerticalStackLayout>
             </Border>
 
-            <!-- ========== BOTÃO CONFIRMAR ========== -->
             <Border BackgroundColor="#A42D45"
                     StrokeShape="RoundRectangle 10"
                     Padding="0"
@@ -201,12 +225,11 @@
                 </Border.GestureRecognizers>
 
                 <HorizontalStackLayout Spacing="10" VerticalOptions="Center" HorizontalOptions="Center" Padding="16,0">
-                    <Label Text="✔" FontSize="16" TextColor="White" VerticalOptions="Center" />
-                    <Label Text="Confirmar Pagamento" FontSize="14" FontAttributes="Bold" TextColor="White" VerticalOptions="Center" HorizontalOptions="CenterAndExpand"/>
+                    <Label Text="✔" FontSize="16" TextColor="White" VerticalOptions="Center" Style="{StaticResource MainButtonText}" FontAttributes="None"/>
+                    <Label Text="Confirmar Pagamento" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" Style="{StaticResource MainButtonText}"/>
                 </HorizontalStackLayout>
             </Border>
 
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
-

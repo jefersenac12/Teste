@@ -2,23 +2,22 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Teste.ReservasAnterioresPage"
-             BackgroundColor="#FAF6F3">
-
+             BackgroundColor="#FAF6F3"
+             Title="Reservas Anteriores">
     <ScrollView>
         <VerticalStackLayout Spacing="20" 
-                            Padding="20"
-                            HorizontalOptions="Center"
-                            VerticalOptions="Start">
-
-            <!-- Container Header -->
+                             Padding="20"
+                             HorizontalOptions="Center"
+                             VerticalOptions="Start">
             <Border Stroke="#E0E0E0"
                     StrokeThickness="1"
                     BackgroundColor="White"
                     StrokeShape="RoundRectangle 12"
                     Padding="16"
-                    Margin="0,10,0,0">
+                    Margin="0,0,0,0"
+                    WidthRequest="300"
+                    HorizontalOptions="Center">
 
-                <!-- Header com botão voltar -->
                 <Grid ColumnDefinitions="Auto,*,Auto">
                     <Button Grid.Column="0"
                             Text="←"
@@ -31,8 +30,7 @@
                             Clicked="OnVoltarClicked" />
 
                     <Label Grid.Column="1"
-                           Text="Minhas Resevas"
-                           FontSize="20"
+                           Text="Minhas Reservas" FontSize="20"
                            FontAttributes="Bold"
                            HorizontalOptions="Center"
                            VerticalOptions="Center"
@@ -50,361 +48,163 @@
                 </Grid>
             </Border>
 
-            <!-- Abas -->
+            <Border Stroke="#E0E0E0"
+                    StrokeThickness="1"
+                    BackgroundColor="White"
+                    StrokeShape="RoundRectangle 12"
+                    Padding="12, 0"
+                    WidthRequest="300"
+                    HorizontalOptions="Center">
+                <HorizontalStackLayout Spacing="8">
+                    <Image Source="search_icon.png"
+                           WidthRequest="18"
+                           HeightRequest="18"
+                           VerticalOptions="Center" />
+                    <Entry Placeholder="Buscar Por Reservas"
+                           BackgroundColor="Transparent"
+                           TextColor="#666"
+                           PlaceholderColor="#999"
+                           HorizontalOptions="FillAndExpand"
+                           VerticalOptions="Center"
+                           HeightRequest="40" />
+                </HorizontalStackLayout>
+            </Border>
+
+
             <Grid ColumnDefinitions="*,*" 
                   ColumnSpacing="0"
-                  Margin="0,20,0,0">
+                  Margin="0,0,0,0"
+                  WidthRequest="300"
+                  HorizontalOptions="Center">
 
-                <!-- Aba Ativas -->
                 <VerticalStackLayout Grid.Column="0" Spacing="8">
                     <Button Text="Ativas"
                             FontSize="18"
-                            FontAttributes="Bold"
-                            TextColor="#8B0000"
-                            BackgroundColor="Transparent"
-                            HorizontalOptions="Center"
+                            TextColor="#8B4513" BackgroundColor="Transparent"
+                            HorizontalOptions="FillAndExpand"
                             Clicked="OnAtivasClicked" />
                     <BoxView HeightRequest="3"
                              BackgroundColor="Transparent"
                              HorizontalOptions="Fill" />
                 </VerticalStackLayout>
 
-                <!-- Aba Anteriores -->
                 <VerticalStackLayout Grid.Column="1" Spacing="8">
                     <Button Text="Anteriores"
                             FontSize="18"
                             FontAttributes="Bold"
-                            TextColor="#8B0000"
-                            BackgroundColor="Transparent"
-                            HorizontalOptions="Center"
+                            TextColor="#8B0000" BackgroundColor="Transparent"
+                            HorizontalOptions="FillAndExpand"
                             Clicked="OnAnterioresClicked" />
                     <BoxView HeightRequest="3"
-                             BackgroundColor="#8B0000"
-                             HorizontalOptions="Fill" />
+                             BackgroundColor="#8B0000" HorizontalOptions="Fill" />
                 </VerticalStackLayout>
             </Grid>
 
-            <!-- Lista de Reservas -->
-            <VerticalStackLayout x:Name="ListaReservasAnteriores" Spacing="16" Margin="0,20,0,0">
+            <VerticalStackLayout x:Name="ListaReservasAnteriores" 
+                                 Spacing="16" 
+                                 Margin="0,20,0,0"
+                                 WidthRequest="300"
+                                 HorizontalOptions="Center">
 
-                <!-- Card 1 - Pago com ícone verde -->
-                <Border Stroke="#E0E0E0"
-                        StrokeThickness="1"
-                        BackgroundColor="White"
-                        StrokeShape="RoundRectangle 12"
-                        Padding="16">
+                <Border Stroke="#E0E0E0" StrokeThickness="1" BackgroundColor="White" StrokeShape="RoundRectangle 12" Padding="16">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnCardClicked" />
                     </Border.GestureRecognizers>
-                    <Grid ColumnDefinitions="Auto,*,Auto" 
-                          RowDefinitions="Auto,Auto,Auto,Auto,Auto"
-                          ColumnSpacing="12"
-                          RowSpacing="4">
-
-                        <!-- Ícone check verde -->
-                        <Border Grid.Row="0" Grid.Column="0" Grid.RowSpan="2"
-                                WidthRequest="32"
-                                HeightRequest="32"
-                                BackgroundColor="#4CAF50"
-                                StrokeShape="Ellipse"
-                                VerticalOptions="Start"
-                                Margin="0,4,0,0">
-                            <Label Text="✓"
-                                   TextColor="White"
-                                   FontSize="18"
-                                   FontAttributes="Bold"
-                                   HorizontalOptions="Center"
-                                   VerticalOptions="Center" />
+                    <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="4">
+                        <Border Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" WidthRequest="32" HeightRequest="32" BackgroundColor="#4CAF50" StrokeShape="Ellipse" VerticalOptions="Start" Margin="0,4,0,0">
+                            <Label Text="✓" TextColor="White" FontSize="18" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
                         </Border>
-
-                        <!-- Conteúdo -->
-                        <Label Grid.Row="0" Grid.Column="1"
-                               Text="Café Da Manhã"
-                               FontSize="16"
-                               FontAttributes="Bold"
-                               TextColor="#A42D45" />
-
-                        <Border Grid.Row="0" Grid.Column="2"
-                                BackgroundColor="#F68F55"
-                                StrokeShape="RoundRectangle 12"
-                                Padding="16,6"
-                                VerticalOptions="Start">
-                            <Label Text="Pago"
-                                   TextColor="White"
-                                   FontSize="13"
-                                   FontAttributes="Bold" />
+                        <Label Grid.Row="0" Grid.Column="1" Text="Café Da Manhã" FontSize="16" FontAttributes="Bold" TextColor="#A42D45" />
+                        <Border Grid.Row="0" Grid.Column="2" BackgroundColor="#F68F55" StrokeShape="RoundRectangle 12" Padding="16,6" VerticalOptions="Start">
+                            <Label Text="Pago" TextColor="White" FontSize="13" FontAttributes="Bold" />
                         </Border>
-
-                        <Label Grid.Row="1" Grid.Column="1"
-                               Text="25 jul, 2024 - 10:00"
-                               FontSize="13"
-                               TextColor="#A42D45" />
-
-                        <Label Grid.Row="2" Grid.Column="1"
-                               Text="2x Adultos"
-                               FontSize="13"
-                               TextColor="#A42D45" />
-
-                        <Label Grid.Row="3" Grid.Column="1"
-                               Text="2x Criança"
-                               FontSize="13"
-                               TextColor="#A42D45" />
-
-                        <Label Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2"
-                               Text="R$ 250,00"
-                               FontSize="16"
-                               FontAttributes="Bold"
-                               TextColor="#A42D45"
-                               HorizontalOptions="End"
-                               Margin="0,8,0,0" />
+                        <Label Grid.Row="1" Grid.Column="1" Text="25 jul, 2024 - 10:00" FontSize="13" TextColor="#A42D45" />
+                        <Label Grid.Row="2" Grid.Column="1" Text="2x Adultos" FontSize="13" TextColor="#A42D45" />
+                        <Label Grid.Row="3" Grid.Column="1" Text="2x Criança" FontSize="13" TextColor="#A42D45" />
+                        <Label Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Text="R$ 250,00" FontSize="16" FontAttributes="Bold" TextColor="#A42D45" HorizontalOptions="End" Margin="0,8,0,0" />
                     </Grid>
                 </Border>
 
-                <!-- Card 2 - Cancelado com ícone X vermelho -->
-                <Border Stroke="#E0E0E0"
-                        StrokeThickness="1"
-                        BackgroundColor="White"
-                        StrokeShape="RoundRectangle 12"
-                        Padding="16">
+                <Border Stroke="#E0E0E0" StrokeThickness="1" BackgroundColor="White" StrokeShape="RoundRectangle 12" Padding="16">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnCardClicked" />
                     </Border.GestureRecognizers>
-                    <Grid ColumnDefinitions="Auto,*,Auto" 
-                          RowDefinitions="Auto,Auto,Auto,Auto,Auto"
-                          ColumnSpacing="12"
-                          RowSpacing="4">
-
-                        <!-- Ícone X vermelho -->
-                        <Border Grid.Row="0" Grid.Column="0" Grid.RowSpan="2"
-                                WidthRequest="32"
-                                HeightRequest="32"
-                                BackgroundColor="#F2686F"
-                                StrokeShape="Ellipse"
-                                VerticalOptions="Start"
-                                Margin="0,4,0,0">
-                            <Label Text="✕"
-                                   TextColor="White"
-                                   FontSize="18"
-                                   FontAttributes="Bold"
-                                   HorizontalOptions="Center"
-                                   VerticalOptions="Center" />
+                    <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="4">
+                        <Border Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" WidthRequest="32" HeightRequest="32" BackgroundColor="#F2686F" StrokeShape="Ellipse" VerticalOptions="Start" Margin="0,4,0,0">
+                            <Label Text="✕" TextColor="White" FontSize="18" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
                         </Border>
-
-                        <!-- Conteúdo -->
-                        <Label Grid.Row="0" Grid.Column="1"
-                               Text="Café Da Manhã"
-                               FontSize="16"
-                               FontAttributes="Bold"
-                               TextColor="#A42D45" />
-
-                        <Border Grid.Row="0" Grid.Column="2"
-                                BackgroundColor="#F2686F"
-                                StrokeShape="RoundRectangle 12"
-                                Padding="12,6"
-                                VerticalOptions="Start">
-                            <Label Text="Cancelado"
-                                   TextColor="White"
-                                   FontSize="13"
-                                   FontAttributes="Bold" />
+                        <Label Grid.Row="0" Grid.Column="1" Text="Café Da Manhã" FontSize="16" FontAttributes="Bold" TextColor="#A42D45" />
+                        <Border Grid.Row="0" Grid.Column="2" BackgroundColor="#F2686F" StrokeShape="RoundRectangle 12" Padding="12,6" VerticalOptions="Start">
+                            <Label Text="Cancelado" TextColor="White" FontSize="13" FontAttributes="Bold" />
                         </Border>
-
-                        <Label Grid.Row="1" Grid.Column="1"
-                               Text="25 jul, 2024 - 10:00"
-                               FontSize="13"
-                               TextColor="#A42D45" />
-
-                        <Label Grid.Row="2" Grid.Column="1"
-                               Text="2x Adultos"
-                               FontSize="13"
-                               TextColor="#A42D45" />
-
-                        <Label Grid.Row="3" Grid.Column="1"
-                               Text="2x Criança"
-                               FontSize="13"
-                               TextColor="#A42D45" />
-
-                        <Label Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2"
-                               Text="R$ 250,00"
-                               FontSize="16"
-                               FontAttributes="Bold"
-                               TextColor="#A42D45"
-                               HorizontalOptions="End"
-                               Margin="0,8,0,0" />
+                        <Label Grid.Row="1" Grid.Column="1" Text="25 jul, 2024 - 10:00" FontSize="13" TextColor="#A42D45" />
+                        <Label Grid.Row="2" Grid.Column="1" Text="2x Adultos" FontSize="13" TextColor="#A42D45" />
+                        <Label Grid.Row="3" Grid.Column="1" Text="2x Criança" FontSize="13" TextColor="#A42D45" />
+                        <Label Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Text="R$ 250,00" FontSize="16" FontAttributes="Bold" TextColor="#A42D45" HorizontalOptions="End" Margin="0,8,0,0" />
                     </Grid>
                 </Border>
 
-                <!-- Card 3 - Pendente com ícone relógio -->
-                <Border Stroke="#E0E0E0"
-                        StrokeThickness="1"
-                        BackgroundColor="White"
-                        StrokeShape="RoundRectangle 12"
-                        Padding="16">
+                <Border Stroke="#E0E0E0" StrokeThickness="1" BackgroundColor="White" StrokeShape="RoundRectangle 12" Padding="16">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnCardClicked" />
                     </Border.GestureRecognizers>
-                    <Grid ColumnDefinitions="Auto,*,Auto" 
-                          RowDefinitions="Auto,Auto,Auto,Auto,Auto"
-                          ColumnSpacing="12"
-                          RowSpacing="4">
-
-                        <!-- Ícone relógio amarelo -->
-                        <Border Grid.Row="0" Grid.Column="0" Grid.RowSpan="2"
-                                WidthRequest="32"
-                                HeightRequest="32"
-                                Stroke="#FCBC71"
-                                StrokeThickness="2"
-                                BackgroundColor="Transparent"
-                                StrokeShape="Ellipse"
-                                VerticalOptions="Start"
-                                Margin="0,4,0,0">
-                            <Label Text="⟳"
-                                   TextColor="#FCBC71"
-                                   FontSize="18"
-                                   FontAttributes="Bold"
-                                   HorizontalOptions="Center"
-                                   VerticalOptions="Center" />
+                    <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="4">
+                        <Border Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" WidthRequest="32" HeightRequest="32" Stroke="#FCBC71" StrokeThickness="2" BackgroundColor="Transparent" StrokeShape="Ellipse" VerticalOptions="Start" Margin="0,4,0,0">
+                            <Label Text="⟳" TextColor="#FCBC71" FontSize="18" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
                         </Border>
-
-                        <!-- Conteúdo -->
-                        <Label Grid.Row="0" Grid.Column="1"
-                               Text="Café Da Manhã"
-                               FontSize="16"
-                               FontAttributes="Bold"
-                               TextColor="#A42D45" />
-
-                        <Border Grid.Row="0" Grid.Column="2"
-                                BackgroundColor="#FCBC71"
-                                StrokeShape="RoundRectangle 12"
-                                Padding="12,6"
-                                VerticalOptions="Start">
-                            <Label Text="Pendente"
-                                   TextColor="White"
-                                   FontSize="13"
-                                   FontAttributes="Bold" />
+                        <Label Grid.Row="0" Grid.Column="1" Text="Café Da Manhã" FontSize="16" FontAttributes="Bold" TextColor="#A42D45" />
+                        <Border Grid.Row="0" Grid.Column="2" BackgroundColor="#FCBC71" StrokeShape="RoundRectangle 12" Padding="12,6" VerticalOptions="Start">
+                            <Label Text="Pendente" TextColor="White" FontSize="13" FontAttributes="Bold" />
                         </Border>
-
-                        <Label Grid.Row="1" Grid.Column="1"
-                               Text="25 jul, 2024 - 10:00"
-                               FontSize="13"
-                               TextColor="#A42D45" />
-
-                        <Label Grid.Row="2" Grid.Column="1"
-                               Text="2x Adultos"
-                               FontSize="13"
-                               TextColor="#A42D45" />
-
-                        <Label Grid.Row="3" Grid.Column="1"
-                               Text="2x Criança"
-                               FontSize="13"
-                               TextColor="#A42D45" />
-
-                        <Label Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2"
-                               Text="R$ 250,00"
-                               FontSize="16"
-                               FontAttributes="Bold"
-                               TextColor="#A42D45"
-                               HorizontalOptions="End"
-                               Margin="0,8,0,0" />
+                        <Label Grid.Row="1" Grid.Column="1" Text="25 jul, 2024 - 10:00" FontSize="13" TextColor="#A42D45" />
+                        <Label Grid.Row="2" Grid.Column="1" Text="2x Adultos" FontSize="13" TextColor="#A42D45" />
+                        <Label Grid.Row="3" Grid.Column="1" Text="2x Criança" FontSize="13" TextColor="#A42D45" />
+                        <Label Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Text="R$ 250,00" FontSize="16" FontAttributes="Bold" TextColor="#A42D45" HorizontalOptions="End" Margin="0,8,0,0" />
                     </Grid>
                 </Border>
 
-                <!-- Card 4 - Pago com ícone verde -->
-                <Border Stroke="#E0E0E0"
-                        StrokeThickness="1"
-                        BackgroundColor="White"
-                        StrokeShape="RoundRectangle 12"
-                        Padding="16">
+                <Border Stroke="#E0E0E0" StrokeThickness="1" BackgroundColor="White" StrokeShape="RoundRectangle 12" Padding="16">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnCardClicked" />
                     </Border.GestureRecognizers>
-                    <Grid ColumnDefinitions="Auto,*,Auto" 
-                          RowDefinitions="Auto,Auto,Auto,Auto,Auto"
-                          ColumnSpacing="12"
-                          RowSpacing="4">
-
-                        <!-- Ícone check verde -->
-                        <Border Grid.Row="0" Grid.Column="0" Grid.RowSpan="2"
-                                WidthRequest="32"
-                                HeightRequest="32"
-                                BackgroundColor="#4CAF50"
-                                StrokeShape="Ellipse"
-                                VerticalOptions="Start"
-                                Margin="0,4,0,0">
-                            <Label Text="✓"
-                                   TextColor="White"
-                                   FontSize="18"
-                                   FontAttributes="Bold"
-                                   HorizontalOptions="Center"
-                                   VerticalOptions="Center" />
+                    <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="4">
+                        <Border Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" WidthRequest="32" HeightRequest="32" BackgroundColor="#4CAF50" StrokeShape="Ellipse" VerticalOptions="Start" Margin="0,4,0,0">
+                            <Label Text="✓" TextColor="White" FontSize="18" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
                         </Border>
-
-                        <!-- Conteúdo -->
-                        <Label Grid.Row="0" Grid.Column="1"
-                               Text="Café Da Manhã"
-                               FontSize="16"
-                               FontAttributes="Bold"
-                               TextColor="#A42D45" />
-
-                        <Border Grid.Row="0" Grid.Column="2"
-                                BackgroundColor="#F68F55"
-                                StrokeShape="RoundRectangle 12"
-                                Padding="16,6"
-                                VerticalOptions="Start">
-                            <Label Text="Pago"
-                                   TextColor="White"
-                                   FontSize="13"
-                                   FontAttributes="Bold" />
+                        <Label Grid.Row="0" Grid.Column="1" Text="Café Da Manhã" FontSize="16" FontAttributes="Bold" TextColor="#A42D45" />
+                        <Border Grid.Row="0" Grid.Column="2" BackgroundColor="#F68F55" StrokeShape="RoundRectangle 12" Padding="16,6" VerticalOptions="Start">
+                            <Label Text="Pago" TextColor="White" FontSize="13" FontAttributes="Bold" />
                         </Border>
-
-                        <Label Grid.Row="1" Grid.Column="1"
-                               Text="25 jul, 2024 - 10:00"
-                               FontSize="13"
-                               TextColor="#A42D45" />
-
-                        <Label Grid.Row="2" Grid.Column="1"
-                               Text="2x Adultos"
-                               FontSize="13"
-                               TextColor="#A42D45" />
-
-                        <Label Grid.Row="3" Grid.Column="1"
-                               Text="2x Criança"
-                               FontSize="13"
-                               TextColor="#A42D45" />
-
-                        <Label Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2"
-                               Text="R$ 250,00"
-                               FontSize="16"
-                               FontAttributes="Bold"
-                               TextColor="#A42D45"
-                               HorizontalOptions="End"
-                               Margin="0,8,0,0" />
+                        <Label Grid.Row="1" Grid.Column="1" Text="25 jul, 2024 - 10:00" FontSize="13" TextColor="#A42D45" />
+                        <Label Grid.Row="2" Grid.Column="1" Text="2x Adultos" FontSize="13" TextColor="#A42D45" />
+                        <Label Grid.Row="3" Grid.Column="1" Text="2x Criança" FontSize="13" TextColor="#A42D45" />
+                        <Label Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Text="R$ 250,00" FontSize="16" FontAttributes="Bold" TextColor="#A42D45" HorizontalOptions="End" Margin="0,8,0,0" />
                     </Grid>
                 </Border>
 
             </VerticalStackLayout>
 
-            <!-- Ver todas as reservas -->
-            <Button Text="Ver todas as reservas  ˅"
+            <Button Text="Ver todas as reservas ˅"
                     FontSize="14"
                     TextColor="#8B4513"
                     BackgroundColor="Transparent"
                     HorizontalOptions="Center"
-                    Margin="0,10,0,10"
+                    Margin="0,10,0,0"
+                    WidthRequest="300"
                     Clicked="OnVerTodasClicked" />
 
-            <!-- Botão Sair -->
             <Button Text="🚪 Sair"
                     FontSize="16"
                     FontAttributes="Bold"
-                    TextColor="#8B0000"
+                    TextColor="#891633"
                     BackgroundColor="White"
                     BorderColor="#E0E0E0"
                     BorderWidth="1"
                     CornerRadius="10"
                     Padding="0,14"
                     Margin="0,0,0,20"
+                    WidthRequest="300"
                     Clicked="OnSairClicked" />
-
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

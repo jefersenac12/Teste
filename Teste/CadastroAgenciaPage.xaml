@@ -10,21 +10,21 @@
                              VerticalOptions="Center"
                              HorizontalOptions="Center">
 
-            <!-- Logo -->
             <Image Source="logo_villagio.png"
                    WidthRequest="120"
                    HeightRequest="120"
                    HorizontalOptions="Center" />
 
-            <!-- Abas -->
             <HorizontalStackLayout Spacing="12"
                                    HorizontalOptions="Center">
                 <VerticalStackLayout>
                     <Button Text="Entrar"
+                                FontSize="20"
                             BackgroundColor="Transparent"
                             TextColor="#8B0000"
-                            FontAttributes="Bold"
+                            FontFamily="Canvas_Inline_Reg" FontAttributes="Bold"
                             WidthRequest="120"
+                            
                             HeightRequest="40"
                             Clicked="OnEntrarClicked" />
                     <BoxView HeightRequest="2"
@@ -37,7 +37,8 @@
                     <Button Text="Cadastrar"
                             BackgroundColor="Transparent"
                             TextColor="#98694C"
-                            FontAttributes="Bold"
+                                FontSize="20"
+                            FontFamily="Canvas_Inline_Reg" FontAttributes="Bold"
                             WidthRequest="120"
                             HeightRequest="40"
                             Clicked="OnCadastrarClicked" />
@@ -48,100 +49,96 @@
                 </VerticalStackLayout>
             </HorizontalStackLayout>
 
-            <!-- Botões de escolha -->
             <HorizontalStackLayout Spacing="12"
                                    HorizontalOptions="Center"
                                    Margin="0,16,0,0">
                 <Button Text="Família"
+                             FontSize="20"
                         BackgroundColor="#FAF6F3"
                         TextColor="#98694C"
-                        FontAttributes="Bold"
+                        FontFamily="Canvas_Inline_Reg" FontAttributes="Bold"
                         WidthRequest="120"
                         HeightRequest="40"
                         Clicked="OnFamiliaClicked" />
                 <Button Text="Agência"
+                        FontSize="20"
                         BackgroundColor="#891633"
                         TextColor="White"
-                        FontAttributes="Bold"
+                        FontFamily="Canvas_Inline_Reg" FontAttributes="Bold"
                         WidthRequest="120"
                         HeightRequest="40"
                         Clicked="OnAgenciaClicked" />
             </HorizontalStackLayout>
 
-            <!-- Campo Nome da Agência -->
             <VerticalStackLayout Spacing="4" WidthRequest="280" Margin="0,8,0,0">
                 <Label Text="Nome da Agência"
                        FontSize="14"
                        TextColor="#98694C"
-                       FontAttributes="Bold" />
+                       FontFamily="SourceSansPro" FontAttributes="Bold" />
                 <Entry x:Name="nomeEntry"
                        BackgroundColor="#FAF6F3"
                        TextColor="#000"
                        PlaceholderColor="#999"
-                       HeightRequest="45" />
+                       FontFamily="SourceSansPro" HeightRequest="45" />
             </VerticalStackLayout>
 
-            <!-- Campo Telefone -->
             <VerticalStackLayout Spacing="4" WidthRequest="280">
                 <Label Text="Telefone"
                        FontSize="14"
                        TextColor="#98694C"
-                       FontAttributes="Bold" />
+                       FontFamily="SourceSansPro" FontAttributes="Bold" />
                 <Entry x:Name="telefoneEntry"
                        Keyboard="Telephone"
                        BackgroundColor="#FAF6F3"
                        TextColor="#000"
                        PlaceholderColor="#999"
-                       HeightRequest="45" />
+                       FontFamily="SourceSansPro" HeightRequest="45" />
             </VerticalStackLayout>
 
-            <!-- Campo Email -->
             <VerticalStackLayout Spacing="4" WidthRequest="280">
                 <Label Text="Email"
                        FontSize="14"
                        TextColor="#98694C"
-                       FontAttributes="Bold" />
+                       FontFamily="SourceSansPro" FontAttributes="Bold" />
                 <Entry x:Name="emailEntry"
                        Keyboard="Email"
                        BackgroundColor="#FAF6F3"
                        TextColor="#000"
                        PlaceholderColor="#999"
-                       HeightRequest="45" />
+                       FontFamily="SourceSansPro" HeightRequest="45" />
             </VerticalStackLayout>
 
-            <!-- Campo CNPJ -->
             <VerticalStackLayout Spacing="4" WidthRequest="280">
                 <Label Text="CNPJ"
                        FontSize="14"
                        TextColor="#98694C"
-                       FontAttributes="Bold" />
+                       FontFamily="SourceSansPro" FontAttributes="Bold" />
                 <Entry x:Name="cnpjEntry"
                        Keyboard="Numeric"
                        BackgroundColor="#FAF6F3"
                        TextColor="#000"
                        PlaceholderColor="#999"
-                       HeightRequest="45" />
+                       FontFamily="SourceSansPro" HeightRequest="45" />
             </VerticalStackLayout>
 
-            <!-- Campo Senha -->
             <VerticalStackLayout Spacing="4" WidthRequest="280">
                 <Label Text="Senha"
                        FontSize="14"
                        TextColor="#98694C"
-                       FontAttributes="Bold" />
+                       FontFamily="SourceSansPro" FontAttributes="Bold" />
                 <Entry x:Name="senhaEntry"
                        IsPassword="True"
                        BackgroundColor="#FAF6F3"
                        TextColor="#000"
                        PlaceholderColor="#999"
-                       HeightRequest="45" />
+                       FontFamily="SourceSansPro" HeightRequest="45" />
             </VerticalStackLayout>
 
-            <!-- Botão Cadastrar -->
             <Button Text="Cadastrar"
+                    FontSize="20"
                     BackgroundColor="#891633"
                     TextColor="White"
-                    FontAttributes="Bold"
+                    FontFamily="Canvas_Inline_Reg" FontAttributes="Bold"
                     WidthRequest="280"
                     HeightRequest="50"
                     CornerRadius="10"
