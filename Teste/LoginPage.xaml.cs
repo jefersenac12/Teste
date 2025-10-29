@@ -9,8 +9,8 @@ namespace Teste
     public partial class LoginPage : ContentPage
     {
         private static readonly HttpClient client = new HttpClient();
-        private readonly string apiUrlAgencia = "https://localhost:7064/api/Usuario/logarAgencia";
-        private readonly string apiUrlFamilia = "https://localhost:7064/api/Usuario/logarFamilia";
+        private readonly string apiUrlAgencia = "http://tiijeferson.runasp.net/api/Usuario/logarAgencia";
+        private readonly string apiUrlFamilia = "http://tiijeferson.runasp.net/api/Usuario/logarFamilia";
 
         public LoginPage()
         {

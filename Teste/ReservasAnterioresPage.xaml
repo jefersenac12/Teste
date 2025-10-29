@@ -85,7 +85,7 @@
             </Grid>
 
             <!-- Lista de Reservas -->
-            <VerticalStackLayout Spacing="16" Margin="0,20,0,0">
+            <VerticalStackLayout x:Name="ListaReservasAnteriores" Spacing="16" Margin="0,20,0,0">
 
                 <!-- Card 1 - Pago com ícone verde -->
                 <Border Stroke="#E0E0E0"

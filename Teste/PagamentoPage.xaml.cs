@@ -200,9 +200,18 @@ namespace Teste
                 if (!continuar) return;
             }
 
+            // Usa o mesmo formato exibido na tela para evitar discrepâncias (pt-BR)
+            string valorConfirmacao = LblTotal?.Text?.Trim();
+            if (string.IsNullOrWhiteSpace(valorConfirmacao))
+            {
+                var ptBr = CultureInfo.GetCultureInfo("pt-BR");
+                var valorFormatado = totalAmount.ToString("N2", ptBr);
+                valorConfirmacao = $"R${valorFormatado}";
+            }
+
             bool confirmar = await DisplayAlert(
                 "Confirmar Pagamento",
-                $"Deseja confirmar o pagamento de R${totalAmount:F2}?",
+                $"Deseja confirmar o pagamento de {valorConfirmacao}?",
                 "Sim",
                 "Não"
             );

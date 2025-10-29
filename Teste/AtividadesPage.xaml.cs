@@ -28,7 +28,7 @@ namespace Teste
             // Inicializa Labels de contagem na tela
             LblAdultos.Text = adultos.ToString();
             LblCrianca0a5.Text = criancas0a5.ToString();
-            LblCrianca6a12.Text = criancas6a12.ToString(); // Garantindo que esta Label existe no XAML
+            LblCrianca6a12.Text = criancas6a12.ToString(); 
 
             // Carrega a data salva (ou usa a data atual como fallback)
             if (Preferences.ContainsKey("DataAgendamento"))

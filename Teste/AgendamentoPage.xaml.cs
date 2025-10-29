@@ -48,9 +48,11 @@ namespace Teste
     {
         private static readonly HttpClient client = new HttpClient();
         private readonly string apiUrlSafras = "http://tiijeferson.runasp.net/api/Safra/ativas";
+        private readonly string apiUrlTodasSafras = "http://tiijeferson.runasp.net/api/Safra"; // Nova URL para todas as safras
 
         private DateTime _dataAtual;
         private Safra? _safraAtiva;
+        private List<Safra> _todasSafras = new List<Safra>(); // Lista de todas as safras
         public ObservableCollection<DiaCalendario> Dias { get; set; }
         public ObservableCollection<string> Frutas { get; set; }
 
@@ -72,6 +74,7 @@ namespace Teste
         {
             try
             {
+                await CarregarTodasSafras(); // Carrega todas as safras primeiro
                 await CarregarSafraAtiva();
             }
             catch (Exception ex)
@@ -84,6 +87,46 @@ namespace Teste
                 AtualizarCalendario();
                 AtualizarFrutas();
             }
+        }
+
+        // Novo método para carregar todas as safras do banco
+        private async Task CarregarTodasSafras()
+        {
+            try
+            {
+                var response = await client.GetAsync(apiUrlTodasSafras);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    var safras = JsonSerializer.Deserialize<List<Safra>>(json, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                    _todasSafras = safras ?? new List<Safra>();
+                }
+                else
+                {
+                    _todasSafras = new List<Safra>();
+                }
+            }
+            catch (Exception)
+            {
+                _todasSafras = new List<Safra>();
+            }
+        }
+
+        // Método para encontrar safra por data
+        private Safra? EncontrarSafraPorData(DateTime data)
+        {
+            if (_todasSafras?.Any() == true)
+            {
+                return _todasSafras.FirstOrDefault(s => 
+                    data.Date >= s.DataInicio.Date && 
+                    data.Date <= s.DataFim.Date);
+            }
+            return null;
         }
 
         // --- MÉTODO DE CARREGAMENTO (Sua versão, que é boa) ---
@@ -137,14 +180,14 @@ namespace Teste
             }
         }
 
-        // --- SEU NOVO MÉTODO DE FALLBACK DINÂMICO (Está ótimo!) ---
+        // --- MÉTODO DE FALLBACK DINÂMICO ATUALIZADO PARA 2025 ---
         private void CarregarSafraFallback()
         {
             var dataAtual = DateTime.Now;
             int mesAtual = dataAtual.Month;
             int anoAtual = dataAtual.Year;
 
-            // Definindo as Safras anuais (Baseado em períodos comuns de colheita)
+            // Definindo as Safras para 2025/2026 (Baseado em períodos comuns de colheita)
             // 1. Safra de Verão (Dezembro a Março - Ano Vira)
             if (mesAtual >= 12 || mesAtual <= 3)
             {
@@ -398,7 +441,17 @@ namespace Teste
                 }
             }
 
-            if (_safraAtiva == null)
+            // Primeiro, tenta encontrar safra específica para a data selecionada
+            var safraParaData = EncontrarSafraPorData(diaSelecionado.Data);
+            
+            if (safraParaData != null)
+            {
+                // Usa a safra específica encontrada para a data
+                _safraAtiva = safraParaData;
+                Preferences.Set("SafraId", _safraAtiva.Id);
+                Preferences.Set("SafraNome", _safraAtiva.Nome);
+            }
+            else if (_safraAtiva == null)
             {
                 await DisplayAlert("Erro", "Aguarde, carregando dados da safra...", "OK");
                 // Tenta carregar de novo
@@ -413,15 +466,26 @@ namespace Teste
             // Verificar se a data está dentro da safra (agora dinâmica ou da API)
             if (diaSelecionado.Data.Date < _safraAtiva.DataInicio.Date || diaSelecionado.Data.Date > _safraAtiva.DataFim.Date)
             {
-                await DisplayAlert("Aviso",
-                    $"A data selecionada está fora do período da safra ativa ({_safraAtiva.Nome}).",
-                    "OK");
+                // Se não há safra específica para a data, mostra aviso mais informativo
+                if (safraParaData == null)
+                {
+                    await DisplayAlert("Aviso",
+                        $"A data selecionada ({diaSelecionado.Data:dd/MM/yyyy}) não está dentro de nenhum período de safra disponível.\n\n" +
+                        $"Safra atual: {_safraAtiva.Nome} ({_safraAtiva.DataInicio:dd/MM/yyyy} a {_safraAtiva.DataFim:dd/MM/yyyy})",
+                        "OK");
+                }
+                else
+                {
+                    await DisplayAlert("Aviso",
+                        $"A data selecionada está fora do período da safra ativa ({_safraAtiva.Nome}).",
+                        "OK");
+                }
                 return;
             }
 
             // Salvar dados para próxima tela
             Preferences.Set("DataAgendamento", diaSelecionado.Data.ToString("yyyy-MM-dd"));
-            // Preferences já foram setados no CarregarSafraAtiva
+            // Preferences já foram setados no CarregarSafraAtiva ou acima
             // Preferences.Set("SafraId", _safraAtiva.Id);
             // Preferences.Set("SafraNome", _safraAtiva.Nome);
 
