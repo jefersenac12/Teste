@@ -9,7 +9,6 @@ public partial class CadastroAgenciaPage : ContentPage
     private readonly string apiUrl = "http://tiijeferson.runasp.net/api/Usuario/cadastrarAgencia";
     //private readonly string apiUrl = "https://localhost:7064/api/Usuario/cadastrarAgencia";
 
-
     public CadastroAgenciaPage()
     {
         InitializeComponent();
@@ -17,6 +16,23 @@ public partial class CadastroAgenciaPage : ContentPage
 
     private async void OnCadastrarAgenciaClicked(object sender, EventArgs e)
     {
+        // Validação dos campos obrigatórios
+        if (string.IsNullOrWhiteSpace(nomeEntry.Text) ||
+            string.IsNullOrWhiteSpace(telefoneEntry.Text) ||
+            string.IsNullOrWhiteSpace(emailEntry.Text) ||
+            string.IsNullOrWhiteSpace(senhaEntry.Text) ||
+            string.IsNullOrWhiteSpace(cnpjEntry.Text))
+        {
+            await DisplayAlert("Erro", "Todos os campos são obrigatórios.", "OK");
+            return;
+        }
+
+        if (!emailEntry.Text.Contains("@") || !emailEntry.Text.Contains("."))
+        {
+            await DisplayAlert("Erro", "E-mail inválido.", "OK");
+            return;
+        }
+
         var novoUsuario = new
         {
             Nome = nomeEntry.Text,
@@ -36,6 +52,14 @@ public partial class CadastroAgenciaPage : ContentPage
             if (response.IsSuccessStatusCode)
             {
                 await DisplayAlert("Sucesso", "Agência cadastrada com sucesso!", "OK");
+
+                // Limpa os campos após sucesso
+                nomeEntry.Text = string.Empty;
+                telefoneEntry.Text = string.Empty;
+                emailEntry.Text = string.Empty;
+                senhaEntry.Text = string.Empty;
+                cnpjEntry.Text = string.Empty;
+
                 await Navigation.PushAsync(new AgendamentoPage());
             }
             else
@@ -57,18 +81,16 @@ public partial class CadastroAgenciaPage : ContentPage
 
     private void OnEntrarClicked(object sender, EventArgs e)
     {
-        // Volta para a tela de Login
         Navigation.PushAsync(new LoginPage());
     }
 
     private void OnCadastrarClicked(object sender, EventArgs e)
     {
-        // Navega para a pagina de cadastro de famalia
+        // Navega para a página de cadastro de família
     }
 
     private void OnAgenciaClicked(object sender, EventArgs e)
     {
-
+        // Já está na página de cadastro de agência
     }
 }
-

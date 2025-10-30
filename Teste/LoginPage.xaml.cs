@@ -1,8 +1,6 @@
-
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-
 
 namespace Teste
 {
@@ -48,13 +46,27 @@ namespace Teste
             string identificador = identificadorEntry.Text;
             string senha = senhaEntry.Text;
 
+            if (string.IsNullOrWhiteSpace(identificador) || string.IsNullOrWhiteSpace(senha))
+            {
+                await DisplayAlert("Erro", "Preencha todos os campos.", "OK");
+                return;
+            }
+
             // Tenta primeiro como Família
             bool loginFamilia = await TentarLoginFamilia(identificador, senha);
-            if (loginFamilia) return;
+            if (loginFamilia)
+            {
+                LimparCampos();
+                return;
+            }
 
             // Se falhar, tenta como Agência
             bool loginAgencia = await TentarLoginAgencia(identificador, senha);
-            if (loginAgencia) return;
+            if (loginAgencia)
+            {
+                LimparCampos();
+                return;
+            }
 
             // Se ambos falharem
             await DisplayAlert("Falha", "Login não encontrado", "OK");
@@ -110,6 +122,12 @@ namespace Teste
             catch { }
 
             return false;
+        }
+
+        private void LimparCampos()
+        {
+            identificadorEntry.Text = string.Empty;
+            senhaEntry.Text = string.Empty;
         }
 
         private async void OnCadastrarClicked(object sender, EventArgs e)

@@ -25,7 +25,7 @@
                         BackgroundColor="Transparent"
                         TextColor="#891633"
                         FontAttributes="Bold"
-                        FontFamily="Canvas_Inline_Reg"
+                        FontFamily="SourceSansPro" 
                         WidthRequest="140"
                         HeightRequest="40"
                         FontSize="20"
@@ -42,7 +42,7 @@
                 <Button Text="Cadastrar"
                         BackgroundColor="Transparent"
                         TextColor="#891633"
-                        FontFamily="Canvas_Inline_Reg"
+                        FontFamily="SourceSansPro" 
                         FontAttributes="Bold"
                         WidthRequest="140"
                         FontSize="20"
@@ -88,7 +88,7 @@
 
         <!-- Botão Entrar -->
         <Button x:Name="entrarButton"
-                FontFamily="Canvas_Inline_Reg"
+               FontFamily="SourceSansPro" 
                 FontSize="20"
                 Text="Entrar"
                 BackgroundColor="#891633"

@@ -22,7 +22,7 @@
                                 FontSize="20"
                             BackgroundColor="Transparent"
                             TextColor="#8B0000"
-                            FontFamily="Canvas_Inline_Reg" FontAttributes="Bold"
+                            FontFamily="SourceSansPro"  FontAttributes="Bold"
                             WidthRequest="120"
                             
                             HeightRequest="40"
@@ -38,7 +38,7 @@
                             BackgroundColor="Transparent"
                             TextColor="#98694C"
                                 FontSize="20"
-                            FontFamily="Canvas_Inline_Reg" FontAttributes="Bold"
+                            FontFamily="SourceSansPro"  FontAttributes="Bold"
                             WidthRequest="120"
                             HeightRequest="40"
                             Clicked="OnCadastrarClicked" />
@@ -56,7 +56,7 @@
                              FontSize="20"
                         BackgroundColor="#FAF6F3"
                         TextColor="#98694C"
-                        FontFamily="Canvas_Inline_Reg" FontAttributes="Bold"
+                        FontFamily="SourceSansPro"  FontAttributes="Bold"
                         WidthRequest="120"
                         HeightRequest="40"
                         Clicked="OnFamiliaClicked" />
@@ -64,7 +64,7 @@
                         FontSize="20"
                         BackgroundColor="#891633"
                         TextColor="White"
-                        FontFamily="Canvas_Inline_Reg" FontAttributes="Bold"
+                        FontFamily="SourceSansPro" FontAttributes="Bold"
                         WidthRequest="120"
                         HeightRequest="40"
                         Clicked="OnAgenciaClicked" />
@@ -138,7 +138,7 @@
                     FontSize="20"
                     BackgroundColor="#891633"
                     TextColor="White"
-                    FontFamily="Canvas_Inline_Reg" FontAttributes="Bold"
+             FontFamily="SourceSansPro"  FontAttributes="Bold"
                     WidthRequest="280"
                     HeightRequest="50"
                     CornerRadius="10"

@@ -1,17 +1,11 @@
-﻿using Microsoft.Maui.Storage;
+﻿
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Text.Json;
-using System.Text;
-using Microsoft.Maui.Controls;
-using System.Linq; // Necessário para .Any(), .Where(), .Select(), etc.
 
 namespace Teste
 {
-    // ===================================
-    // 1. NOVO CONCEITO OOP: CLASSE FRUTAPERIODO
-    // ===================================
     public class FrutaPeriodo
     {
         public string Nome { get; set; }
@@ -112,7 +106,7 @@ namespace Teste
     public partial class AgendamentoPage : ContentPage
     {
         private static readonly HttpClient client = new HttpClient();
-        private readonly string apiUrlSafras = "http://tiijeferson.runasp.net/api/Safra/ativas";
+        private readonly string apiUrlSafras = "http://tiijeferson.runasp.net/api/agenda";
         private readonly string apiUrlTodasSafras = "http://tiijeferson.runasp.net/api/Safra";
 
         // ===================================

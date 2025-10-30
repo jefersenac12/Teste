@@ -43,7 +43,7 @@
                     Style="{StaticResource TitleLabel}" 
                     FontSize="20" 
                     HorizontalOptions="Start" 
-                    FontFamily="Canvas_Inline_Reg" 
+                  FontFamily="SourceSansPro" 
                     FontAttributes="Bold" />
 
             <Border Style="{StaticResource CardContainer}" WidthRequest="304">
@@ -106,7 +106,7 @@
                     Style="{StaticResource TitleLabel}" 
                     FontSize="24" 
                     HorizontalOptions="Start"
-                    FontFamily="Canvas_Inline_Reg" 
+                   FontFamily="SourceSansPro" 
                     FontAttributes="Bold" />
 
             <Border Style="{StaticResource CardContainer}" WidthRequest="304">
@@ -153,7 +153,7 @@
                         Clicked="OnContinuarClicked" 
                         Padding="0" 
                         FontSize="16"  
-                        FontFamily="Canvas_Inline_Reg">
+                       FontFamily="SourceSansPro">
                     <Button.Text>&#x1F4C5; Continuar Para Atividade</Button.Text>
                 </Button>
             </Grid>

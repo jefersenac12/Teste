@@ -15,6 +15,15 @@ public partial class CadastroFamiliaPage : ContentPage
 
     private async void OnCadastrarFamiliaClicked(object sender, EventArgs e)
     {
+        // Validação dos campos obrigatórios
+        if (string.IsNullOrWhiteSpace(nomeEntry.Text) ||
+            string.IsNullOrWhiteSpace(telefoneEntry.Text) ||
+            string.IsNullOrWhiteSpace(senhaEntry.Text))
+        {
+            await DisplayAlert("Erro", "Todos os campos são obrigatórios.", "OK");
+            return;
+        }
+
         var novaFamilia = new
         {
             Nome = nomeEntry.Text,
@@ -32,6 +41,12 @@ public partial class CadastroFamiliaPage : ContentPage
             if (response.IsSuccessStatusCode)
             {
                 await DisplayAlert("Sucesso", "Família cadastrada com sucesso!", "OK");
+
+                // Limpa os campos após sucesso
+                nomeEntry.Text = string.Empty;
+                telefoneEntry.Text = string.Empty;
+                senhaEntry.Text = string.Empty;
+
                 await Navigation.PushAsync(new AgendamentoPage());
             }
             else
@@ -58,6 +73,6 @@ public partial class CadastroFamiliaPage : ContentPage
 
     private void OnCadastrarClicked(object sender, EventArgs e)
     {
-
+        // Já está na página de cadastro de família
     }
 }
