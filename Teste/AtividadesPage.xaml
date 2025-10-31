@@ -140,6 +140,7 @@
                            Grid.Column="1" />
                 </Grid>
             </Border>
+
             <Label Text="Selecione um Horário que Preferir:"
                    FontSize="14"
                    TextColor="#794325"
@@ -323,7 +324,7 @@
                     HeightRequest="55"
                     Margin="0,5,0,20"
                     WidthRequest="310"
-                    FontFamily="Canvas_Inline_Reg" />
+                    FontFamily="SourceSansPro" />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

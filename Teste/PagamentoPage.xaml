@@ -9,14 +9,14 @@
     <ContentPage.Resources>
         <ResourceDictionary>
             <Style TargetType="Label" x:Key="TitleMain">
-                <Setter Property="FontFamily" Value="Canvas_Inline_Reg" />
+                <Setter Property="FontFamily" Value="SourceSansPro"  />
                 <Setter Property="FontSize" Value="20" />
                 <Setter Property="FontAttributes" Value="Bold" />
                 <Setter Property="TextColor" Value="#A42D45" />
             </Style>
 
             <Style TargetType="Label" x:Key="SectionTitle">
-                <Setter Property="FontFamily" Value="Canvas_Inline_Reg" />
+                <Setter Property="FontFamily" Value="SourceSansPro"  />
                 <Setter Property="FontSize" Value="16" />
                 <Setter Property="FontAttributes" Value="Bold" />
                 <Setter Property="TextColor" Value="#A42D45" />
@@ -32,7 +32,7 @@
             </Style>
 
             <Style TargetType="Label" x:Key="MainButtonText">
-                <Setter Property="FontFamily" Value="Canvas_Inline_Reg" />
+                <Setter Property="FontFamily" Value="SourceSansPro"  />
                 <Setter Property="FontSize" Value="14" />
                 <Setter Property="FontAttributes" Value="Bold" />
                 <Setter Property="TextColor" Value="White" />
