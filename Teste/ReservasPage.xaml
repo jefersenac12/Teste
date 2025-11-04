@@ -5,20 +5,24 @@
              x:Class="Teste.ReservasAtivasPage"
              BackgroundColor="#FAF6F3"
              Title="Reservas Ativas">
+
     <ScrollView>
-        <VerticalStackLayout Spacing="20" 
+        <VerticalStackLayout Spacing="20"
                              Padding="20"
                              HorizontalOptions="Center"
                              VerticalOptions="Start">
+
+            <!-- Cabeçalho -->
             <Border Stroke="#E0E0E0"
                     StrokeThickness="1"
-                    BackgroundColor="White"
+                    BackgroundColor="#FAF6F3"
                     Padding="16"
-                    Margin="0,0,0,0" WidthRequest="300" 
+                    WidthRequest="300"
                     HorizontalOptions="Center">
                 <Border.StrokeShape>
                     <shapes:RoundRectangle CornerRadius="12" />
                 </Border.StrokeShape>
+
                 <Grid ColumnDefinitions="Auto,*,Auto">
                     <Button Grid.Column="0"
                             Text="←"
@@ -31,7 +35,8 @@
                             Clicked="OnVoltarClicked" />
 
                     <Label Grid.Column="1"
-                           Text="Minhas Reservas" FontSize="20"
+                           Text="Minhas Reservas"
+                           FontSize="20"
                            FontAttributes="Bold"
                            HorizontalOptions="Center"
                            VerticalOptions="Center"
@@ -49,35 +54,11 @@
                 </Grid>
             </Border>
 
-            <Border Stroke="#E0E0E0"
-                    StrokeThickness="1"
-                    BackgroundColor="White"
-                    Padding="12, 0"
-                    WidthRequest="300"
-                    HorizontalOptions="Center">
-                <Border.StrokeShape>
-                    <shapes:RoundRectangle CornerRadius="12" />
-                </Border.StrokeShape>
-                <HorizontalStackLayout Spacing="8">
-                    <Image Source="search_icon.png"
-                           WidthRequest="18"
-                           HeightRequest="18"
-                           VerticalOptions="Center" />
-                    <Entry Placeholder="Buscar Por Reservas"
-                           BackgroundColor="Transparent"
-                           TextColor="#666"
-                           PlaceholderColor="#999"
-                           HorizontalOptions="FillAndExpand"
-                           VerticalOptions="Center"
-                           HeightRequest="40"
-                           TextChanged="OnSearchTextChanged" />
-                </HorizontalStackLayout>
-            </Border>
-
-            <VerticalStackLayout x:Name="ListaReservasAtivas" 
-                                 Spacing="16" 
-                                 Margin="0,0,0,0" 
-                                 WidthRequest="300" 
+            <!-- Lista de Reservas -->
+            <VerticalStackLayout x:Name="ListaReservasAtivas"
+                                 Spacing="16"
+                                 Margin="0,0,0,0"
+                                 WidthRequest="300"
                                  HorizontalOptions="Center" />
 
             <Button Text="Ver todas as reservas ˅"
