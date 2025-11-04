@@ -83,6 +83,9 @@
 	  <Compile Update="InicioPage.xaml.cs">
 	    <DependentUpon>InicioPage.xaml</DependentUpon>
 	  </Compile>
+	  <Compile Update="ReservasPage.xaml.cs">
+	    <DependentUpon>ReservasPage.xaml</DependentUpon>
+	  </Compile>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -107,10 +110,7 @@
 	  <MauiXaml Update="PerfilPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="ReservasAnterioresPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="ReservasAtivasPage.xaml">
+	  <MauiXaml Update="ReservasPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>

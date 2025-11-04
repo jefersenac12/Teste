@@ -1,10 +1,23 @@
-﻿using Microsoft.Maui.Controls;
+using Microsoft.Maui.Controls;
 using Microsoft.Maui.Storage;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Teste
 {
+    public class Atividade
+    {
+        public int Id { get; set; }
+        public string Nome { get; set; } = "";
+        public string Descricao { get; set; } = "";
+        public decimal Valor { get; set; }
+        public bool Ativa { get; set; }
+    }
+
     public partial class AtividadesPage : ContentPage
     {
         // Variáveis de estado
@@ -12,14 +25,18 @@ namespace Teste
         private int criancas0a5 = 0;
         private int criancas6a12 = 0;
 
-        // Preços Fixos
-        private readonly double precoBasico = 25.00;
-        private readonly double precoCompleto = 65.00;
-        private readonly double precoTrezinho = 15.00;
-        private readonly double precoCrianca6a12 = 12.50; // Meia entrada
+        // Atividades carregadas do banco
+        private List<Atividade> atividades = new List<Atividade>();
+        private Dictionary<int, double> precosAtividades = new Dictionary<int, double>();
+        
+        // Preço padrão para meia entrada (crianças 6-12)
+        private readonly double precoCrianca6a12 = 12.50;
 
         private DateTime dataSelecionada;
         private TimeSpan? horarioSelecionado = null;
+        
+        private readonly HttpClient httpClient = new HttpClient();
+        private readonly string apiUrlAtividade = "http://tiijeferson.runasp.net/api/Atividade";
 
         public AtividadesPage()
         {
@@ -56,7 +73,57 @@ namespace Teste
             // No entanto, assumindo que InitializeComponent() funciona, anexamos aqui.
             TimePickerHorario.PropertyChanged += TimePickerHorario_PropertyChanged;
 
+            // Carrega atividades do banco de dados
+            _ = CarregarAtividades();
+
             AtualizarTotal();
+        }
+
+        private async Task CarregarAtividades()
+        {
+            try
+            {
+                var response = await httpClient.GetAsync(apiUrlAtividade);
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    atividades = JsonSerializer.Deserialize<List<Atividade>>(json, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    }) ?? new List<Atividade>();
+
+                    // Mapeia preços por ID
+                    foreach (var atividade in atividades)
+                    {
+                        precosAtividades[atividade.Id] = (double)atividade.Valor;
+                    }
+                }
+                else
+                {
+                    // Se a API falhar, usa dados fictícios
+                    CriarAtividadesFicticias();
+                }
+            }
+            catch (Exception)
+            {
+                // Se houver erro de conexão, usa dados fictícios
+                CriarAtividadesFicticias();
+            }
+        }
+
+        private void CriarAtividadesFicticias()
+        {
+            atividades.Clear();
+            precosAtividades.Clear();
+
+            // Preços fixos especificados pelo usuário
+            atividades.Add(new Atividade { Id = 1, Nome = "Café da manhã Básico", Valor = 25.00m });
+            atividades.Add(new Atividade { Id = 2, Nome = "Café da manhã Completo", Valor = 65.00m });
+            atividades.Add(new Atividade { Id = 3, Nome = "Trezinho / Colha e Pague", Valor = 15.00m });
+
+            precosAtividades[1] = 25.00;
+            precosAtividades[2] = 65.00;
+            precosAtividades[3] = 15.00;
         }
 
         // ========== SET DATA ==========
@@ -142,18 +209,16 @@ namespace Teste
             double total = 0;
 
             // Custo de Atividades Adicionais (calculado por adulto)
-            if (CheckBasico.IsChecked)
-                total += adultos * precoBasico;
+            if (CheckBasico.IsChecked && precosAtividades.ContainsKey(1))
+                total += adultos * precosAtividades[1];
 
-            if (CheckCompleto.IsChecked)
-                total += adultos * precoCompleto;
+            if (CheckCompleto.IsChecked && precosAtividades.ContainsKey(2))
+                total += adultos * precosAtividades[2];
 
-            if (CheckTrezinho.IsChecked)
-                total += adultos * precoTrezinho;
+            if (CheckTrezinho.IsChecked && precosAtividades.ContainsKey(3))
+                total += adultos * precosAtividades[3];
 
-            // Custo das crianças (6 a 12 anos)
-            // Se as atividades acima forem por pessoa, a lógica do total deve ser refeita
-            // Mas, seguindo a estrutura atual (somente adultos pagam o preço total da atividade):
+            // Custo das crianças (6 a 12 anos) - meia entrada
             total += criancas6a12 * precoCrianca6a12;
 
             LblTotalEstimado.Text = $"Total estimado: R${total:F2}";
@@ -190,21 +255,30 @@ namespace Teste
             // Garante que o total está atualizado
             AtualizarTotal();
 
-            // Monta a lista de atividades escolhidas
+            // Monta a lista de atividades escolhidas usando nomes do banco
             List<string> atividadesSelecionadas = new List<string>();
-            if (CheckBasico.IsChecked) atividadesSelecionadas.Add("Café da manhã Básico");
-            if (CheckCompleto.IsChecked) atividadesSelecionadas.Add("Café da manhã Completo");
-            if (CheckTrezinho.IsChecked) atividadesSelecionadas.Add("Trezinho / Colha e Pague");
-
-            // Mapeia as atividades selecionadas para seus IDs
-            // Assumimos os seguintes IDs no backend:
-            // 1 = Café da manhã Básico
-            // 2 = Café da manhã Completo
-            // 3 = Trezinho / Colha e Pague
             List<int> atividadeIds = new List<int>();
-            if (CheckBasico.IsChecked) atividadeIds.Add(1);
-            if (CheckCompleto.IsChecked) atividadeIds.Add(2);
-            if (CheckTrezinho.IsChecked) atividadeIds.Add(3);
+            
+            if (CheckBasico.IsChecked) 
+            {
+                var atividade = atividades.FirstOrDefault(a => a.Id == 1);
+                atividadesSelecionadas.Add(atividade?.Nome ?? "Café da manhã Básico");
+                atividadeIds.Add(1);
+            }
+            
+            if (CheckCompleto.IsChecked) 
+            {
+                var atividade = atividades.FirstOrDefault(a => a.Id == 2);
+                atividadesSelecionadas.Add(atividade?.Nome ?? "Café da manhã Completo");
+                atividadeIds.Add(2);
+            }
+            
+            if (CheckTrezinho.IsChecked) 
+            {
+                var atividade = atividades.FirstOrDefault(a => a.Id == 3);
+                atividadesSelecionadas.Add(atividade?.Nome ?? "Trezinho / Colha e Pague");
+                atividadeIds.Add(3);
+            }
 
             string atividadesTexto = string.Join(", ", atividadesSelecionadas);
             string totalStr = LblTotalEstimado.Text.Replace("Total estimado: R$", "").Trim();

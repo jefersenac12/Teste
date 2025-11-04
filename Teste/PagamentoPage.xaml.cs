@@ -1,17 +1,32 @@
-﻿
+
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
+using System.Net.Http;
+using System.Linq;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Storage;
+using Microsoft.Maui.Controls.Shapes;
 
 
 namespace Teste
 {
+    public class AtividadePagamento
+    {
+        public int Id { get; set; }
+        public string Nome { get; set; } = "";
+        public string Descricao { get; set; } = "";
+        public decimal Valor { get; set; }
+        public bool Ativa { get; set; }
+    }
+
     public partial class PagamentoPage : ContentPage
     {
         private static readonly HttpClient client = new HttpClient();
         private readonly string apiUrlAgenda = "http://tiijeferson.runasp.net/api/Agenda";
         private readonly string apiUrlReserva = "http://tiijeferson.runasp.net/api/Reserva";
         private readonly string apiUrlPagamento = "http://tiijeferson.runasp.net/api/Pagamento";
+        private readonly string apiUrlAtividade = "http://tiijeferson.runasp.net/api/Atividade";
 
         private decimal totalAmount = 0;
         private string pixKey = "fazenda.villaggio@pix.com.br";
@@ -19,18 +34,66 @@ namespace Teste
         private string comprovantePath = string.Empty;
         private int safraId = 0;
         private List<int> atividadeIds = new List<int>();
+        private Dictionary<int, AtividadePagamento> atividadesCarregadas = new Dictionary<int, AtividadePagamento>();
 
         public PagamentoPage()
         {
             InitializeComponent();
-            CarregarDadosReserva();
-         
+            _ = InitializeAsync();
+        }
+
+        private async Task InitializeAsync()
+        {
+            await CarregarAtividades();
+            await CarregarDadosReserva();
+        }
+
+        private async Task CarregarAtividades()
+        {
+            try
+            {
+                var response = await client.GetAsync(apiUrlAtividade);
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    var atividades = JsonSerializer.Deserialize<List<AtividadePagamento>>(json, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                    if (atividades != null)
+                    {
+                        atividadesCarregadas.Clear();
+                        foreach (var atividade in atividades)
+                        {
+                            atividadesCarregadas[atividade.Id] = atividade;
+                        }
+                    }
+                }
+                else
+                {
+                    CriarAtividadesFicticias();
+                }
+            }
+            catch (Exception)
+            {
+                CriarAtividadesFicticias();
+            }
+        }
+
+        private void CriarAtividadesFicticias()
+        {
+            // Preços fixos especificados pelo usuário
+            atividadesCarregadas.Clear();
+            atividadesCarregadas[1] = new AtividadePagamento { Id = 1, Nome = "Café da manhã Básico", Valor = 25.00m, Ativa = true };
+            atividadesCarregadas[2] = new AtividadePagamento { Id = 2, Nome = "Café da manhã Completo", Valor = 65.00m, Ativa = true };
+            atividadesCarregadas[3] = new AtividadePagamento { Id = 3, Nome = "Trezinho / Colha e Pague", Valor = 15.00m, Ativa = true };
         }
 
         /// <summary>
         /// Carrega dados da reserva a partir de Preferences e define safra com base no mês selecionado.
         /// </summary>
-        private void CarregarDadosReserva()
+        private async Task CarregarDadosReserva()
         {
             try
             {
@@ -59,12 +122,20 @@ namespace Teste
                     horario = TimeSpan.Zero;
                 }
 
-                // Determina safra e frutas pelo mês da data selecionada
-                var safraNome = ObterSafraPorMes(dataSelecionada.Month, out List<string> frutasSafra);
+                // Safra: título usa Preferences se existir; frutas SEMPRE pelo mês da data escolhida
+                var safraNome = Preferences.Get("SafraNome", string.Empty);
+                safraId = Preferences.Get("SafraId", 0);
+                List<string> frutasSafra = new();
+                var tituloPorMes = ObterSafraPorMes(dataSelecionada.Month, out _);
+                if (string.IsNullOrWhiteSpace(safraNome))
+                {
+                    safraNome = tituloPorMes;
+                    Preferences.Set("SafraId", safraId);
+                    Preferences.Set("SafraNome", safraNome);
+                }
 
-                // Atualiza safraId e salva em Preferences
-                Preferences.Set("SafraId", safraId);
-                Preferences.Set("SafraNome", safraNome);
+                // Força as frutas a serem do mês atual, independentemente do que foi salvo
+                ObterSafraPorMes(dataSelecionada.Month, out frutasSafra);
 
                 // Converter lista de Atividade IDs (se existir)
                 atividadeIds = new List<int>();
@@ -96,30 +167,48 @@ namespace Teste
                 LblPessoas.Text = $"{adultos} Adultos, {criancas0a5} Crianças (0–5), {criancas6a12} Crianças (6–12)";
                 LblAtividades.Text = string.IsNullOrWhiteSpace(atividades) ? "Nenhuma atividade selecionada" : atividades;
 
-                // Adiciona safra e frutas (evita duplicação de "Safra")
-                var frutasTexto = frutasSafra.Any() ? string.Join(", ", frutasSafra) : "Nenhuma fruta definida";
+                // Título e ícones das frutas em safra (seção própria)
                 var tituloSafra = NormalizarTituloSafra(safraNome);
-                LblAtividades.Text += $"\n\nSafra: {tituloSafra}\nFrutas da Safra: {frutasTexto}";
+                var tituloBase = string.IsNullOrWhiteSpace(tituloSafra) ? "Safra: Não definida" : $"Safra: {tituloSafra}";
+                var emojisSafra = frutasSafra?.Any() == true 
+                    ? string.Join(" ", frutasSafra.Select(f => f.Split(' ')[0]).Distinct()) 
+                    : string.Empty;
+                LblSafraTitulo.Text = string.IsNullOrEmpty(emojisSafra) ? tituloBase : $"{tituloBase}  {emojisSafra}";
+                RenderizarFrutasSafra(frutasSafra);
 
-                // Mostrar total
-                LblTotal.Text = $"R${totalStr}";
-
-                // Converter total para decimal usando InvariantCulture
-                if (!decimal.TryParse(totalStr, NumberStyles.Any, CultureInfo.InvariantCulture, out totalAmount))
-                {
-                    // Tenta com cultura local como fallback
-                    if (!decimal.TryParse(totalStr, NumberStyles.Any, CultureInfo.CurrentCulture, out totalAmount))
-                    {
-                        totalAmount = 0;
-                        DisplayAlert("Aviso", "Não foi possível ler o valor total. Será usado R$0,00.", "OK");
-                    }
-                }
+                // Recalcular total usando preços reais do banco
+                decimal totalRecalculado = RecalcularTotal(adultos, criancas6a12, atividadeIds);
+                totalAmount = totalRecalculado;
+                
+                // Mostrar total recalculado
+                LblTotal.Text = $"R${totalRecalculado:F2}";
             }
             catch (Exception ex)
             {
                 // Não propagar exceção direta; exibir mensagem amigável
                 DisplayAlert("Erro", $"Não foi possível carregar os dados da reserva: {ex.Message}", "OK");
             }
+        }
+
+        // Recalcula o total usando preços reais do banco
+        private decimal RecalcularTotal(int adultos, int criancas6a12, List<int> atividadeIds)
+        {
+            decimal total = 0;
+
+            // Preço fixo para crianças (meia entrada)
+            const decimal precoCrianca6a12 = 12.50m;
+            total += criancas6a12 * precoCrianca6a12;
+
+            // Somar preços das atividades selecionadas (por adulto)
+            foreach (var atividadeId in atividadeIds)
+            {
+                if (atividadesCarregadas.ContainsKey(atividadeId))
+                {
+                    total += adultos * atividadesCarregadas[atividadeId].Valor;
+                }
+            }
+
+            return total;
         }
 
         // Remove prefixos "Safra" do nome quando já usamos o rótulo "Safra:" na UI
@@ -236,25 +325,17 @@ namespace Teste
         {
             try
             {
-                // Fluxo simplificado: sem validações/servidor, apenas resumo e navegação
-                string atividadesResumo = LblAtividades?.Text ?? Preferences.Get("AtividadesSelecionadas", "");
-                var cultura = CultureInfo.GetCultureInfo("pt-BR");
-                string valorResumo = LblTotal?.Text ?? ($"R$ {totalAmount.ToString("N2", cultura)}");
-                await DisplayAlert("Resumo da Reserva", $"Atividades: {atividadesResumo}\nValor: {valorResumo}", "OK");
-                Preferences.Set("UltimaReservaId", 999);
-                try { await Navigation.PushAsync(new ReservasAtivasPage()); }
-                catch { await Navigation.PopToRootAsync(); }
-                return;
                 // Ler dados persistidos novamente (defesa)
                 string dataStr = Preferences.Get("DataAgendamento", "");
                 string horarioStr = Preferences.Get("HorarioSelecionado", "");
-                int clienteId = Preferences.Get("ClienteId", 1);
+                int usuarioId = Preferences.Get("UsuarioId", Preferences.Get("ClienteId", 1));
 
                 int adultos = Preferences.Get("QtdAdultos", 0);
                 int criancas0a5 = Preferences.Get("QtdCriancas0a5", 0);
                 int criancas6a12 = Preferences.Get("QtdCriancas6a12", 0);
 
-                int quantidadeTotal = adultos + criancas0a5 + criancas6a12;
+                // Quantidade segue constraint: InteiraEntrada + MeiaEntrada
+                int quantidadeTotal = adultos + criancas6a12;
 
                 if (quantidadeTotal == 0)
                 {
@@ -306,11 +387,19 @@ namespace Teste
                     await DisplayAlert("Aviso", "Usando agenda temporária. A reserva será processada normalmente.", "OK");
                 }
 
+                // 2) Validar vagas disponíveis
+                bool vagasDisponiveis = await ValidarVagasDisponiveis(agendaId, quantidadeTotal);
+                if (!vagasDisponiveis)
+                {
+                    await DisplayAlert("Vagas Esgotadas", "Não há vagas suficientes disponíveis para esta data e horário. Por favor, escolha outra data.", "OK");
+                    return;
+                }
+
                 // 2) Criar reserva
                 var novaReserva = new
                 {
                     AgendaId = agendaId,
-                    ClienteId = clienteId,
+                    UsuarioId = usuarioId,
                     Quantidade = quantidadeTotal,
                     InteiraEntrada = adultos,
                     MeiaEntrada = criancas6a12,
@@ -327,9 +416,74 @@ namespace Teste
                 if (!responseReserva.IsSuccessStatusCode)
                 {
                     var erroReserva = await responseReserva.Content.ReadAsStringAsync();
-                    await DisplayAlert("Erro", $"Falha ao criar reserva: {erroReserva}", "OK");
+                    // Fallback: cria uma reserva fictícia localmente e navega para Reservas
+                    string statusPagamentoFallback = string.IsNullOrEmpty(comprovantePath) ? "PENDENTE" : "PAGO";
+                    var reservaFicticia = new
+                    {
+                        Id = 0,
+                        AgendaId = agendaId,
+                        UsuarioId = usuarioId,
+                        DataReserva = DateTime.Now.ToString("o"),
+                        Quantidade = quantidadeTotal,
+                        NPEntrada = criancas0a5,
+                        MeiaEntrada = criancas6a12,
+                        InteiraEntrada = adultos,
+                        ValorTotal = totalAmount,
+                        Status = statusPagamentoFallback
+                    };
+                    Preferences.Set("ReservaFicticiaJson", JsonSerializer.Serialize(reservaFicticia));
+                    await DisplayAlert("Aviso", "Não foi possível criar a reserva no servidor. Uma reserva fictícia foi criada localmente.", "OK");
+                    Preferences.Set("UltimaReservaId", 0);
+                    try { await Navigation.PushAsync(new ReservasAtivasPage()); }
+                    catch { await Navigation.PopToRootAsync(); }
                     return;
                 }
+
+                // Obter ID da reserva criada
+                int reservaId = 0;
+                try
+                {
+                    var jsonReservaResp = await responseReserva.Content.ReadAsStringAsync();
+                    var obj = JsonSerializer.Deserialize<JsonElement>(jsonReservaResp, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    if (obj.ValueKind == JsonValueKind.Object)
+                    {
+                        if (obj.TryGetProperty("id", out var idEl) && idEl.ValueKind == JsonValueKind.Number)
+                            reservaId = idEl.GetInt32();
+                        else if (obj.TryGetProperty("Id", out var idEl2) && idEl2.ValueKind == JsonValueKind.Number)
+                            reservaId = idEl2.GetInt32();
+                    }
+                    else if (obj.ValueKind == JsonValueKind.String)
+                    {
+                        int.TryParse(obj.GetString(), out reservaId);
+                    }
+                }
+                catch { }
+
+                // 3) Criar pagamento
+                string statusPagamento = string.IsNullOrEmpty(comprovantePath) ? "PENDENTE" : "PAGO";
+                var novoPagamento = new
+                {
+                    ReservaId = reservaId,
+                    Valor = totalAmount,
+                    Metodo = "PIX",
+                    Status = statusPagamento,
+                    DataPagamento = DateTime.Now
+                };
+
+                var jsonPagamento = JsonSerializer.Serialize(novoPagamento);
+                var contentPagamento = new StringContent(jsonPagamento, Encoding.UTF8, "application/json");
+                var responsePagamento = await client.PostAsync(apiUrlPagamento, contentPagamento);
+
+                if (!responsePagamento.IsSuccessStatusCode)
+                {
+                    var erroPag = await responsePagamento.Content.ReadAsStringAsync();
+                    await DisplayAlert("Aviso", $"Reserva criada, mas pagamento falhou: {erroPag}", "OK");
+                }
+
+                // Navega para Reservas Ativas
+                Preferences.Set("UltimaReservaId", reservaId);
+                try { await Navigation.PushAsync(new ReservasAtivasPage()); }
+                catch { await Navigation.PopToRootAsync(); }
             }
             catch (Exception ex)
             {
@@ -346,6 +500,11 @@ namespace Teste
         {
             try
             {
+                // Garantir SafraId configurado
+                if (safraId == 0)
+                {
+                    safraId = Preferences.Get("SafraId", 0);
+                }
                 // Tenta múltiplos formatos/rotas para compatibilidade com o backend
                 string dataHoraIso = dataHora.ToString("yyyy-MM-ddTHH:mm:ss");
                 string dataHoraSpc = dataHora.ToString("yyyy-MM-dd HH:mm:ss");
@@ -445,32 +604,127 @@ namespace Teste
         /// </summary>
         private string ObterSafraPorMes(int mes, out List<string> frutas)
         {
-            frutas = new List<string>();
+            // Cronograma mensal informado (com emojis)
+            var cronograma = new Dictionary<int, List<string>>
+            {
+                { 1, new() { "🍇 Uva", "🍈 Goiaba", "🍓 Morango", "🍒 Lichia" } },
+                { 2, new() { "🍇 Uva", "🍈 Goiaba", "🍓 Morango" } },
+                { 3, new() { "🍇 Uva", "🍈 Goiaba" } },
+                { 4, new() { "🍈 Goiaba", "🍓 Morango" } },
+                { 5, new() { "🍇 Uva", "🍈 Goiaba", "🍓 Morango" } },
+                { 6, new() { "🍇 Uva", "🍈 Goiaba", "🍓 Morango" } },
+                { 7, new() { "🍇 Uva", "🍈 Goiaba", "🍓 Morango" } },
+                { 8, new() { "🍓 Morango" } },
+                { 9, new() { "🍓 Morango" } },
+                { 10, new() { "🍑 Pêssego", "🍓 Morango", "🍈 Goiaba" } },
+                { 11, new() { "🍑 Pêssego", "🍓 Morango", "🍈 Goiaba" } },
+                { 12, new() { "🍇 Uva", "🍈 Goiaba", "🍓 Morango", "🍒 Lichia" } },
+            };
 
-            // Ajuste os IDs conforme sua modelagem real (aqui são exemplos)
-            if (mes >= 1 && mes <= 3) // Jan-Mar => Verão
+            frutas = cronograma.TryGetValue(mes, out var lista) ? lista : new List<string>();
+
+            // Usa o mês como identificador de safra simples
+            safraId = mes;
+            var cultura = CultureInfo.GetCultureInfo("pt-BR");
+            var nomeMes = cultura.DateTimeFormat.GetMonthName(mes);
+            var tituloMes = cultura.TextInfo.ToTitleCase(nomeMes);
+            return $"Safra de {tituloMes}";
+        }
+
+        /// <summary>
+        /// Valida se há vagas disponíveis suficientes na agenda para a quantidade solicitada
+        /// </summary>
+        private async Task<bool> ValidarVagasDisponiveis(int agendaId, int quantidadeSolicitada)
+        {
+            try
             {
-                safraId = 1;
-                frutas = new List<string> { "🍉 Melancia", "🥭 Manga", "🍍 Abacaxi" };
-                return "Safra de Verão 2025";
+                // Buscar informações da agenda
+                var response = await client.GetAsync($"{apiUrlAgenda}/{agendaId}");
+                
+                if (!response.IsSuccessStatusCode)
+                {
+                    // Se não conseguir verificar, permite a reserva (fallback)
+                    return true;
+                }
+
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                var agenda = JsonSerializer.Deserialize<JsonElement>(jsonResponse, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                // Extrair vagas disponíveis
+                int vagasDisponiveis = 50; // Valor padrão
+                if (agenda.TryGetProperty("vagasDisponiveis", out JsonElement vagasElement) && vagasElement.ValueKind == JsonValueKind.Number)
+                {
+                    vagasDisponiveis = vagasElement.GetInt32();
+                }
+                else if (agenda.TryGetProperty("VagasDisponiveis", out JsonElement vagasElement2) && vagasElement2.ValueKind == JsonValueKind.Number)
+                {
+                    vagasDisponiveis = vagasElement2.GetInt32();
+                }
+
+                // Verificar se há vagas suficientes
+                return vagasDisponiveis >= quantidadeSolicitada;
             }
-            else if (mes >= 4 && mes <= 6) // Abr-Jun => Outono
+            catch (Exception ex)
             {
-                safraId = 2;
-                frutas = new List<string> { "🍊 Laranja", "🍋 Limão", "🍌 Banana" };
-                return "Safra de Outono 2025";
+                // Em caso de erro, permite a reserva (fallback)
+                System.Diagnostics.Debug.WriteLine($"Erro ao validar vagas: {ex.Message}");
+                return true;
             }
-            else if (mes >= 7 && mes <= 9) // Jul-Set => Inverno
+        }
+
+        private void RenderizarFrutasSafra(List<string> frutas)
+        {
+            try
             {
-                safraId = 3;
-                frutas = new List<string> { "🍎 Maçã", "🍐 Pera", "🍇 Uva" };
-                return "Safra de Inverno 2025";
+                FrutasSafraFlex.Children.Clear();
+
+                if (frutas == null || frutas.Count == 0)
+                {
+                    var chipVazio = new Border
+                    {
+                        BackgroundColor = Color.FromArgb("#F9F3EF"),
+                        StrokeThickness = 1,
+                        Stroke = Color.FromArgb("#F1E5E2"),
+                        Padding = 8,
+                        Margin = new Thickness(0, 4, 6, 4),
+                        StrokeShape = new RoundRectangle { CornerRadius = 10 }
+                    };
+                    chipVazio.Content = new Label
+                    {
+                        Text = "Sem frutas em safra",
+                        FontSize = 12,
+                        TextColor = Color.FromArgb("#A42D45")
+                    };
+                    FrutasSafraFlex.Children.Add(chipVazio);
+                    return;
+                }
+
+                foreach (var fruta in frutas)
+                {
+                    var chip = new Border
+                    {
+                        BackgroundColor = Color.FromArgb("#F9F3EF"),
+                        StrokeThickness = 1,
+                        Stroke = Color.FromArgb("#F1E5E2"),
+                        Padding = 8,
+                        Margin = new Thickness(0, 4, 6, 4),
+                        StrokeShape = new RoundRectangle { CornerRadius = 10 }
+                    };
+                    chip.Content = new Label
+                    {
+                        Text = fruta,
+                        FontSize = 12,
+                        TextColor = Color.FromArgb("#A42D45")
+                    };
+                    FrutasSafraFlex.Children.Add(chip);
+                }
             }
-            else // Out-Dez => Primavera
+            catch
             {
-                safraId = 4;
-                frutas = new List<string> { "🍑 Pêssego", "🍓 Morango", "🍈 Goiaba" };
-                return "Safra de Primavera 2025";
+                // evita quebra visual caso controls não estejam prontos
             }
         }
     }

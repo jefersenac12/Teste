@@ -89,7 +89,7 @@ namespace Teste
                 if (response.IsSuccessStatusCode)
                 {
                     await DisplayAlert("Sucesso", "Login Família realizado!", "OK");
-                    await Navigation.PushAsync(new AtividadesPage());
+                    await Navigation.PushAsync(new AgendamentoPage());
                     return true;
                 }
             }
