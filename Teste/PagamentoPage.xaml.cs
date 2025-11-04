@@ -167,13 +167,7 @@ namespace Teste
                 LblPessoas.Text = $"{adultos} Adultos, {criancas0a5} Crianças (0–5), {criancas6a12} Crianças (6–12)";
                 LblAtividades.Text = string.IsNullOrWhiteSpace(atividades) ? "Nenhuma atividade selecionada" : atividades;
 
-                // Título e ícones das frutas em safra (seção própria)
-                var tituloSafra = NormalizarTituloSafra(safraNome);
-                var tituloBase = string.IsNullOrWhiteSpace(tituloSafra) ? "Safra: Não definida" : $"Safra: {tituloSafra}";
-                var emojisSafra = frutasSafra?.Any() == true 
-                    ? string.Join(" ", frutasSafra.Select(f => f.Split(' ')[0]).Distinct()) 
-                    : string.Empty;
-                LblSafraTitulo.Text = string.IsNullOrEmpty(emojisSafra) ? tituloBase : $"{tituloBase}  {emojisSafra}";
+                // Renderiza apenas os chips de frutas (sem título)
                 RenderizarFrutasSafra(frutasSafra);
 
                 // Recalcular total usando preços reais do banco

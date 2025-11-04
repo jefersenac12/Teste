@@ -88,10 +88,7 @@
                            FontAttributes="Bold"
                            Style="{StaticResource BodyText}"/>
 
-                    <Label x:Name="LblSafraTitulo"
-                           Text="Safra:"
-                           FontSize="12"
-                           Style="{StaticResource BodyText}"/>
+                    <!-- Título dinâmico removido; mostramos apenas os chips -->
 
                     <FlexLayout x:Name="FrutasSafraFlex"
                                 Wrap="Wrap"
@@ -245,7 +242,7 @@
 
                 <HorizontalStackLayout Spacing="10" VerticalOptions="Center" HorizontalOptions="Center" Padding="16,0">
                     <Label Text="✔" FontSize="16" TextColor="White" VerticalOptions="Center" Style="{StaticResource MainButtonText}" FontAttributes="None"/>
-                    <Label Text="Confirmar Pagamento" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" Style="{StaticResource MainButtonText}"/>
+                    <Label Text="Confirmar Pagamento" VerticalOptions="Center" HorizontalOptions="Center" Style="{StaticResource MainButtonText}"/>
                 </HorizontalStackLayout>
             </Border>
 
