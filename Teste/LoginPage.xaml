@@ -59,7 +59,7 @@
 
         <!-- Campo Telefone -->
         <VerticalStackLayout Spacing="4" WidthRequest="280" Margin="0,8,0,0">
-            <Label Text="Telefone"
+            <Label Text="Telefone ou Cnpj"
                    FontSize="14"
                    TextColor="#98694C"
                    FontAttributes="Bold"/>

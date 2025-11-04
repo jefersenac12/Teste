@@ -17,7 +17,7 @@
                 <Setter Property="FontFamily" Value="SourceSansPro" />
             </Style>
             <Style TargetType="Label" x:Key="TitleMain" BasedOn="{StaticResource BodyText}">
-                <Setter Property="FontFamily" Value="Canvas_Inline_Reg" />
+                <Setter Property="FontFamily" Value="SourceSansPro" />
                 <Setter Property="FontSize" Value="20" />
                 <Setter Property="FontAttributes" Value="Bold" />
                 <Setter Property="TextColor" Value="#891633" />
