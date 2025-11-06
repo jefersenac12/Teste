@@ -1,15 +1,18 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Controls.Shapes;
 using Microsoft.Maui.Storage;
-using System.Linq;
 
 namespace Teste
 {
+    // ===============================
+    // MODELO PRINCIPAL (igual ao BD)
+    // ===============================
     public class Reserva
     {
         public int Id { get; set; }
@@ -21,23 +24,28 @@ namespace Teste
         public int MeiaEntrada { get; set; }
         public int InteiraEntrada { get; set; }
         public decimal ValorTotal { get; set; }
-        public string Status { get; set; }
     }
 
+    // ===============================
+    // CLASSE DE EXIBIÇÃO (UX)
+    // ===============================
     public class ReservaExibicao
     {
         public Reserva Reserva { get; set; }
         public string AtividadeNome { get; set; }
         public string DataTexto { get; set; }
-        public string StatusUpper { get; set; }
+        public string StatusUpper { get; set; } = "PENDENTE"; // valor default visual
     }
 
-    public partial class ReservasAtivasPage : ContentPage
+    // ===============================
+    // PÁGINA PRINCIPAL
+    // ===============================
+    public partial class ReservasPage : ContentPage
     {
-        private readonly string apiUrlReserva = "http://tiijeferson.runasp.net/api/Reserva";
-        private List<ReservaExibicao> _reservasExibicao = new();
+        private const string ApiUrlReserva = "http://tiijeferson.runasp.net/api/Usuario/Reserva";
+        private readonly List<ReservaExibicao> _reservasExibicao = new();
 
-        public ReservasAtivasPage()
+        public ReservasPage()
         {
             InitializeComponent();
         }
@@ -45,17 +53,17 @@ namespace Teste
         protected override async void OnAppearing()
         {
             base.OnAppearing();
-            await CarregarReservasAtivasAsync();
+            await CarregarReservasAsync();
         }
 
         // ============================================================
         // Carrega reservas do servidor ou gera reservas fictícias
         // ============================================================
-        private async Task CarregarReservasAtivasAsync()
+        private async Task CarregarReservasAsync()
         {
             if (ListaReservasAtivas == null)
             {
-                await DisplayAlert("Erro", "Componente da lista não foi inicializado.", "OK");
+                await DisplayAlert("Erro", "A lista de reservas não foi inicializada.", "OK");
                 return;
             }
 
@@ -65,59 +73,86 @@ namespace Teste
             {
                 int usuarioId = Preferences.Get("UsuarioId", Preferences.Get("ClienteId", 1));
                 using var client = new HttpClient();
-                var opts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
-                HttpResponseMessage resp = await client.GetAsync($"{apiUrlReserva}/usuario/{usuarioId}");
-                if (!resp.IsSuccessStatusCode)
-                    resp = await client.GetAsync($"{apiUrlReserva}?usuarioId={usuarioId}");
-
-                List<Reserva> reservas = new();
-                if (resp.IsSuccessStatusCode)
+                var opts = new JsonSerializerOptions
                 {
-                    var json = await resp.Content.ReadAsStringAsync();
-                    reservas = JsonSerializer.Deserialize<List<Reserva>>(json, opts) ?? new List<Reserva>();
+                    PropertyNameCaseInsensitive = true,
+                    UnmappedMemberHandling = System.Text.Json.Serialization.JsonUnmappedMemberHandling.Skip
+                };
+
+                HttpResponseMessage resp = null;
+
+                try
+                {
+                    resp = await client.GetAsync($"{ApiUrlReserva}/usuario/{usuarioId}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"⚠️ Erro no endpoint 1: {ex.Message}");
                 }
 
-                // 🔹 Se não houver reservas no servidor, cria reservas fictícias
+                // Tenta outro endpoint se o primeiro falhar
+                if (resp == null || !resp.IsSuccessStatusCode)
+                {
+                    try
+                    {
+                        resp = await client.GetAsync($"{ApiUrlReserva}?usuarioId={usuarioId}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"⚠️ Erro no endpoint 2: {ex.Message}");
+                    }
+                }
+
+                List<Reserva> reservas = new();
+
+                if (resp != null && resp.IsSuccessStatusCode)
+                {
+                    try
+                    {
+                        var json = await resp.Content.ReadAsStringAsync();
+                        reservas = JsonSerializer.Deserialize<List<Reserva>>(json, opts) ?? new List<Reserva>();
+                        Console.WriteLine($"✅ {reservas.Count} reservas carregadas da API");
+                    }
+                    catch (JsonException jsonEx)
+                    {
+                        Console.WriteLine($"❌ Erro ao desserializar JSON: {jsonEx.Message}");
+                        await DisplayAlert("Erro", "Formato de dados inválido recebido da API.", "OK");
+                    }
+                }
+
+                // Se não veio nada, gera dados de exemplo
                 if (reservas == null || reservas.Count == 0)
                 {
                     reservas = GerarReservasFicticias(usuarioId);
-                    await DisplayAlert("Aviso", "Nenhuma reserva encontrada. Exibindo reservas fictícias.", "OK");
+                    await DisplayAlert("Aviso", "Nenhuma reserva encontrada. Exibindo dados de teste.", "OK");
                 }
 
+                // Converte para formato de exibição
                 _reservasExibicao.Clear();
-                foreach (var reserva in reservas)
+                _reservasExibicao.AddRange(reservas.Select(r => new ReservaExibicao
                 {
-                    string statusTexto = reserva.Status?.ToUpperInvariant() ?? "PENDENTE";
-                    if (statusTexto != "PENDENTE" && statusTexto != "PAGO" && statusTexto != "CANCELADO")
-                        continue;
-
-                    string atividadeNome = $"Reserva #{reserva.Id}";
-                    string dataTexto = reserva.DataReserva.ToString("dd/MM/yyyy - HH:mm");
-
-                    _reservasExibicao.Add(new ReservaExibicao
-                    {
-                        Reserva = reserva,
-                        AtividadeNome = atividadeNome,
-                        DataTexto = dataTexto,
-                        StatusUpper = statusTexto
-                    });
-                }
+                    Reserva = r,
+                    AtividadeNome = $"Atividade {r.AgendaId}",
+                    DataTexto = r.DataReserva.ToString("dd/MM/yyyy"),
+                    StatusUpper = "PENDENTE"
+                }));
 
                 RenderizarReservas(_reservasExibicao);
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Erro", $"Erro ao carregar reservas: {ex.Message}", "OK");
+                Console.WriteLine($"💥 Erro crítico: {ex}");
+                await DisplayAlert("Erro", $"Falha ao carregar reservas: {ex.Message}", "OK");
+                RenderizarReservas(new List<ReservaExibicao>());
             }
         }
 
         // ============================================================
-        // Gera reservas fictícias
+        // Gera reservas fictícias (exemplo)
         // ============================================================
-        private List<Reserva> GerarReservasFicticias(int usuarioId)
-        {
-            return new List<Reserva>
+        private static List<Reserva> GerarReservasFicticias(int usuarioId) =>
+            new()
             {
                 new Reserva
                 {
@@ -127,8 +162,9 @@ namespace Teste
                     DataReserva = DateTime.Now.AddDays(2),
                     InteiraEntrada = 2,
                     MeiaEntrada = 1,
-                    ValorTotal = 150.00m,
-                    Status = "PAGO"
+                    NPEntrada = 0,
+                    Quantidade = 3,
+                    ValorTotal = 150.00m
                 },
                 new Reserva
                 {
@@ -138,8 +174,9 @@ namespace Teste
                     DataReserva = DateTime.Now.AddDays(5),
                     InteiraEntrada = 1,
                     MeiaEntrada = 2,
-                    ValorTotal = 90.00m,
-                    Status = "PENDENTE"
+                    NPEntrada = 1,
+                    Quantidade = 4,
+                    ValorTotal = 90.00m
                 },
                 new Reserva
                 {
@@ -149,19 +186,19 @@ namespace Teste
                     DataReserva = DateTime.Now.AddDays(7),
                     InteiraEntrada = 3,
                     MeiaEntrada = 0,
-                    ValorTotal = 180.00m,
-                    Status = "CANCELADO"
+                    NPEntrada = 2,
+                    Quantidade = 5,
+                    ValorTotal = 180.00m
                 }
             };
-        }
 
         // ============================================================
-        // Renderização visual
+        // Renderização visual dos cards
         // ============================================================
         private void RenderizarReservas(IEnumerable<ReservaExibicao> itens)
         {
             ListaReservasAtivas.Children.Clear();
-            var lista = itens?.ToList() ?? new List<ReservaExibicao>();
+            var lista = itens?.ToList() ?? [];
 
             if (lista.Count == 0)
             {
@@ -169,34 +206,45 @@ namespace Teste
                 {
                     Text = "Nenhuma reserva ativa encontrada.",
                     HorizontalOptions = LayoutOptions.Center,
-                    Margin = new Thickness(0, 20)
+                    Margin = new Thickness(0, 20),
+                    TextColor = Colors.Gray
                 });
                 return;
             }
 
             foreach (var item in lista)
             {
-                var card = MontarCardReserva(
-                    item.AtividadeNome,
-                    item.DataTexto,
-                    item.Reserva.InteiraEntrada,
-                    item.Reserva.MeiaEntrada,
-                    item.Reserva.NPEntrada,
-                    item.Reserva.ValorTotal,
-                    item.StatusUpper);
+                try
+                {
+                    var card = MontarCardReserva(
+                        item.AtividadeNome,
+                        item.DataTexto,
+                        item.Reserva.InteiraEntrada,
+                        item.Reserva.MeiaEntrada,
+                        item.Reserva.NPEntrada,
+                        item.Reserva.ValorTotal,
+                        item.StatusUpper);
 
-                card.BindingContext = item;
-                var tap = new TapGestureRecognizer();
-                tap.Tapped += OnCardClicked;
-                card.GestureRecognizers.Add(tap);
-                ListaReservasAtivas.Children.Add(card);
+                    card.BindingContext = item;
+                    var tap = new TapGestureRecognizer();
+                    tap.Tapped += OnCardClicked;
+                    card.GestureRecognizers.Add(tap);
+                    ListaReservasAtivas.Children.Add(card);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"❌ Erro ao criar card: {ex.Message}");
+                }
             }
         }
 
-        private View MontarCardReserva(string atividade, string dataTexto,
-            int inteira, int meia, int npen, decimal valorTotal, string status)
+        private View MontarCardReserva(
+            string atividade, string dataTexto,
+            int inteira, int meia, int npen,
+            decimal valorTotal, string status)
         {
             var ptBr = System.Globalization.CultureInfo.GetCultureInfo("pt-BR");
+
             var border = new Border
             {
                 Stroke = Color.FromArgb("#E0E0E0"),
@@ -205,13 +253,37 @@ namespace Teste
                 Padding = 16,
                 HorizontalOptions = LayoutOptions.Center,
                 WidthRequest = 300,
-                StrokeShape = new RoundRectangle { CornerRadius = 12 }
+                StrokeShape = new RoundRectangle { CornerRadius = 12 },
+                Margin = new Thickness(0, 5)
             };
 
             var stack = new VerticalStackLayout { Spacing = 8 };
-            stack.Children.Add(new Label { Text = atividade, FontSize = 16, FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb("#A42D45") });
-            stack.Children.Add(new Label { Text = $"Data: {dataTexto}", FontSize = 13, TextColor = Color.FromArgb("#A42D45") });
-            stack.Children.Add(new Label { Text = $"Participantes: {inteira}x adultos, {meia}x crianças", FontSize = 13, TextColor = Color.FromArgb("#A42D45") });
+
+            stack.Children.Add(new Label
+            {
+                Text = atividade,
+                FontSize = 16,
+                FontAttributes = FontAttributes.Bold,
+                TextColor = Color.FromArgb("#A42D45")
+            });
+
+            stack.Children.Add(new Label
+            {
+                Text = $"Data: {dataTexto}",
+                FontSize = 13,
+                TextColor = Color.FromArgb("#A42D45")
+            });
+
+            var participantesText = $"Participantes: {inteira}x adultos, {meia}x crianças";
+            if (npen > 0)
+                participantesText += $", {npen}x (0-5 anos)";
+
+            stack.Children.Add(new Label
+            {
+                Text = participantesText,
+                FontSize = 13,
+                TextColor = Color.FromArgb("#A42D45")
+            });
 
             var grid = new Grid
             {
@@ -233,8 +305,13 @@ namespace Teste
                 VerticalOptions = LayoutOptions.Center
             }, 0, 0);
 
-            var corStatus = status == "PAGO" ? "#F68F55" :
-                            status == "CANCELADO" ? "#F2686F" : "#FCBC71";
+            // Define cor do status
+            var corStatus = status switch
+            {
+                "PAGO" => "#F68F55",
+                "CANCELADO" => "#F2686F",
+                _ => "#FCBC71"
+            };
 
             var statusBorder = new Border
             {
@@ -252,69 +329,47 @@ namespace Teste
             };
             grid.Add(statusBorder, 1, 0);
 
-            if (status == "PENDENTE" || status == "CANCELADO")
-            {
-                var btnExcluir = new Button
-                {
-                    Text = "🗑 Excluir",
-                    TextColor = Color.FromArgb("#666"),
-                    FontSize = 13,
-                    BackgroundColor = Color.FromArgb("#F5F5F5"),
-                    CornerRadius = 12,
-                    Padding = new Thickness(12, 6)
-                };
-                btnExcluir.Clicked += OnExcluirClicked;
-                grid.Add(btnExcluir, 2, 0);
-            }
-
             stack.Children.Add(grid);
             border.Content = stack;
             return border;
         }
 
         // ============================================================
-        // Eventos
+        // Eventos de clique
         // ============================================================
-        private async void OnVoltarClicked(object sender, EventArgs e) => await Navigation.PopAsync();
-
-        private async void OnMenuClicked(object sender, EventArgs e)
-        {
-            string action = await DisplayActionSheet("Menu", "Cancelar", null, "Configurações", "Ajuda", "Sobre");
-            if (action == "Configurações")
-                await DisplayAlert("Configurações", "Abrindo configurações...", "OK");
-            else if (action == "Ajuda")
-                await DisplayAlert("Ajuda", "Abrindo central de ajuda...", "OK");
-            else if (action == "Sobre")
-                await DisplayAlert("Sobre", "App de Reservas - Versão 1.0", "OK");
-        }
-
-        private async void OnExcluirClicked(object sender, EventArgs e)
-        {
-            bool answer = await DisplayAlert("Confirmar Exclusão", "Deseja realmente excluir esta reserva?", "Sim", "Não");
-            if (answer)
-                await DisplayAlert("Sucesso", "Reserva excluída com sucesso!", "OK");
-        }
-
-        private async void OnSairClicked(object sender, EventArgs e)
-        {
-            bool answer = await DisplayAlert("Confirmar Saída", "Deseja realmente sair?", "Sim", "Não");
-            if (answer)
-                await Navigation.PopToRootAsync();
-        }
-
-        private async void OnVerTodasClicked(object sender, EventArgs e)
-        {
-            await DisplayAlert("Todas as Reservas", "Carregando todas as reservas...", "OK");
-        }
-
         private async void OnCardClicked(object sender, EventArgs e)
         {
             if (sender is Border b && b.BindingContext is ReservaExibicao re)
             {
-                await DisplayAlert("Reserva",
-                    $"Atividade: {re.AtividadeNome}\nData: {re.DataTexto}\nStatus: {re.StatusUpper}\nValor: R$ {re.Reserva.ValorTotal:N2}",
+                await DisplayAlert("Detalhes da Reserva",
+                    $"Atividade: {re.AtividadeNome}\n" +
+                    $"Data: {re.DataTexto}\n" +
+                    $"Adultos: {re.Reserva.InteiraEntrada}\n" +
+                    $"Crianças (6-12): {re.Reserva.MeiaEntrada}\n" +
+                    $"Crianças (0-5): {re.Reserva.NPEntrada}\n" +
+                    $"Valor Total: R$ {re.Reserva.ValorTotal:N2}",
                     "OK");
             }
+        }
+
+        private void OnVoltarClicked(object sender, EventArgs e)
+        {
+
+        }
+
+        private void OnMenuClicked(object sender, EventArgs e)
+        {
+
+        }
+
+        private void OnVerTodasClicked(object sender, EventArgs e)
+        {
+
+        }
+
+        private void OnSairClicked(object sender, EventArgs e)
+        {
+
         }
     }
 }

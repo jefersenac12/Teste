@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Microsoft.Maui.Storage;
 
 namespace Teste
 {
@@ -28,23 +29,17 @@ namespace Teste
             string apenasNumeros = Regex.Replace(texto, @"[^\d]", "");
 
             if (apenasNumeros.Length >= 14)
-            {
                 identificadorEntry.Placeholder = "CNPJ detectado";
-            }
             else if (apenasNumeros.Length >= 10)
-            {
                 identificadorEntry.Placeholder = "Telefone detectado";
-            }
             else
-            {
                 identificadorEntry.Placeholder = "Telefone ou CNPJ";
-            }
         }
 
         private async void OnEntrarClicked(object sender, EventArgs e)
         {
-            string identificador = identificadorEntry.Text;
-            string senha = senhaEntry.Text;
+            string identificador = identificadorEntry.Text?.Trim();
+            string senha = senhaEntry.Text?.Trim();
 
             if (string.IsNullOrWhiteSpace(identificador) || string.IsNullOrWhiteSpace(senha))
             {
@@ -52,74 +47,54 @@ namespace Teste
                 return;
             }
 
-            // Tenta primeiro como Família
-            bool loginFamilia = await TentarLoginFamilia(identificador, senha);
-            if (loginFamilia)
-            {
-                LimparCampos();
+            // Tenta login como Família
+            if (await TentarLogin(apiUrlFamilia, new { Telefone = identificador, Senha = senha }, "Família"))
                 return;
-            }
 
             // Se falhar, tenta como Agência
-            bool loginAgencia = await TentarLoginAgencia(identificador, senha);
-            if (loginAgencia)
-            {
-                LimparCampos();
+            if (await TentarLogin(apiUrlAgencia, new { CNPJ = identificador, Senha = senha }, "Agência"))
                 return;
-            }
 
-            // Se ambos falharem
-            await DisplayAlert("Falha", "Login não encontrado", "OK");
+            await DisplayAlert("Falha", "Credenciais inválidas. Tente novamente.", "OK");
         }
 
-        private async Task<bool> TentarLoginFamilia(string telefone, string senha)
+        private async Task<bool> TentarLogin(string url, object request, string tipoUsuario)
         {
             try
             {
-                var loginRequest = new
-                {
-                    Telefone = telefone,
-                    Senha = senha
-                };
-
-                var json = JsonSerializer.Serialize(loginRequest);
+                string json = JsonSerializer.Serialize(request);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-                HttpResponseMessage response = await client.PostAsync(apiUrlFamilia, content);
+                HttpResponseMessage response = await client.PostAsync(url, content);
+                string respostaJson = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
-                    await DisplayAlert("Sucesso", "Login Família realizado!", "OK");
+                    using var doc = JsonDocument.Parse(respostaJson);
+                    var root = doc.RootElement;
+
+                    int id = root.GetProperty("id").GetInt32();
+                    string nome = root.TryGetProperty("nome", out var n) ? n.GetString() ?? "" : "";
+                    string email = root.TryGetProperty("email", out var e) ? e.GetString() ?? "" : "";
+
+                    Preferences.Set("UsuarioId", id);
+                    Preferences.Set("UsuarioNome", nome);
+                    Preferences.Set("UsuarioEmail", email);
+                    Preferences.Set("UsuarioTipo", tipoUsuario);
+
+                    await DisplayAlert("Sucesso", $"Login {tipoUsuario} realizado com sucesso!", "OK");
                     await Navigation.PushAsync(new AgendamentoPage());
+                    LimparCampos();
                     return true;
                 }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"[LOGIN ERRO] {response.StatusCode}: {respostaJson}");
+                }
             }
-            catch { }
-
-            return false;
-        }
-
-        private async Task<bool> TentarLoginAgencia(string cnpj, string senha)
-        {
-            try
+            catch (Exception ex)
             {
-                var loginRequest = new
-                {
-                    CNPJ = cnpj,
-                    Senha = senha
-                };
-
-                var json = JsonSerializer.Serialize(loginRequest);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-                HttpResponseMessage response = await client.PostAsync(apiUrlAgencia, content);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    await DisplayAlert("Sucesso", "Login Agência realizado!", "OK");
-                    await Navigation.PushAsync(new AtividadesPage());
-                    return true;
-                }
+                await DisplayAlert("Erro", $"Falha ao realizar login ({tipoUsuario}): {ex.Message}", "OK");
             }
-            catch { }
 
             return false;
         }
