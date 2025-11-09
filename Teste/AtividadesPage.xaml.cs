@@ -1,42 +1,49 @@
-using Microsoft.Maui.Controls;
-using Microsoft.Maui.Storage;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace Teste
 {
-    public class Atividade
+    public class Atividade : INotifyPropertyChanged
     {
         public int Id { get; set; }
-        public string Nome { get; set; } = "";
-        public string Descricao { get; set; } = "";
+        public string Nome { get; set; } = string.Empty;
+        public string Descricao { get; set; } = string.Empty;
         public decimal Valor { get; set; }
-        public bool Ativa { get; set; }
+
+        private bool _isSelecionada;
+        public bool IsSelecionada
+        {
+            get => _isSelecionada;
+            set
+            {
+                if (_isSelecionada != value)
+                {
+                    _isSelecionada = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsSelecionada)));
+                }
+            }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
     }
 
     public partial class AtividadesPage : ContentPage
     {
-        // Variáveis de estado
+        private static readonly HttpClient client = new HttpClient();
+        private readonly string apiUrlAtividade = "http://tiijeferson.runasp.net/api/Atividade";
+
+        private ObservableCollection<Atividade> _atividades = new();
+        private DateTime dataSelecionada;
+        private TimeSpan? horarioSelecionado;
+
+        // Contadores globais - iniciando com 1 adulto como padrão
         private int adultos = 1;
         private int criancas0a5 = 0;
         private int criancas6a12 = 0;
 
-        // Atividades carregadas do banco
-        private List<Atividade> atividades = new List<Atividade>();
-        private Dictionary<int, double> precosAtividades = new Dictionary<int, double>();
-        
         // Preço padrão para meia entrada (crianças 6-12)
         private readonly double precoCrianca6a12 = 12.50;
-
-        private DateTime dataSelecionada;
-        private TimeSpan? horarioSelecionado = null;
-        
-        private readonly HttpClient httpClient = new HttpClient();
-        private readonly string apiUrlAtividade = "http://tiijeferson.runasp.net/api/Atividade";
 
         public AtividadesPage()
         {
@@ -45,13 +52,12 @@ namespace Teste
             // Inicializa Labels de contagem na tela
             LblAdultos.Text = adultos.ToString();
             LblCrianca0a5.Text = criancas0a5.ToString();
-            LblCrianca6a12.Text = criancas6a12.ToString(); 
+            LblCrianca6a12.Text = criancas6a12.ToString();
 
-            // Carrega a data salva (ou usa a data atual como fallback)
             if (Preferences.ContainsKey("DataAgendamento"))
             {
-                string dataStr = Preferences.Get("DataAgendamento", "");
-                if (DateTime.TryParse(dataStr, out DateTime data))
+                var dataStr = Preferences.Get("DataAgendamento", "");
+                if (DateTime.TryParse(dataStr, out var data))
                     dataSelecionada = data;
                 else
                     dataSelecionada = DateTime.Now;
@@ -62,71 +68,10 @@ namespace Teste
             }
 
             AtualizarDataNaTela();
-
-            // Sincroniza eventos de CheckBox
-            CheckBasico.CheckedChanged += OnAtividadeChanged;
-            CheckCompleto.CheckedChanged += OnAtividadeChanged;
-            CheckTrezinho.CheckedChanged += OnAtividadeChanged;
-
-            // Anexa o PropertyChanged do TimePicker (conforme sua solicitação)
-            // Se o TimePickerHorario não estiver inicializado pelo XAML, isso pode causar um erro
-            // No entanto, assumindo que InitializeComponent() funciona, anexamos aqui.
             TimePickerHorario.PropertyChanged += TimePickerHorario_PropertyChanged;
-
-            // Carrega atividades do banco de dados
             _ = CarregarAtividades();
-
-            AtualizarTotal();
         }
 
-        private async Task CarregarAtividades()
-        {
-            try
-            {
-                var response = await httpClient.GetAsync(apiUrlAtividade);
-                if (response.IsSuccessStatusCode)
-                {
-                    var json = await response.Content.ReadAsStringAsync();
-                    atividades = JsonSerializer.Deserialize<List<Atividade>>(json, new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    }) ?? new List<Atividade>();
-
-                    // Mapeia preços por ID
-                    foreach (var atividade in atividades)
-                    {
-                        precosAtividades[atividade.Id] = (double)atividade.Valor;
-                    }
-                }
-                else
-                {
-                    // Se a API falhar, usa dados fictícios
-                    CriarAtividadesFicticias();
-                }
-            }
-            catch (Exception)
-            {
-                // Se houver erro de conexão, usa dados fictícios
-                CriarAtividadesFicticias();
-            }
-        }
-
-        private void CriarAtividadesFicticias()
-        {
-            atividades.Clear();
-            precosAtividades.Clear();
-
-            // Preços fixos especificados pelo usuário
-            atividades.Add(new Atividade { Id = 1, Nome = "Café da manhã Básico", Valor = 25.00m });
-            atividades.Add(new Atividade { Id = 2, Nome = "Café da manhã Completo", Valor = 65.00m });
-            atividades.Add(new Atividade { Id = 3, Nome = "Trezinho / Colha e Pague", Valor = 15.00m });
-
-            precosAtividades[1] = 25.00;
-            precosAtividades[2] = 65.00;
-            precosAtividades[3] = 15.00;
-        }
-
-        // ========== SET DATA ==========
         public void SetData(DateTime data)
         {
             dataSelecionada = data;
@@ -140,172 +85,210 @@ namespace Teste
                 LblDataSelecionada.Text = dataSelecionada.ToString("dd/MM/yyyy");
         }
 
-        private void BtnVoltar_Clicked(object? sender, EventArgs e)
+        private async Task CarregarAtividades()
         {
-            Navigation.PopAsync();
-        }
+            try
+            {
+                var response = await client.GetAsync(apiUrlAtividade);
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    var atividades = JsonSerializer.Deserialize<List<Atividade>>(json, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    }) ?? new List<Atividade>();
 
-        private void OnAtividadeChanged(object? sender, CheckedChangedEventArgs e)
-        {
+                    _atividades = new ObservableCollection<Atividade>(
+                        atividades.Select(a =>
+                        {
+                            a.IsSelecionada = false;
+                            return a;
+                        }).Take(3)
+                    );
+                }
+                else
+                {
+                    CriarAtividadesFicticias();
+                }
+            }
+            catch
+            {
+                CriarAtividadesFicticias();
+            }
+
+            AtividadesCollectionView.ItemsSource = _atividades;
+
+            // Adiciona listener para quando o checkbox mudar
+            foreach (var atividade in _atividades)
+            {
+                atividade.PropertyChanged += (s, e) =>
+                {
+                    if (e.PropertyName == nameof(Atividade.IsSelecionada))
+                        AtualizarTotal();
+                };
+            }
+
             AtualizarTotal();
         }
 
-        // Você solicitou NÃO mexer neste método, então ele é mantido.
-        // Ele rastreia a hora selecionada.
-        private void TimePickerHorario_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void CriarAtividadesFicticias()
+        {
+            var lista = new List<Atividade>
+            {
+                new() { Id = 1, Nome = "Café da manhã Básicaaa", Valor = 25.00m, IsSelecionada = false },
+                new() { Id = 2, Nome = "Café da manhã Completo", Valor = 65.00m, IsSelecionada = false },
+                new() { Id = 3, Nome = "Trezinho / Colha e Pague", Valor = 15.00m, IsSelecionada = false }
+            };
+
+            _atividades = new ObservableCollection<Atividade>(lista);
+        }
+
+        private void AtualizarTotal()
+        {
+            if (_atividades == null || _atividades.Count == 0)
+            {
+                if (LblTotalEstimado != null)
+                    LblTotalEstimado.Text = "Total estimado: R$ 0,00";
+                return;
+            }
+
+            double total = 0;
+
+            // Calcula o custo das atividades selecionadas (por adulto)
+            foreach (var atividade in _atividades.Where(a => a.IsSelecionada))
+            {
+                total += adultos * (double)atividade.Valor;
+            }
+
+            // Custo das crianças (6 a 12 anos) - meia entrada
+            total += criancas6a12 * precoCrianca6a12;
+
+            if (LblTotalEstimado != null)
+                LblTotalEstimado.Text = $"Total estimado: R$ {total:F2}";
+        }
+
+        private void BtnVoltar_Clicked(object sender, EventArgs e) => Navigation.PopAsync();
+
+        private void TimePickerHorario_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(TimePicker.Time))
                 horarioSelecionado = TimePickerHorario.Time;
         }
 
-        // ========== CONTADORES DE ADULTOS ==========
-        private void BtnAdultoMenos_Clicked(object? sender, EventArgs e)
-        {
-            if (adultos > 1) adultos--;
-            LblAdultos.Text = adultos.ToString();
-            AtualizarTotal();
-        }
-
-        private void BtnAdultoMais_Clicked(object? sender, EventArgs e)
+        // ======= BOTÕES DE ADULTOS =======
+        private void BtnAdultoMais_Clicked(object sender, EventArgs e)
         {
             adultos++;
             LblAdultos.Text = adultos.ToString();
             AtualizarTotal();
         }
 
-        // ========== CONTADORES DE CRIANÇAS (0 a 5) ==========
-        private void BtnCrianca0a5Menos_Clicked(object? sender, EventArgs e)
+        private void BtnAdultoMenos_Clicked(object sender, EventArgs e)
         {
-            if (criancas0a5 > 0) criancas0a5--;
-            LblCrianca0a5.Text = criancas0a5.ToString();
-            AtualizarTotal();
+            if (adultos > 1) // Mantém no mínimo 1 adulto
+            {
+                adultos--;
+                LblAdultos.Text = adultos.ToString();
+                AtualizarTotal();
+            }
         }
 
-        private void BtnCrianca0a5Mais_Clicked(object? sender, EventArgs e)
+        // ======= BOTÕES DE CRIANÇAS 0 A 5 (GRÁTIS) =======
+        private void BtnCrianca0a5Mais_Clicked(object sender, EventArgs e)
         {
             criancas0a5++;
             LblCrianca0a5.Text = criancas0a5.ToString();
             AtualizarTotal();
         }
 
-        // ========== CONTADORES DE CRIANÇAS (6 a 12) ==========
-        private void BtnCrianca6a12Menos_Clicked(object? sender, EventArgs e)
+        private void BtnCrianca0a5Menos_Clicked(object sender, EventArgs e)
         {
-            if (criancas6a12 > 0) criancas6a12--;
-            LblCrianca6a12.Text = criancas6a12.ToString();
-            AtualizarTotal();
+            if (criancas0a5 > 0)
+            {
+                criancas0a5--;
+                LblCrianca0a5.Text = criancas0a5.ToString();
+                AtualizarTotal();
+            }
         }
 
-        private void BtnCrianca6a12Mais_Clicked(object? sender, EventArgs e)
+        // ======= BOTÕES DE CRIANÇAS 6 A 12 (MEIA ENTRADA) =======
+        private void BtnCrianca6a12Mais_Clicked(object sender, EventArgs e)
         {
             criancas6a12++;
             LblCrianca6a12.Text = criancas6a12.ToString();
             AtualizarTotal();
         }
 
-        // ========== CÁLCULO TOTAL ==========
-        private void AtualizarTotal()
+        private void BtnCrianca6a12Menos_Clicked(object sender, EventArgs e)
         {
-            double total = 0;
-
-            // Custo de Atividades Adicionais (calculado por adulto)
-            if (CheckBasico.IsChecked && precosAtividades.ContainsKey(1))
-                total += adultos * precosAtividades[1];
-
-            if (CheckCompleto.IsChecked && precosAtividades.ContainsKey(2))
-                total += adultos * precosAtividades[2];
-
-            if (CheckTrezinho.IsChecked && precosAtividades.ContainsKey(3))
-                total += adultos * precosAtividades[3];
-
-            // Custo das crianças (6 a 12 anos) - meia entrada
-            total += criancas6a12 * precoCrianca6a12;
-
-            LblTotalEstimado.Text = $"Total estimado: R${total:F2}";
+            if (criancas6a12 > 0)
+            {
+                criancas6a12--;
+                LblCrianca6a12.Text = criancas6a12.ToString();
+                AtualizarTotal();
+            }
         }
 
-        // ========== BOTÃO CONTINUAR ==========
-        private async void BtnContinuar_Clicked(object? sender, EventArgs e)
+        private async void BtnContinuar_Clicked(object sender, EventArgs e)
         {
-            // Valida se o horário foi selecionado (o TimePicker inicializa como 00:00:00, 
-            // mas o uso de `horarioSelecionado == null` depende se a propriedade foi disparada)
-            // Uma verificação mais robusta é usar a propriedade Time do controle:
-            TimeSpan horarioCapturado = TimePickerHorario.Time;
+            var horarioCapturado = TimePickerHorario.Time;
 
-            // Verifica se o usuário interagiu com o TimePicker.
-            // Para garantir que não é o valor padrão, poderíamos adicionar uma validação mais complexa,
-            // mas por enquanto, usaremos a verificação baseada no valor da instância (se for 00:00:00, pedimos para selecionar).
             if (horarioCapturado == new TimeSpan(0, 0, 0) && horarioSelecionado == null)
             {
                 await DisplayAlert("Aviso", "Por favor, selecione um horário.", "OK");
                 return;
             }
 
-            // Se o PropertyChanged não foi disparado, o valor mais recente é o TimePickerHorario.Time
             if (horarioSelecionado == null)
                 horarioSelecionado = horarioCapturado;
 
+            var selecionadas = _atividades.Where(a => a.IsSelecionada).ToList();
 
-            if (!CheckBasico.IsChecked && !CheckCompleto.IsChecked && !CheckTrezinho.IsChecked)
+            if (selecionadas.Count == 0)
             {
                 await DisplayAlert("Aviso", "Selecione pelo menos uma atividade.", "OK");
                 return;
             }
 
-            // Garante que o total está atualizado
-            AtualizarTotal();
-
-            // Monta a lista de atividades escolhidas usando nomes do banco
-            List<string> atividadesSelecionadas = new List<string>();
-            List<int> atividadeIds = new List<int>();
-            
-            if (CheckBasico.IsChecked) 
+            // Calcula o total
+            double total = 0;
+            foreach (var atividade in selecionadas)
             {
-                var atividade = atividades.FirstOrDefault(a => a.Id == 1);
-                atividadesSelecionadas.Add(atividade?.Nome ?? "Café da manhã Básico");
-                atividadeIds.Add(1);
+                total += adultos * (double)atividade.Valor;
             }
-            
-            if (CheckCompleto.IsChecked) 
-            {
-                var atividade = atividades.FirstOrDefault(a => a.Id == 2);
-                atividadesSelecionadas.Add(atividade?.Nome ?? "Café da manhã Completo");
-                atividadeIds.Add(2);
-            }
-            
-            if (CheckTrezinho.IsChecked) 
-            {
-                var atividade = atividades.FirstOrDefault(a => a.Id == 3);
-                atividadesSelecionadas.Add(atividade?.Nome ?? "Trezinho / Colha e Pague");
-                atividadeIds.Add(3);
-            }
+            total += criancas6a12 * precoCrianca6a12;
 
-            string atividadesTexto = string.Join(", ", atividadesSelecionadas);
-            string totalStr = LblTotalEstimado.Text.Replace("Total estimado: R$", "").Trim();
+            // Salva no Preferences
+            var atividadesSelecionadas = selecionadas.Select(a => a.Nome);
+            var atividadeIds = selecionadas.Select(a => a.Id);
 
-            // Salva dados no Preferences
-            Preferences.Set("AtividadesSelecionadas", atividadesTexto);
-            Preferences.Set("AtividadeIds", string.Join(",", atividadeIds));
+            Preferences.Set("AtividadesSelecionadas", string.Join(", ", atividadesSelecionadas));
+            Preferences.Set("AtividadesIds", string.Join(",", atividadeIds));
             Preferences.Set("QtdAdultos", adultos);
             Preferences.Set("QtdCriancas0a5", criancas0a5);
             Preferences.Set("QtdCriancas6a12", criancas6a12);
-            Preferences.Set("TotalEstimado", totalStr);
+            Preferences.Set("ValorTotalEstimado", total.ToString("F2"));
             Preferences.Set("DataAgendamento", dataSelecionada.ToString("yyyy-MM-dd"));
-            Preferences.Set("HorarioSelecionado", horarioSelecionado.Value.ToString(@"hh\:mm"));
+            Preferences.Set("HorarioSelecionado", horarioSelecionado?.ToString(@"hh\:mm") ?? string.Empty);
 
-            // Exibe o resumo
-            await DisplayAlert("Resumo da reserva",
-                $"Atividades: {atividadesTexto}\n\n" +
+            var jsonSelecionadas = JsonSerializer.Serialize(selecionadas.Select(a => new
+            {
+                a.Id,
+                a.Nome,
+                a.Valor
+            }));
+            Preferences.Set("AtividadesSelecionadasDetalhe", jsonSelecionadas);
+
+            await DisplayAlert("Resumo da Reserva",
+                $"Atividades: {string.Join(", ", atividadesSelecionadas)}\n\n" +
                 $"Data: {dataSelecionada:dd/MM/yyyy}\n" +
-                $"Horário: {horarioSelecionado.Value:hh\\:mm}\n" +
+                $"Horário: {horarioSelecionado:hh\\:mm}\n" +
                 $"Adultos: {adultos}\n" +
                 $"Crianças (0–5): {criancas0a5}\n" +
                 $"Crianças (6–12): {criancas6a12}\n\n" +
-                $"{LblTotalEstimado.Text}",
+                $"Total estimado: R$ {total:F2}",
                 "OK");
 
-            // Navega para a próxima página
-            // NOTA: Certifique-se de que a classe PagamentoPage existe
             await Navigation.PushAsync(new PagamentoPage());
         }
     }
