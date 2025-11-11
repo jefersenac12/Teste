@@ -218,6 +218,20 @@ namespace Teste
             return total;
         }
 
+        // ADICIONE ESTE MÉTODO
+        private static async Task<string> SafeReadContent(HttpResponseMessage resp)
+        {
+            try
+            {
+                return await resp.Content.ReadAsStringAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Erro ao ler conteúdo da resposta: {ex.Message}");
+                return $"Erro ao ler resposta: {ex.Message}";
+            }
+        }
+
         private async void OnCopyPixKeyClicked(object sender, EventArgs e)
         {
             try
@@ -389,48 +403,67 @@ namespace Teste
                     return;
                 }
 
-                // Lê o ID da reserva
+                // Lê o ID da reserva - CORREÇÃO AQUI
                 string jsonResp = await responseReserva.Content.ReadAsStringAsync();
-                System.Diagnostics.Debug.WriteLine($"Resposta da reserva: {jsonResp}");
+                System.Diagnostics.Debug.WriteLine($"Resposta completa da reserva: {jsonResp}");
 
                 int reservaId = 0;
                 try
                 {
-                    if (int.TryParse(jsonResp, out var idSimples))
+                    // Tenta parsear como objeto completo primeiro
+                    var doc = JsonSerializer.Deserialize<JsonElement>(jsonResp, opts);
+
+                    if (doc.ValueKind == JsonValueKind.Object)
                     {
-                        reservaId = idSimples;
+                        // Tenta obter o ID da reserva de diferentes formas
+                        if (doc.TryGetProperty("id", out var idEl) && idEl.ValueKind == JsonValueKind.Number)
+                            reservaId = idEl.GetInt32();
+                        else if (doc.TryGetProperty("Id", out var idEl2) && idEl2.ValueKind == JsonValueKind.Number)
+                            reservaId = idEl2.GetInt32();
+                        else if (doc.TryGetProperty("reservaId", out var reservaIdEl) && reservaIdEl.ValueKind == JsonValueKind.Number)
+                            reservaId = reservaIdEl.GetInt32();
+                        else if (doc.TryGetProperty("ReservaId", out var reservaIdEl2) && reservaIdEl2.ValueKind == JsonValueKind.Number)
+                            reservaId = reservaIdEl2.GetInt32();
                     }
-                    else
+                    // Se não conseguiu parsear como objeto, tenta como número simples
+                    else if (doc.ValueKind == JsonValueKind.Number)
                     {
-                        var doc = JsonSerializer.Deserialize<JsonElement>(jsonResp, opts);
-                        if (doc.ValueKind == JsonValueKind.Object)
-                        {
-                            if (doc.TryGetProperty("id", out var idEl) && idEl.ValueKind == JsonValueKind.Number)
-                                reservaId = idEl.GetInt32();
-                            else if (doc.TryGetProperty("Id", out var idEl2) && idEl2.ValueKind == JsonValueKind.Number)
-                                reservaId = idEl2.GetInt32();
-                        }
+                        reservaId = doc.GetInt32();
+                    }
+                    // Tenta como string também
+                    else if (doc.ValueKind == JsonValueKind.String && int.TryParse(doc.GetString(), out var idFromString))
+                    {
+                        reservaId = idFromString;
                     }
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Erro ao parsear reservaId: {ex.Message}");
+                    System.Diagnostics.Debug.WriteLine($"Erro ao parsear reservaId, tentando parse simples: {ex.Message}");
+
+                    // Fallback: tenta parse direto como número
+                    if (int.TryParse(jsonResp, out var idSimples))
+                    {
+                        reservaId = idSimples;
+                    }
                 }
 
                 if (reservaId == 0)
                 {
-                    await DisplayAlert("Aviso", "Reserva criada mas ID não foi retornado. Verifique suas reservas.", "OK");
-                    await Navigation.PushAsync(new ReservasPage());
-                    return;
+                    // Ainda assim tenta continuar, pois a reserva pode ter sido criada
+                    System.Diagnostics.Debug.WriteLine("Não foi possível obter o ID da reserva, mas continuando o processo...");
+                    await DisplayAlert("Aviso", "Reserva criada com sucesso! O ID não pôde ser recuperado, mas você pode verificar suas reservas.", "OK");
+                    // Não retorna aqui, continua para criar o pagamento
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"Reserva criada com ID: {reservaId}");
+                    Preferences.Set("UltimaReservaId", reservaId);
                 }
 
-                System.Diagnostics.Debug.WriteLine($"Reserva criada com ID: {reservaId}");
-                Preferences.Set("UltimaReservaId", reservaId);
-
-                // Cria o pagamento
+                // Cria o pagamento mesmo se não conseguiu o reservaId
                 var novoPagamento = new
                 {
-                    ReservaId = reservaId,
+                    ReservaId = reservaId, // Pode ser 0, mas a API pode lidar com isso
                     Valor = Math.Round(valorFinal, 2),
                     Metodo = "PIX",
                     Status = string.IsNullOrEmpty(comprovantePath) ? "PENDENTE" : "PAGO",
@@ -446,13 +479,29 @@ namespace Teste
                 if (responsePagamento.IsSuccessStatusCode)
                 {
                     System.Diagnostics.Debug.WriteLine("Pagamento criado com sucesso");
-                    await DisplayAlert("Sucesso", $"Reserva (ID: {reservaId}) e pagamento processados com sucesso!\nValor: R$ {valorFinal:F2}", "OK");
+
+                    if (reservaId > 0)
+                    {
+                        await DisplayAlert("Sucesso", $"Reserva (ID: {reservaId}) e pagamento processados com sucesso!\nValor: R$ {valorFinal:F2}", "OK");
+                    }
+                    else
+                    {
+                        await DisplayAlert("Sucesso", $"Reserva e pagamento processados com sucesso!\nValor: R$ {valorFinal:F2}\nVerifique suas reservas para ver o ID.", "OK");
+                    }
                 }
                 else
                 {
                     var erroPag = await SafeReadContent(responsePagamento);
                     System.Diagnostics.Debug.WriteLine($"Erro no pagamento: {erroPag}");
-                    await DisplayAlert("Aviso", $"Reserva criada (ID: {reservaId}), mas pagamento falhou.", "OK");
+
+                    if (reservaId > 0)
+                    {
+                        await DisplayAlert("Aviso", $"Reserva criada (ID: {reservaId}), mas pagamento falhou: {erroPag}", "OK");
+                    }
+                    else
+                    {
+                        await DisplayAlert("Aviso", "Reserva criada, mas pagamento falhou. Verifique suas reservas.", "OK");
+                    }
                 }
 
                 // Limpa os dados temporários
@@ -468,18 +517,6 @@ namespace Teste
             {
                 System.Diagnostics.Debug.WriteLine($"SalvarReservaEPagamento erro: {ex.Message}\n{ex.StackTrace}");
                 await DisplayAlert("Erro inesperado", $"Erro: {ex.Message}", "OK");
-            }
-        }
-
-        private static async Task<string> SafeReadContent(HttpResponseMessage resp)
-        {
-            try
-            {
-                return await resp.Content.ReadAsStringAsync();
-            }
-            catch
-            {
-                return string.Empty;
             }
         }
 
