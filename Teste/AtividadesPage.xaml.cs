@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.Text.Json;
 
 namespace Teste
@@ -250,7 +251,7 @@ namespace Teste
                 return;
             }
 
-            // Calcula o total
+            // Calcula o total CORRETAMENTE
             double total = 0;
             foreach (var atividade in selecionadas)
             {
@@ -258,7 +259,10 @@ namespace Teste
             }
             total += criancas6a12 * precoCrianca6a12;
 
-            // Salva no Preferences
+            // Salva no Preferences - ADICIONE ESTA LINHA PARA SALVAR O VALOR DAS ATIVIDADES
+            var atividadesValores = selecionadas.Select(a => a.Valor.ToString(CultureInfo.InvariantCulture));
+            Preferences.Set("AtividadesValores", string.Join(",", atividadesValores));
+
             var atividadesSelecionadas = selecionadas.Select(a => a.Nome);
             var atividadeIds = selecionadas.Select(a => a.Id);
 
@@ -267,7 +271,7 @@ namespace Teste
             Preferences.Set("QtdAdultos", adultos);
             Preferences.Set("QtdCriancas0a5", criancas0a5);
             Preferences.Set("QtdCriancas6a12", criancas6a12);
-            Preferences.Set("ValorTotalEstimado", total.ToString("F2"));
+            Preferences.Set("ValorTotalEstimado", total.ToString("F2", CultureInfo.InvariantCulture)); // Use cultura invariável
             Preferences.Set("DataAgendamento", dataSelecionada.ToString("yyyy-MM-dd"));
             Preferences.Set("HorarioSelecionado", horarioSelecionado?.ToString(@"hh\:mm") ?? string.Empty);
 

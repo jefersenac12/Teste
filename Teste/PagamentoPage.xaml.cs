@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Controls.Shapes;
 using Microsoft.Maui.Graphics;
+using Microsoft.Maui.Storage;
 
 namespace Teste
 {
@@ -25,11 +26,10 @@ namespace Teste
     {
         private static readonly HttpClient client = new HttpClient();
 
-        // Endpoints (ajuste se necessário)
-        private readonly string apiUrlAgenda = "http://tiijeferson.runasp.net/api/usuario/Agenda";
-        private readonly string apiUrlReserva = "http://tiijeferson.runasp.net/api/usuario/Reserva";
-        private readonly string apiUrlPagamento = "http://tiijeferson.runasp.net/api/usuario/Pagamento";
-        private readonly string apiUrlAtividade = "http://tiijeferson.runasp.net/api/usuario/Atividade";
+        private readonly string apiUrlAgenda = "http://tiijeferson.runasp.net/api/Agenda";
+        private readonly string apiUrlReserva = "http://tiijeferson.runasp.net/api/Reserva";
+        private readonly string apiUrlPagamento = "http://tiijeferson.runasp.net/api/Pagamento";
+        private readonly string apiUrlAtividade = "http://tiijeferson.runasp.net/api/Atividade";
 
         private decimal totalAmount = 0;
         private readonly string pixKey = "fazenda.villaggio@pix.com.br";
@@ -75,12 +75,11 @@ namespace Teste
                 }
 
                 atividadesCarregadas.Clear();
-                foreach (var a in atividades)
+                foreach (var a in atividades.Where(a => a.Ativa))
                     atividadesCarregadas[a.Id] = a;
             }
             catch (Exception ex)
             {
-                // fallback para evitar que a página quebre
                 System.Diagnostics.Debug.WriteLine($"CarregarAtividades erro: {ex.Message}");
                 CriarAtividadesFicticias();
             }
@@ -101,14 +100,14 @@ namespace Teste
                 string dataStr = Preferences.Get("DataAgendamento", "");
                 string horarioStr = Preferences.Get("HorarioSelecionado", "");
                 string atividadesStr = Preferences.Get("AtividadesSelecionadas", "");
-                string atividadesIdsStr = Preferences.Get("AtividadeIds", "");
-                string totalStr = Preferences.Get("TotalEstimado", "0");
+                string atividadesIdsStr = Preferences.Get("AtividadesIds", "");
+                string valorTotalEstimado = Preferences.Get("ValorTotalEstimado", "0");
+                string atividadesValoresStr = Preferences.Get("AtividadesValores", "");
 
                 int adultos = Preferences.Get("QtdAdultos", 0);
                 int criancas0a5 = Preferences.Get("QtdCriancas0a5", 0);
                 int criancas6a12 = Preferences.Get("QtdCriancas6a12", 0);
 
-                // Data: tenta múltiplos formatos
                 DateTime dataSelecionada;
                 if (!TryParseDateOnly(dataStr, out dataSelecionada))
                     dataSelecionada = DateTime.Today;
@@ -118,6 +117,9 @@ namespace Teste
                     horario = TimeSpan.Zero;
 
                 safraId = Preferences.Get("SafraId", 0);
+                if (safraId == 0)
+                    safraId = dataSelecionada.Month;
+
                 string safraNome = Preferences.Get("SafraNome", "");
 
                 List<string> frutasSafra = new();
@@ -125,11 +127,10 @@ namespace Teste
                 if (string.IsNullOrWhiteSpace(safraNome))
                 {
                     safraNome = tituloPorMes;
-                    Preferences.Set("SafraId", safraId);
                     Preferences.Set("SafraNome", safraNome);
+                    Preferences.Set("SafraId", safraId);
                 }
 
-                // IDs de atividades
                 atividadeIds = new();
                 if (!string.IsNullOrWhiteSpace(atividadesIdsStr))
                 {
@@ -139,39 +140,29 @@ namespace Teste
                         .Where(v => v > 0)
                         .ToList();
                 }
-                else if (!string.IsNullOrWhiteSpace(atividadesStr))
-                {
-                    var nomes = atividadesStr.Split(',', StringSplitOptions.RemoveEmptyEntries);
-                    foreach (var nome in nomes)
-                    {
-                        var id = MapearNomeParaId(nome.Trim());
-                        if (id.HasValue) atividadeIds.Add(id.Value);
-                    }
-                    if (atividadeIds.Any())
-                        Preferences.Set("AtividadeIds", string.Join(",", atividadeIds));
-                }
 
-                // Atualiza labels (só se existirem no XAML)
-                if (LblDataHorario != null) LblDataHorario.Text = $"{dataSelecionada:dd/MM/yyyy} - {horario:hh\\:mm}";
-                if (LblPessoas != null) LblPessoas.Text = $"{adultos} Adultos, {criancas0a5} Crianças (0–5), {criancas6a12} Crianças (6–12)";
-                if (LblAtividades != null) LblAtividades.Text = string.IsNullOrWhiteSpace(atividadesStr) ? "Nenhuma atividade selecionada" : atividadesStr;
+                if (LblDataHorario != null)
+                    LblDataHorario.Text = $"{dataSelecionada:dd/MM/yyyy} - {horario:hh\\:mm}";
+
+                if (LblPessoas != null)
+                    LblPessoas.Text = $"{adultos} Adultos, {criancas0a5} Crianças (0–5), {criancas6a12} Crianças (6–12)";
+
+                if (LblAtividades != null)
+                    LblAtividades.Text = string.IsNullOrWhiteSpace(atividadesStr) ? "Nenhuma atividade selecionada" : atividadesStr;
 
                 RenderizarFrutasSafra(frutasSafra);
 
-                // Total: tenta usar TotalEstimado se válido, senão recalcula
-                if (!decimal.TryParse(totalStr, NumberStyles.Any, CultureInfo.GetCultureInfo("pt-BR"), out var parsedTotal))
-                {
-                    totalAmount = RecalcularTotal(adultos, criancas6a12, atividadeIds);
-                }
-                else
-                {
-                    totalAmount = parsedTotal;
-                }
+                // SEMPRE recalcula o total para garantir precisão
+                totalAmount = RecalcularTotal(adultos, criancas6a12, atividadeIds, atividadesValoresStr);
 
-                if (LblTotal != null) LblTotal.Text = $"R${totalAmount:F2}";
+                System.Diagnostics.Debug.WriteLine($"Total recalculado: {totalAmount} (Adultos: {adultos}, Crianças6-12: {criancas6a12}, Atividades: {atividadeIds.Count})");
+
+                if (LblTotal != null)
+                    LblTotal.Text = $"R$ {totalAmount:F2}";
             }
             catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"CarregarDadosReserva erro: {ex.Message}");
                 await DisplayAlert("Erro", $"Falha ao carregar dados: {ex.Message}", "OK");
             }
         }
@@ -181,46 +172,50 @@ namespace Teste
             date = DateTime.MinValue;
             if (string.IsNullOrWhiteSpace(dateStr)) return false;
 
-            var pt = CultureInfo.GetCultureInfo("pt-BR");
-
-            // tenta ISO primeiro
-            if (DateTime.TryParse(dateStr, out var dt))
-            {
-                date = dt.Date;
-                return true;
-            }
-
-            // tenta dd/MM/yyyy
-            if (DateTime.TryParseExact(dateStr, new[] { "dd/MM/yyyy", "yyyy-MM-dd", "yyyy-MM-ddTHH:mm:ss", "o" }, pt, DateTimeStyles.None, out var dt2))
-            {
-                date = dt2.Date;
-                return true;
-            }
-
-            return false;
+            // Tenta múltiplos formatos
+            var formatos = new[] { "yyyy-MM-dd", "dd/MM/yyyy", "yyyy-MM-ddTHH:mm:ss", "o" };
+            return DateTime.TryParseExact(dateStr, formatos, CultureInfo.InvariantCulture, DateTimeStyles.None, out date)
+                || DateTime.TryParse(dateStr, out date);
         }
 
-        private decimal RecalcularTotal(int adultos, int criancas6a12, List<int> atividadeIds)
+        private decimal RecalcularTotal(int adultos, int criancas6a12, List<int> atividadeIds, string atividadesValoresStr = "")
         {
-            decimal total = criancas6a12 * 12.50m;
+            decimal total = criancas6a12 * 12.50m; // Meia entrada para crianças 6-12 anos
 
+            // PRIMEIRO: Tenta usar os valores salvos das atividades (mais confiável)
+            if (!string.IsNullOrEmpty(atividadesValoresStr))
+            {
+                var valores = atividadesValoresStr.Split(',')
+                    .Where(s => !string.IsNullOrEmpty(s))
+                    .Select(s => decimal.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out var v) ? v : 0m)
+                    .Where(v => v > 0)
+                    .ToList();
+
+                foreach (var valor in valores)
+                {
+                    total += adultos * valor;
+                    System.Diagnostics.Debug.WriteLine($"Adicionando atividade: {adultos} x {valor} = {adultos * valor}");
+                }
+
+                if (valores.Count > 0)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Total calculado com valores salvos: {total}");
+                    return total;
+                }
+            }
+
+            // SEGUNDO: Fallback - usa as atividades carregadas da API
             foreach (var id in atividadeIds)
             {
                 if (atividadesCarregadas.TryGetValue(id, out var atv))
+                {
                     total += adultos * atv.Valor;
+                    System.Diagnostics.Debug.WriteLine($"Adicionando atividade API: {adultos} x {atv.Valor} = {adultos * atv.Valor}");
+                }
             }
 
+            System.Diagnostics.Debug.WriteLine($"Total final: {total}");
             return total;
-        }
-
-        private static int? MapearNomeParaId(string nome)
-        {
-            if (string.IsNullOrWhiteSpace(nome)) return null;
-            var lower = nome.ToLowerInvariant();
-            if (lower.Contains("básico") || lower.Contains("basico")) return 1;
-            if (lower.Contains("completo")) return 2;
-            if (lower.Contains("trezinho") || lower.Contains("colha")) return 3;
-            return null;
         }
 
         private async void OnCopyPixKeyClicked(object sender, EventArgs e)
@@ -230,9 +225,9 @@ namespace Teste
                 await Clipboard.SetTextAsync(pixKey);
                 await DisplayAlert("Sucesso", "Chave Pix copiada!", "OK");
             }
-            catch
+            catch (Exception ex)
             {
-                await DisplayAlert("Erro", "Falha ao copiar a chave Pix.", "OK");
+                await DisplayAlert("Erro", $"Falha ao copiar: {ex.Message}", "OK");
             }
         }
 
@@ -261,7 +256,7 @@ namespace Teste
             }
         }
 
-        private async void OnConfirmPaymentClicked(object sender, EventArgs e)
+        private async void OnConfirmPaymentClicked(object sender, TappedEventArgs e)
         {
             if (string.IsNullOrEmpty(comprovantePath))
             {
@@ -269,8 +264,12 @@ namespace Teste
                 if (!continuar) return;
             }
 
-            bool confirmar = await DisplayAlert("Confirmar Pagamento", $"Deseja confirmar o pagamento de R${totalAmount:F2}?", "Sim", "Não");
+            bool confirmar = await DisplayAlert("Confirmar Pagamento", $"Deseja confirmar o pagamento de R$ {totalAmount:F2}?", "Sim", "Não");
             if (!confirmar) return;
+
+            var border = (sender as TapGestureRecognizer)?.Parent as Border;
+            if (border != null)
+                border.IsEnabled = false;
 
             try
             {
@@ -278,7 +277,10 @@ namespace Teste
             }
             catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"OnConfirmPaymentClicked erro: {ex.Message}\n{ex.StackTrace}");
                 await DisplayAlert("Erro", $"Erro ao salvar reserva: {ex.Message}", "OK");
+                if (border != null)
+                    border.IsEnabled = true;
             }
         }
 
@@ -286,7 +288,6 @@ namespace Teste
         {
             try
             {
-                // Tenta recuperar UsuarioId; aceita fallback ClienteId para compatibilidade com sessões antigas
                 int usuarioId = Preferences.Get("UsuarioId", 0);
                 if (usuarioId == 0) usuarioId = Preferences.Get("ClienteId", 0);
 
@@ -296,175 +297,180 @@ namespace Teste
                     return;
                 }
 
-                // Data/hora: prefere Preferences (data iso ou dd/MM/yyyy) + HorarioSelecionado
                 string dataStr = Preferences.Get("DataAgendamento", "");
                 string horarioStr = Preferences.Get("HorarioSelecionado", "");
+                string atividadesValoresStr = Preferences.Get("AtividadesValores", "");
 
                 DateTime dataHora;
-                var pt = CultureInfo.GetCultureInfo("pt-BR");
-
-                // tenta combinar data + horário
-                if (!string.IsNullOrWhiteSpace(dataStr) && !string.IsNullOrWhiteSpace(horarioStr)
-                    && DateTime.TryParseExact($"{dataStr} {horarioStr}",
-                        new[] { "yyyy-MM-dd HH:mm", "dd/MM/yyyy HH:mm", "yyyy-MM-ddTHH:mm", "yyyy-MM-ddTHH:mm:ss", "o" }, pt, DateTimeStyles.None, out var dtComb))
+                if (!TryParseDateOnly(dataStr, out dataHora))
                 {
-                    dataHora = dtComb;
-                }
-                else if (TryParseDateOnly(dataStr, out var dOnly) && TimeSpan.TryParse(horarioStr, out var ts))
-                {
-                    dataHora = dOnly.Date.Add(ts);
-                }
-                else if (TryParseDateOnly(dataStr, out var dOnly2))
-                {
-                    dataHora = dOnly2.Date;
-                }
-                else
-                {
-                    await DisplayAlert("Erro", "Data/hora inválida.", "OK");
+                    await DisplayAlert("Erro", "Data inválida.", "OK");
                     return;
                 }
+
+                // Adiciona o horário à data
+                if (TimeSpan.TryParse(horarioStr, out var horario))
+                {
+                    dataHora = dataHora.Date.Add(horario);
+                }
+
+                System.Diagnostics.Debug.WriteLine($"DataHora combinada: {dataHora:yyyy-MM-dd HH:mm:ss}");
 
                 int adultos = Preferences.Get("QtdAdultos", 0);
                 int criancas0a5 = Preferences.Get("QtdCriancas0a5", 0);
                 int criancas6a12 = Preferences.Get("QtdCriancas6a12", 0);
-                int quantidadeTotal = adultos + criancas6a12 + criancas0a5;
+                int quantidadeTotal = adultos + criancas0a5 + criancas6a12;
+
                 if (quantidadeTotal <= 0)
                 {
                     await DisplayAlert("Erro", "Quantidade de pessoas inválida.", "OK");
                     return;
                 }
 
-                // Garante que atividadeIds esteja preenchido (tenta ler Preferences como fallback)
-                if (atividadeIds == null || !atividadeIds.Any())
-                {
-                    var atividadesIdsStr = Preferences.Get("AtividadeIds", "");
-                    if (!string.IsNullOrWhiteSpace(atividadesIdsStr))
-                    {
-                        atividadeIds = atividadesIdsStr
-                            .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                            .Select(s => int.TryParse(s.Trim(), out var v) ? v : 0)
-                            .Where(v => v > 0)
-                            .ToList();
-                    }
-                }
-
-                if (atividadeIds == null || !atividadeIds.Any())
+                int atividadeId = atividadeIds.FirstOrDefault();
+                if (atividadeId == 0)
                 {
                     await DisplayAlert("Erro", "Nenhuma atividade selecionada.", "OK");
                     return;
                 }
 
-                int atividadeId = atividadeIds.First();
-                if (atividadeId == 0)
+                // Recalcula o valor final usando a mesma lógica
+                decimal valorFinal = RecalcularTotal(adultos, criancas6a12, atividadeIds, atividadesValoresStr);
+                if (valorFinal <= 0)
                 {
-                    await DisplayAlert("Erro", "ID de atividade inválido.", "OK");
+                    await DisplayAlert("Erro", "Valor total inválido.", "OK");
                     return;
                 }
 
-                // Criar ou buscar agenda
-                int agendaId = await CriarOuBuscarAgenda(dataHora, atividadeId);
-                if (agendaId == 0)
+                System.Diagnostics.Debug.WriteLine($"Valor final calculado: {valorFinal}");
+
+                // Tenta criar agenda (não bloqueia se falhar)
+                int agendaId = 0;
+                try
                 {
-                    await DisplayAlert("Erro", "Falha ao criar/obter agenda.", "OK");
-                    return;
+                    agendaId = await CriarOuBuscarAgenda(dataHora, atividadeId);
+                    System.Diagnostics.Debug.WriteLine($"AgendaId obtido: {agendaId}");
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Erro ao criar agenda (continuando): {ex.Message}");
                 }
 
-                // Validar vagas (se endpoint suportar)
-                bool vagas = await ValidarVagasDisponiveis(agendaId, quantidadeTotal);
-                if (!vagas)
+                var opts = new JsonSerializerOptions
                 {
-                    await DisplayAlert("Vagas Esgotadas", "Não há vagas suficientes.", "OK");
-                    return;
-                }
+                    PropertyNameCaseInsensitive = true,
+                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                };
 
-                // Monta reserva
+                // Cria a reserva
                 var novaReserva = new
                 {
-                    AgendaId = agendaId,
+                    AgendaId = agendaId > 0 ? agendaId : (int?)null,
                     UsuarioId = usuarioId,
                     Quantidade = quantidadeTotal,
                     InteiraEntrada = adultos,
                     MeiaEntrada = criancas6a12,
                     NPEntrada = criancas0a5,
-                    ValorTotal = totalAmount,
-                    DataReserva = dataHora.ToString("o")
+                    ValorTotal = Math.Round(valorFinal, 2),
+                    DataReserva = dataHora.ToString("yyyy-MM-ddTHH:mm:ss")
                 };
 
-                var opts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 var jsonReserva = JsonSerializer.Serialize(novaReserva, opts);
-                var contentReserva = new StringContent(jsonReserva, Encoding.UTF8, "application/json");
+                System.Diagnostics.Debug.WriteLine($"Enviando reserva: {jsonReserva}");
 
+                var contentReserva = new StringContent(jsonReserva, Encoding.UTF8, "application/json");
                 var responseReserva = await client.PostAsync(apiUrlReserva, contentReserva);
 
                 if (!responseReserva.IsSuccessStatusCode)
                 {
-                    var erroText = await SafeReadContent(responseReserva);
-                    await DisplayAlert("Erro", $"Falha ao criar reserva: HTTP {(int)responseReserva.StatusCode}\n{erroText}", "OK");
+                    var erro = await SafeReadContent(responseReserva);
+                    System.Diagnostics.Debug.WriteLine($"Erro ao criar reserva: HTTP {(int)responseReserva.StatusCode} - {erro}");
+                    await DisplayAlert("Erro", $"Falha ao criar reserva: {erro}", "OK");
                     return;
                 }
 
-                // Ler ID retornado da reserva (se houver)
+                // Lê o ID da reserva
+                string jsonResp = await responseReserva.Content.ReadAsStringAsync();
+                System.Diagnostics.Debug.WriteLine($"Resposta da reserva: {jsonResp}");
+
                 int reservaId = 0;
                 try
                 {
-                    var jsonResp = await responseReserva.Content.ReadAsStringAsync();
-                    var doc = JsonSerializer.Deserialize<JsonElement>(jsonResp, opts);
-
-                    if (doc.ValueKind == JsonValueKind.Object)
+                    if (int.TryParse(jsonResp, out var idSimples))
                     {
-                        if (doc.TryGetProperty("id", out var idEl) && idEl.ValueKind == JsonValueKind.Number) reservaId = idEl.GetInt32();
-                        else if (doc.TryGetProperty("Id", out var idEl2) && idEl2.ValueKind == JsonValueKind.Number) reservaId = idEl2.GetInt32();
+                        reservaId = idSimples;
                     }
-                    else if (doc.ValueKind == JsonValueKind.Number)
+                    else
                     {
-                        reservaId = doc.GetInt32();
-                    }
-                    else if (doc.ValueKind == JsonValueKind.String)
-                    {
-                        int.TryParse(doc.GetString(), out reservaId);
+                        var doc = JsonSerializer.Deserialize<JsonElement>(jsonResp, opts);
+                        if (doc.ValueKind == JsonValueKind.Object)
+                        {
+                            if (doc.TryGetProperty("id", out var idEl) && idEl.ValueKind == JsonValueKind.Number)
+                                reservaId = idEl.GetInt32();
+                            else if (doc.TryGetProperty("Id", out var idEl2) && idEl2.ValueKind == JsonValueKind.Number)
+                                reservaId = idEl2.GetInt32();
+                        }
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // reservaId pode ficar 0; continuamos, mas idealmente o backend retorna o id
+                    System.Diagnostics.Debug.WriteLine($"Erro ao parsear reservaId: {ex.Message}");
                 }
 
-                // Monta pagamento usando o reservaId obtido (se 0, backend deve relacionar por outro campo)
-                string statusPagamento = string.IsNullOrEmpty(comprovantePath) ? "PENDENTE" : "PAGO";
+                if (reservaId == 0)
+                {
+                    await DisplayAlert("Aviso", "Reserva criada mas ID não foi retornado. Verifique suas reservas.", "OK");
+                    await Navigation.PushAsync(new ReservasPage());
+                    return;
+                }
+
+                System.Diagnostics.Debug.WriteLine($"Reserva criada com ID: {reservaId}");
+                Preferences.Set("UltimaReservaId", reservaId);
+
+                // Cria o pagamento
                 var novoPagamento = new
                 {
                     ReservaId = reservaId,
-                    Valor = totalAmount,
+                    Valor = Math.Round(valorFinal, 2),
                     Metodo = "PIX",
-                    Status = statusPagamento,
-                    DataPagamento = DateTime.Now.ToString("o")
+                    Status = string.IsNullOrEmpty(comprovantePath) ? "PENDENTE" : "PAGO",
+                    DataPagamento = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss")
                 };
 
                 var jsonPagamento = JsonSerializer.Serialize(novoPagamento, opts);
-                var responsePagamento = await client.PostAsync(apiUrlPagamento, new StringContent(jsonPagamento, Encoding.UTF8, "application/json"));
+                System.Diagnostics.Debug.WriteLine($"Enviando pagamento: {jsonPagamento}");
 
-                if (!responsePagamento.IsSuccessStatusCode)
+                var responsePagamento = await client.PostAsync(apiUrlPagamento,
+                    new StringContent(jsonPagamento, Encoding.UTF8, "application/json"));
+
+                if (responsePagamento.IsSuccessStatusCode)
                 {
-                    var erroPag = await SafeReadContent(responsePagamento);
-                    await DisplayAlert("Aviso", $"Reserva criada (id {reservaId}) mas pagamento falhou: HTTP {(int)responsePagamento.StatusCode}\n{erroPag}", "OK");
+                    System.Diagnostics.Debug.WriteLine("Pagamento criado com sucesso");
+                    await DisplayAlert("Sucesso", $"Reserva (ID: {reservaId}) e pagamento processados com sucesso!\nValor: R$ {valorFinal:F2}", "OK");
                 }
                 else
                 {
-                    await DisplayAlert("Sucesso", "Reserva e pagamento processados com sucesso.", "OK");
+                    var erroPag = await SafeReadContent(responsePagamento);
+                    System.Diagnostics.Debug.WriteLine($"Erro no pagamento: {erroPag}");
+                    await DisplayAlert("Aviso", $"Reserva criada (ID: {reservaId}), mas pagamento falhou.", "OK");
                 }
 
-                Preferences.Set("UltimaReservaId", reservaId);
-                // navega para ReservasPage
-                try { await Navigation.PushAsync(new ReservasPage()); }
-                catch { await Navigation.PopToRootAsync(); }
+                // Limpa os dados temporários
+                Preferences.Remove("AtividadesValores");
+                Preferences.Remove("AtividadesSelecionadas");
+                Preferences.Remove("AtividadesIds");
+                Preferences.Remove("ValorTotalEstimado");
+
+                // Navega para página de reservas
+                await Navigation.PushAsync(new ReservasPage());
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Erro inesperado", $"Erro ao salvar reserva/pagamento: {ex.Message}", "OK");
+                System.Diagnostics.Debug.WriteLine($"SalvarReservaEPagamento erro: {ex.Message}\n{ex.StackTrace}");
+                await DisplayAlert("Erro inesperado", $"Erro: {ex.Message}", "OK");
             }
         }
 
-        // Lê corpo da resposta de forma segura
         private static async Task<string> SafeReadContent(HttpResponseMessage resp)
         {
             try
@@ -477,83 +483,74 @@ namespace Teste
             }
         }
 
-        // Valida vagas na agenda (tenta extrair propriedades comuns)
-        private async Task<bool> ValidarVagasDisponiveis(int agendaId, int quantidadeSolicitada)
-        {
-            try
-            {
-                var resp = await client.GetAsync($"{apiUrlAgenda}/{agendaId}");
-                if (!resp.IsSuccessStatusCode) return true; // fallback permissivo
-
-                var json = await resp.Content.ReadAsStringAsync();
-                var el = JsonSerializer.Deserialize<JsonElement>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                int vagasDisponiveis = 50;
-                if (el.ValueKind == JsonValueKind.Object)
-                {
-                    if (el.TryGetProperty("vagasDisponiveis", out var vEl) && vEl.ValueKind == JsonValueKind.Number) vagasDisponiveis = vEl.GetInt32();
-                    else if (el.TryGetProperty("VagasDisponiveis", out var vEl2) && vEl2.ValueKind == JsonValueKind.Number) vagasDisponiveis = vEl2.GetInt32();
-                    else if (el.TryGetProperty("vagasTotais", out var vt) && vt.ValueKind == JsonValueKind.Number) vagasDisponiveis = vt.GetInt32();
-                }
-
-                return vagasDisponiveis >= quantidadeSolicitada;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"ValidarVagasDisponiveis erro: {ex.Message}");
-                return true; // fallback
-            }
-        }
-
         private async Task<int> CriarOuBuscarAgenda(DateTime dataHora, int atividadeId)
         {
             try
             {
                 if (atividadeId == 0) return 0;
 
-                safraId = safraId == 0 ? Preferences.Get("SafraId", 0) : safraId;
-                string dataHoraIso = dataHora.ToString("yyyy-MM-ddTHH:mm:ss");
+                if (safraId == 0)
+                    safraId = dataHora.Month;
 
-                var urls = new[]
-                {
-                    $"{apiUrlAgenda}/buscar?dataHora={Uri.EscapeDataString(dataHoraIso)}&safraId={safraId}&atividadeId={atividadeId}",
-                    $"{apiUrlAgenda}/search?dataHora={Uri.EscapeDataString(dataHoraIso)}&safraId={safraId}&atividadeId={atividadeId}",
-                    $"{apiUrlAgenda}?dataHora={Uri.EscapeDataString(dataHoraIso)}&safraId={safraId}&atividadeId={atividadeId}"
-                };
+                string dataHoraIso = dataHora.ToString("yyyy-MM-ddTHH:mm:ss");
+                System.Diagnostics.Debug.WriteLine($"CriarOuBuscarAgenda: AtivId={atividadeId}, SafraId={safraId}, Data={dataHoraIso}");
 
                 var opts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
-                foreach (var url in urls)
+                // Tenta buscar agenda existente
+                var urlsBusca = new[]
+                {
+                    $"{apiUrlAgenda}/buscar?dataHora={Uri.EscapeDataString(dataHoraIso)}&safraId={safraId}&atividadeId={atividadeId}",
+                    $"{apiUrlAgenda}/search?atividadeId={atividadeId}&safraId={safraId}",
+                    $"{apiUrlAgenda}?atividadeId={atividadeId}"
+                };
+
+                foreach (var url in urlsBusca)
                 {
                     try
                     {
+                        System.Diagnostics.Debug.WriteLine($"Buscando em: {url}");
                         var resp = await client.GetAsync(url);
-                        if (!resp.IsSuccessStatusCode) continue;
 
-                        var json = await resp.Content.ReadAsStringAsync();
-                        var el = JsonSerializer.Deserialize<JsonElement>(json, opts);
+                        if (resp.IsSuccessStatusCode)
+                        {
+                            var json = await resp.Content.ReadAsStringAsync();
+                            System.Diagnostics.Debug.WriteLine($"Resposta busca: {json}");
 
-                        if (el.ValueKind == JsonValueKind.Object)
-                        {
-                            if (el.TryGetProperty("id", out var idEl) && idEl.ValueKind == JsonValueKind.Number) return idEl.GetInt32();
-                            if (el.TryGetProperty("Id", out var idEl2) && idEl2.ValueKind == JsonValueKind.Number) return idEl2.GetInt32();
-                        }
-                        else if (el.ValueKind == JsonValueKind.Array)
-                        {
-                            foreach (var item in el.EnumerateArray())
+                            if (string.IsNullOrWhiteSpace(json) || json == "null" || json == "[]")
+                                continue;
+
+                            if (int.TryParse(json, out var idSimples))
+                                return idSimples;
+
+                            var el = JsonSerializer.Deserialize<JsonElement>(json, opts);
+
+                            if (el.ValueKind == JsonValueKind.Object)
                             {
-                                if (item.ValueKind == JsonValueKind.Object)
-                                {
-                                    if (item.TryGetProperty("id", out var idEl) && idEl.ValueKind == JsonValueKind.Number) return idEl.GetInt32();
-                                    if (item.TryGetProperty("Id", out var idEl2) && idEl2.ValueKind == JsonValueKind.Number) return idEl2.GetInt32();
-                                }
+                                if (el.TryGetProperty("id", out var idEl) && idEl.ValueKind == JsonValueKind.Number)
+                                    return idEl.GetInt32();
+                                if (el.TryGetProperty("Id", out var idEl2) && idEl2.ValueKind == JsonValueKind.Number)
+                                    return idEl2.GetInt32();
+                            }
+                            else if (el.ValueKind == JsonValueKind.Array && el.GetArrayLength() > 0)
+                            {
+                                var primeiro = el.EnumerateArray().First();
+                                if (primeiro.TryGetProperty("id", out var idEl))
+                                    return idEl.GetInt32();
+                                if (primeiro.TryGetProperty("Id", out var idEl2))
+                                    return idEl2.GetInt32();
                             }
                         }
                     }
-                    catch { /* tenta próxima URL */ }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Erro ao buscar em {url}: {ex.Message}");
+                    }
                 }
 
-                // Se não encontrou, cria uma agenda
+                System.Diagnostics.Debug.WriteLine("Agenda não encontrada, criando nova...");
+
+                // Cria nova agenda
                 var novaAgenda = new
                 {
                     SafraId = safraId,
@@ -564,18 +561,31 @@ namespace Teste
                 };
 
                 var jsonNova = JsonSerializer.Serialize(novaAgenda, opts);
-                var content = new StringContent(jsonNova, Encoding.UTF8, "application/json");
-                var post = await client.PostAsync(apiUrlAgenda, content);
+                System.Diagnostics.Debug.WriteLine($"Criando agenda: {jsonNova}");
 
-                if (!post.IsSuccessStatusCode) return 0;
+                var post = await client.PostAsync(apiUrlAgenda,
+                    new StringContent(jsonNova, Encoding.UTF8, "application/json"));
+
+                if (!post.IsSuccessStatusCode)
+                {
+                    var erro = await SafeReadContent(post);
+                    System.Diagnostics.Debug.WriteLine($"Erro ao criar agenda: {erro}");
+                    return 0;
+                }
 
                 var jsonResp = await post.Content.ReadAsStringAsync();
-                var elResp = JsonSerializer.Deserialize<JsonElement>(jsonResp, opts);
+                System.Diagnostics.Debug.WriteLine($"Resposta criação agenda: {jsonResp}");
 
+                if (int.TryParse(jsonResp, out var idNum))
+                    return idNum;
+
+                var elResp = JsonSerializer.Deserialize<JsonElement>(jsonResp, opts);
                 if (elResp.ValueKind == JsonValueKind.Object)
                 {
-                    if (elResp.TryGetProperty("id", out var idProp) && idProp.ValueKind == JsonValueKind.Number) return idProp.GetInt32();
-                    if (elResp.TryGetProperty("Id", out var idProp2) && idProp2.ValueKind == JsonValueKind.Number) return idProp2.GetInt32();
+                    if (elResp.TryGetProperty("id", out var idEl))
+                        return idEl.GetInt32();
+                    if (elResp.TryGetProperty("Id", out var idEl2))
+                        return idEl2.GetInt32();
                 }
                 else if (elResp.ValueKind == JsonValueKind.Number)
                 {
@@ -601,7 +611,7 @@ namespace Teste
                 { 4, new() { "🍈 Goiaba", "🍓 Morango" } },
                 { 10, new() { "🍑 Pêssego", "🍓 Morango", "🍈 Goiaba" } },
                 { 11, new() { "🍑 Pêssego", "🍓 Morango", "🍈 Goiaba" } },
-                { 12, new() { "🍇 Uva", "🍈 Goiaba", "🍓 Morango", "🍒 Lichia" } },
+                { 12, new() { "🍇 Uva", "🍈 Goiaba", "🍓 Morango", "🍒 Lichia" } }
             };
 
             frutas = cronograma.GetValueOrDefault(mes, new List<string>());
@@ -623,7 +633,7 @@ namespace Teste
 
             foreach (var fruta in frutas)
             {
-                var chip = new Border
+                FrutasSafraFlex.Children.Add(new Border
                 {
                     BackgroundColor = Color.FromArgb("#F9F3EF"),
                     StrokeThickness = 1,
@@ -637,10 +647,8 @@ namespace Teste
                         FontSize = 12,
                         TextColor = Color.FromArgb("#A42D45")
                     }
-                };
-                FrutasSafraFlex.Children.Add(chip);
+                });
             }
         }
     }
 }
-
