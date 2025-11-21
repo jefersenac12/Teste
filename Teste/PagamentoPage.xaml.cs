@@ -47,6 +47,13 @@ namespace Teste
             _ = InitializeAsync();
         }
 
+        private int ObterUsuarioId()
+        {
+            var uid = Preferences.Get("UsuarioId", 0);
+            if (uid == 0) uid = Preferences.Get("ClienteId", 0);
+            return uid;
+        }
+
         private async Task InitializeAsync()
         {
             await CarregarAtividades();
@@ -302,8 +309,7 @@ namespace Teste
         {
             try
             {
-                int usuarioId = Preferences.Get("UsuarioId", 0);
-                if (usuarioId == 0) usuarioId = Preferences.Get("ClienteId", 0);
+                int usuarioId = ObterUsuarioId();
 
                 if (usuarioId == 0)
                 {
@@ -391,6 +397,7 @@ namespace Teste
 
                 var jsonReserva = JsonSerializer.Serialize(novaReserva, opts);
                 System.Diagnostics.Debug.WriteLine($"Enviando reserva: {jsonReserva}");
+                await DisplayAlert("Usuário", $"Usuário vinculado: ID {usuarioId}", "OK");
 
                 var contentReserva = new StringContent(jsonReserva, Encoding.UTF8, "application/json");
                 var responseReserva = await client.PostAsync(apiUrlReserva, contentReserva);

@@ -15,12 +15,12 @@ public partial class CadastroFamiliaPage : ContentPage
 
     private async void OnCadastrarFamiliaClicked(object sender, EventArgs e)
     {
-        // ValidaÁ„o dos campos obrigatÛrios
+        // Valida√ß√£o dos campos obrigat√≥rios
         if (string.IsNullOrWhiteSpace(nomeEntry.Text) ||
             string.IsNullOrWhiteSpace(telefoneEntry.Text) ||
             string.IsNullOrWhiteSpace(senhaEntry.Text))
         {
-            await DisplayAlert("Erro", "Todos os campos s„o obrigatÛrios.", "OK");
+            await DisplayAlert("Erro", "Todos os campos s√£o obrigat√≥rios.", "OK");
             return;
         }
 
@@ -40,9 +40,45 @@ public partial class CadastroFamiliaPage : ContentPage
 
             if (response.IsSuccessStatusCode)
             {
-                await DisplayAlert("Sucesso", "FamÌlia cadastrada com sucesso!", "OK");
+                string respostaJson = await response.Content.ReadAsStringAsync();
+                try
+                {
+                    using var doc = JsonDocument.Parse(respostaJson);
+                    var root = doc.RootElement;
+                    int usuarioId = 0;
+                    string nome = "";
+                    string telefone = "";
 
-                // Limpa os campos apÛs sucesso
+                    if (root.ValueKind == JsonValueKind.Object)
+                    {
+                        if (root.TryGetProperty("id", out var idEl) && idEl.ValueKind == JsonValueKind.Number) usuarioId = idEl.GetInt32();
+                        else if (root.TryGetProperty("UsuarioId", out var idEl2) && idEl2.ValueKind == JsonValueKind.Number) usuarioId = idEl2.GetInt32();
+                        else if (root.TryGetProperty("usuario", out var usuarioEl) && usuarioEl.ValueKind == JsonValueKind.Object)
+                        {
+                            if (usuarioEl.TryGetProperty("id", out var nestedId) && nestedId.ValueKind == JsonValueKind.Number) usuarioId = nestedId.GetInt32();
+                            nome = usuarioEl.TryGetProperty("nome", out var n) && n.ValueKind == JsonValueKind.String ? (n.GetString() ?? "") : "";
+                            telefone = usuarioEl.TryGetProperty("telefone", out var t) && t.ValueKind == JsonValueKind.String ? (t.GetString() ?? "") : "";
+                        }
+                        else
+                        {
+                            nome = root.TryGetProperty("nome", out var n) && n.ValueKind == JsonValueKind.String ? (n.GetString() ?? "") : "";
+                            telefone = root.TryGetProperty("telefone", out var t) && t.ValueKind == JsonValueKind.String ? (t.GetString() ?? "") : "";
+                        }
+                    }
+
+                    if (usuarioId > 0)
+                    {
+                        Preferences.Set("UsuarioId", usuarioId);
+                        Preferences.Set("ClienteId", usuarioId);
+                        Preferences.Set("UsuarioNome", string.IsNullOrEmpty(nome) ? nomeEntry.Text : nome);
+                        Preferences.Set("UsuarioTelefone", string.IsNullOrEmpty(telefone) ? telefoneEntry.Text : telefone);
+                        Preferences.Set("UsuarioTipo", "Familia");
+                    }
+                }
+                catch { }
+
+                await DisplayAlert("Sucesso", "Fam√≠lia cadastrada com sucesso!", "OK");
+
                 nomeEntry.Text = string.Empty;
                 telefoneEntry.Text = string.Empty;
                 senhaEntry.Text = string.Empty;
@@ -57,7 +93,7 @@ public partial class CadastroFamiliaPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Erro", $"Erro de conex„o: {ex.Message}", "OK");
+            await DisplayAlert("Erro", $"Erro de conex√£o: {ex.Message}", "OK");
         }
     }
 
@@ -73,6 +109,6 @@ public partial class CadastroFamiliaPage : ContentPage
 
     private void OnCadastrarClicked(object sender, EventArgs e)
     {
-        // J· est· na p·gina de cadastro de famÌlia
+        // J√° est√° na p√°gina de cadastro de fam√≠lia
     }
 }

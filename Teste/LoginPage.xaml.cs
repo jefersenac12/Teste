@@ -46,15 +46,31 @@ namespace Teste
                 return;
             }
 
-            // Tenta login como Família
-            if (await TentarLogin(apiUrlFamilia, new { Telefone = identificador, Senha = senha }, "Família"))
+            // Tenta login como FamÃ­lia
+            if (await TentarLogin(apiUrlFamilia, new { Telefone = identificador, Senha = senha }, "FamÃ­lia"))
                 return;
 
-            // Se falhar, tenta como Agência
-            if (await TentarLogin(apiUrlAgencia, new { CNPJ = identificador, Senha = senha }, "Agência"))
+            // Se falhar, tenta como AgÃªncia
+            if (await TentarLogin(apiUrlAgencia, new { CNPJ = identificador, Senha = senha }, "AgÃªncia"))
                 return;
 
-            await DisplayAlert("Falha", "Credenciais inválidas. Tente novamente.", "OK");
+            await DisplayAlert("Falha", "Credenciais invÃ¡lidas. Tente novamente.", "OK");
+        }
+
+        private static bool TryGetInt(JsonElement el, string name, out int value)
+        {
+            value = 0;
+            if (el.TryGetProperty(name, out var p))
+            {
+                if (p.ValueKind == JsonValueKind.Number) { value = p.GetInt32(); return true; }
+                if (p.ValueKind == JsonValueKind.String && int.TryParse(p.GetString(), out var v)) { value = v; return true; }
+            }
+            return false;
+        }
+
+        private static string GetString(JsonElement el, string name)
+        {
+            return el.TryGetProperty(name, out var p) && p.ValueKind == JsonValueKind.String ? (p.GetString() ?? "") : "";
         }
 
         private async Task<bool> TentarLogin(string url, object request, string tipoUsuario)
@@ -71,13 +87,42 @@ namespace Teste
                     using var doc = JsonDocument.Parse(respostaJson);
                     var root = doc.RootElement;
 
-                    int id = root.GetProperty("id").GetInt32();
-                    string nome = root.TryGetProperty("nome", out var n) ? n.GetString() ?? "" : "";
-                    string email = root.TryGetProperty("email", out var e) ? e.GetString() ?? "" : "";
+                    int usuarioId = 0;
+                    string nome = "";
+                    string email = "";
+                    string telefone = "";
 
-                    Preferences.Set("UsuarioId", id);
+                    if (root.ValueKind == JsonValueKind.Object)
+                    {
+                        if (TryGetInt(root, "usuarioId", out var uid)) usuarioId = uid;
+                        else if (TryGetInt(root, "UsuarioId", out var uid2)) usuarioId = uid2;
+                        else if (root.TryGetProperty("usuario", out var usuarioEl) && usuarioEl.ValueKind == JsonValueKind.Object)
+                        {
+                            if (TryGetInt(usuarioEl, "id", out var nestedId)) usuarioId = nestedId;
+                            nome = GetString(usuarioEl, "nome");
+                            email = GetString(usuarioEl, "email");
+                            telefone = GetString(usuarioEl, "telefone");
+                        }
+                        else
+                        {
+                            if (TryGetInt(root, "id", out var topId)) usuarioId = topId;
+                            nome = GetString(root, "nome");
+                            email = GetString(root, "email");
+                            telefone = GetString(root, "telefone");
+                        }
+                    }
+
+                    if (usuarioId <= 0)
+                    {
+                        await DisplayAlert("Falha", "NÃ£o foi possÃ­vel identificar o usuÃ¡rio na resposta.", "OK");
+                        return false;
+                    }
+
+                    Preferences.Set("UsuarioId", usuarioId);
+                    Preferences.Set("ClienteId", usuarioId);
                     Preferences.Set("UsuarioNome", nome);
                     Preferences.Set("UsuarioEmail", email);
+                    Preferences.Set("UsuarioTelefone", telefone);
                     Preferences.Set("UsuarioTipo", tipoUsuario);
 
                     await DisplayAlert("Sucesso", $"Login {tipoUsuario} realizado com sucesso!", "OK");

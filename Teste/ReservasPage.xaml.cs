@@ -94,6 +94,13 @@ namespace Teste
         private readonly List<ReservaExibicao> _reservasExibicao = new();
         private bool _isLoading = false;
 
+        private int ObterUsuarioId()
+        {
+            var uid = Preferences.Get("UsuarioId", 0);
+            if (uid == 0) uid = Preferences.Get("ClienteId", 0);
+            return uid;
+        }
+
         public ReservasPage()
         {
             InitializeComponent();
@@ -133,7 +140,7 @@ namespace Teste
                     FontSize = 16
                 });
 
-                int usuarioId = Preferences.Get("UsuarioId", Preferences.Get("ClienteId", 0));
+                int usuarioId = ObterUsuarioId();
 
                 if (usuarioId == 0)
                 {
