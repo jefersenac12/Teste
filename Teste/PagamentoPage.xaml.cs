@@ -465,6 +465,12 @@ namespace Teste
                 {
                     System.Diagnostics.Debug.WriteLine($"Reserva criada com ID: {reservaId}");
                     Preferences.Set("UltimaReservaId", reservaId);
+                    var nomesSelecionados = Preferences.Get("AtividadesSelecionadas", "");
+                    if (!string.IsNullOrWhiteSpace(nomesSelecionados)) Preferences.Set($"ReservaAtividades_{reservaId}", nomesSelecionados);
+                    var horaSalva = Preferences.Get("HorarioSelecionado", "");
+                    if (!string.IsNullOrWhiteSpace(horaSalva)) Preferences.Set($"ReservaHora_{reservaId}", horaSalva);
+                    var dataSalva = Preferences.Get("DataAgendamento", "");
+                    if (!string.IsNullOrWhiteSpace(dataSalva)) Preferences.Set($"ReservaData_{reservaId}", dataSalva);
                 }
 
                 // Cria o pagamento mesmo se não conseguiu o reservaId

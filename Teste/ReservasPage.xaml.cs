@@ -83,6 +83,7 @@ namespace Teste
         public string StatusUpper { get; set; } = "PENDENTE";
         public string CorStatus { get; set; } = "#FCBC71";
         public string TextoStatus { get; set; } = "Pendente";
+        public string AtividadesAdicionais { get; set; } = string.Empty;
     }
 
     // ===============================
@@ -269,6 +270,17 @@ namespace Teste
             var dataReserva = reserva.DataReserva;
             var atividadeNome = reserva.Agenda?.Atividade?.Nome ?? $"Atividade {reserva.AgendaId}";
 
+            var chaveAtividades = $"ReservaAtividades_{reserva.Id}";
+            var atividadesSelecionadasStr = Preferences.Get(chaveAtividades, "");
+            var nomesSel = atividadesSelecionadasStr
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => s.Trim())
+                .Where(s => s.Length > 0)
+                .ToList();
+            string atividadePrincipal = nomesSel.FirstOrDefault() ?? string.Empty;
+            string atividadesAdicionais = string.Join(", ", nomesSel.Skip(1));
+            if (!string.IsNullOrWhiteSpace(atividadePrincipal)) atividadeNome = atividadePrincipal;
+
             // Determina status baseado nos pagamentos
             string status = "PENDENTE";
             if (reserva.Pagamentos != null && reserva.Pagamentos.Any())
@@ -291,15 +303,20 @@ namespace Teste
                 _ => ("#FF9800", "Pendente")
             };
 
+            var horaPreferida = Preferences.Get($"ReservaHora_{reserva.Id}", "");
+            var horarioTexto = dataReserva.ToString("HH:mm");
+            if (!string.IsNullOrWhiteSpace(horaPreferida)) horarioTexto = horaPreferida;
+
             return new ReservaExibicao
             {
                 Reserva = reserva,
                 AtividadeNome = atividadeNome,
                 DataTexto = dataReserva.ToString("dd/MM/yyyy"),
-                HorarioTexto = dataReserva.ToString("HH:mm"),
+                HorarioTexto = horarioTexto,
                 StatusUpper = status.ToUpper(),
                 CorStatus = corStatus,
-                TextoStatus = textoStatus
+                TextoStatus = textoStatus,
+                AtividadesAdicionais = atividadesAdicionais
             };
         }
 
@@ -521,6 +538,9 @@ namespace Teste
                              $"🍼 Crianças (0-5): {reserva.Reserva.NPEntrada}\n" +
                              $"💰 Valor Total: R$ {reserva.Reserva.ValorTotal:N2}\n" +
                              $"📊 Status: {reserva.TextoStatus}";
+
+                if (!string.IsNullOrWhiteSpace(reserva.AtividadesAdicionais))
+                    detalhes += $"\n➕ Atividades adicionais: {reserva.AtividadesAdicionais}";
 
                 await DisplayAlert("Detalhes da Reserva", detalhes, "OK");
             }
