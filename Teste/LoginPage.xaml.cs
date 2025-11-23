@@ -123,7 +123,7 @@ namespace Teste
                     Preferences.Set("UsuarioNome", nome);
                     Preferences.Set("UsuarioEmail", email);
                     Preferences.Set("UsuarioTelefone", telefone);
-                    Preferences.Set("UsuarioTipo", tipoUsuario);
+                    Preferences.Set("UsuarioTipo", NormalizarTipo(tipoUsuario));
 
                     await DisplayAlert("Sucesso", $"Login {tipoUsuario} realizado com sucesso!", "OK");
                     await Navigation.PushAsync(new AgendamentoPage());
@@ -141,6 +141,22 @@ namespace Teste
             }
 
             return false;
+        }
+
+        private static string NormalizarTipo(string tipo)
+        {
+            tipo = (tipo ?? "").Trim();
+            var norm = tipo.Normalize(NormalizationForm.FormD);
+            var sb = new StringBuilder();
+            foreach (var ch in norm)
+            {
+                var uc = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(ch);
+                if (uc != System.Globalization.UnicodeCategory.NonSpacingMark) sb.Append(ch);
+            }
+            var plain = sb.ToString().Normalize(NormalizationForm.FormC).ToUpperInvariant();
+            if (plain.StartsWith("FAM")) return "Familia";
+            if (plain.StartsWith("AGE")) return "Agencia";
+            return plain;
         }
 
         private void LimparCampos()

@@ -2,6 +2,10 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Text.Json;
+using System.Linq;
+using Microsoft.Maui.Storage;
+using System.Text;
+using System.Globalization;
 
 namespace Teste
 {
@@ -99,12 +103,14 @@ namespace Teste
                         PropertyNameCaseInsensitive = true
                     }) ?? new List<Atividade>();
 
+                    var filtradas = FiltrarPorTipoUsuario(atividades);
+
                     _atividades = new ObservableCollection<Atividade>(
-                        atividades.Select(a =>
+                        filtradas.Select(a =>
                         {
                             a.IsSelecionada = false;
                             return a;
-                        }).Take(3)
+                        })
                     );
                 }
                 else
@@ -134,14 +140,72 @@ namespace Teste
 
         private void CriarAtividadesFicticias()
         {
-            var lista = new List<Atividade>
+            var todas = new List<Atividade>
             {
-                new() { Id = 1, Nome = "Café da manhã Básicaaa", Valor = 25.00m, IsSelecionada = false },
-                new() { Id = 2, Nome = "Café da manhã Completo", Valor = 65.00m, IsSelecionada = false },
-                new() { Id = 3, Nome = "Trezinho / Colha e Pague", Valor = 15.00m, IsSelecionada = false }
+                new() { Id = 1, Nome = "Café Caipira Completo", Descricao = "Pacote completo: Família, Café Caipira e Taxa do Passeio 12 Reais", Valor = 87m, IsSelecionada = false },
+                new() { Id = 2, Nome = "Só o Passeio", Descricao = "Passeio sem adicionais", Valor = 15m, IsSelecionada = false },
+                new() { Id = 3, Nome = "Pacote Café Caipira Completo", Descricao = "Pacote Café caipira completo com itens típicos + Taxa do Passeio 12 Reais", Valor = 75m, IsSelecionada = false },
+                new() { Id = 4, Nome = "Café Rural (Reduzido)", Descricao = "Café rural reduzido com itens básicos", Valor = 60m, IsSelecionada = false }
             };
 
-            _atividades = new ObservableCollection<Atividade>(lista);
+            var filtradas = FiltrarPorTipoUsuario(todas);
+            _atividades = new ObservableCollection<Atividade>(filtradas);
+        }
+
+        private static string RemoverAcentos(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return s;
+            var norm = s.Normalize(NormalizationForm.FormD);
+            var sb = new StringBuilder();
+            foreach (var ch in norm)
+            {
+                var uc = CharUnicodeInfo.GetUnicodeCategory(ch);
+                if (uc != UnicodeCategory.NonSpacingMark) sb.Append(ch);
+            }
+            return sb.ToString().Normalize(NormalizationForm.FormC);
+        }
+
+        private static string GetUsuarioTipo()
+        {
+            var tipo = Preferences.Get("UsuarioTipo", "");
+            tipo = RemoverAcentos((tipo ?? "").Trim()).ToUpperInvariant();
+            if (tipo.StartsWith("FAM")) return "Familia";
+            if (tipo.StartsWith("AGE")) return "Agencia";
+            return "";
+        }
+
+        private static List<Atividade> FiltrarPorTipoUsuario(List<Atividade> atividades)
+        {
+            var tipo = GetUsuarioTipo();
+            if (string.IsNullOrEmpty(tipo)) return atividades;
+
+            var mapaFamilia = new HashSet<int> { 1, 2 };
+            var mapaAgencia = new HashSet<int> { 1, 4, 2 };
+
+            IEnumerable<Atividade> fonte = atividades;
+            if (tipo == "Familia") fonte = atividades.Where(a => mapaFamilia.Contains(a.Id));
+            else if (tipo == "Agencia") fonte = atividades.Where(a => mapaAgencia.Contains(a.Id));
+
+            var unique = fonte
+                .GroupBy(a => a.Id)
+                .Select(g => g.First());
+
+            List<int>? order = null;
+            if (tipo == "Familia") order = new List<int> { 1, 2 };
+            else if (tipo == "Agencia") order = new List<int> { 1, 4, 2 };
+
+            if (order != null)
+            {
+                return unique
+                    .OrderBy(a => {
+                        var idx = order.IndexOf(a.Id);
+                        return idx < 0 ? int.MaxValue : idx;
+                    })
+                    .ThenBy(a => a.Id)
+                    .ToList();
+            }
+
+            return unique.OrderBy(a => a.Id).ToList();
         }
 
         private void AtualizarTotal()
