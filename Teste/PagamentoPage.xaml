@@ -172,7 +172,7 @@
                         </Grid.ColumnDefinitions>
 
                         <Border BackgroundColor="#F9F3EF" Padding="10" StrokeThickness="1" Stroke="#F1E5E2">
-                            <Label x:Name="LblPixKey" Text="fazenda.villaggio@pix.com.br" FontSize="11" Style="{StaticResource BodyText}"/>
+                            <Label x:Name="LblPixKey" Text="05680510847" FontSize="11" Style="{StaticResource BodyText}"/>
                         </Border>
 
                         <Button Grid.Column="1"
@@ -186,47 +186,6 @@
                                 Clicked="OnCopyPixKeyClicked"
                                 Style="{StaticResource BodyButton}"/>
                     </Grid>
-                </VerticalStackLayout>
-            </Border>
-
-            <Border BackgroundColor="White"
-                    StrokeShape="RoundRectangle 12"
-                    Padding="16"
-                    WidthRequest="350">
-                <VerticalStackLayout Spacing="8">
-                    <HorizontalStackLayout Spacing="8">
-                        <Label Text="📎" TextColor="#C48E6B" FontSize="14"/>
-                        <Label Text="Anexar comprovante" 
-                               Style="{StaticResource SectionTitle}"/>
-                    </HorizontalStackLayout>
-
-                    <Border StrokeDashArray="2,2"
-                            Stroke="#E3D7D0"
-                            StrokeThickness="2"
-                            BackgroundColor="#F9F3EF"
-                            Padding="30"
-                            Margin="0,8,0,0">
-                        <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
-                            <Label Text="☁️" TextColor="#C48E6B" FontSize="24" HorizontalOptions="Center"/>
-                            <Label Text="Clique ou arraste o comprovante aqui" 
-                                   FontSize="12" 
-                                   HorizontalOptions="Center"
-                                   Style="{StaticResource BodyText}"/>
-                            <Button Text="Selecionar arquivo"
-                                    FontSize="12"
-                                    BackgroundColor="#A42D45"
-                                    TextColor="White"
-                                    CornerRadius="8"
-                                    Padding="10,4"
-                                    Clicked="OnUploadProofClicked"
-                                    Style="{StaticResource BodyButton}"/>
-                            <Image x:Name="ImgComprovantePreview"
-                                   IsVisible="False"
-                                   HeightRequest="100"
-                                   Aspect="AspectFit"
-                                   Margin="0,10,0,0"/>
-                        </VerticalStackLayout>
-                    </Border>
                 </VerticalStackLayout>
             </Border>
 

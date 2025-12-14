@@ -32,7 +32,7 @@ namespace Teste
         private readonly string apiUrlAtividade = "http://tiijeferson.runasp.net/api/Atividade";
 
         private decimal totalAmount = 0;
-        private readonly string pixKey = "fazenda.villaggio@pix.com.br";
+        private readonly string pixKey = "05680510847";
         private string comprovantePath = string.Empty;
         private int safraId = 0;
 
@@ -252,30 +252,6 @@ namespace Teste
             }
         }
 
-        private async void OnUploadProofClicked(object sender, EventArgs e)
-        {
-            try
-            {
-                var result = await FilePicker.PickAsync(new PickOptions
-                {
-                    PickerTitle = "Selecione o comprovante de pagamento",
-                    FileTypes = FilePickerFileType.Images
-                });
-
-                if (result == null) return;
-
-                comprovantePath = result.FullPath;
-                if (ImgComprovantePreview != null)
-                {
-                    ImgComprovantePreview.Source = ImageSource.FromFile(comprovantePath);
-                    ImgComprovantePreview.IsVisible = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                await DisplayAlert("Erro", $"Falha ao anexar o comprovante: {ex.Message}", "OK");
-            }
-        }
 
         private async void OnConfirmPaymentClicked(object sender, TappedEventArgs e)
         {
