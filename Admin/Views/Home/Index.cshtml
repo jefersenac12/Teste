@@ -1,0 +1,137 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<!-- CONTEÚDO -->
+<div class="container my-4">
+
+    <h1 class="fw-bold text-success mb-4">Painel Administrativo</h1>
+
+    <!-- STATS -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6 col-lg-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Usuários Ativos</h6>
+                    <h2 class="fw-bold">1.245</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Atividades em Andamento</h6>
+                    <h2 class="fw-bold">34</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Reservas Hoje</h6>
+                    <h2 class="fw-bold">87</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Pagamentos</h6>
+                    <h2 class="fw-bold">R$ 5.890</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- INSIGHTS -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Safras Registradas</h6>
+                    <h2 class="fw-bold">12</h2>
+                </div>
+            </div>
+        </div>
+
+    <!-- AÇÕES -->
+    <div class="row g-4">
+        <div class="col-sm-6 col-lg-3">
+                <a asp-controller="Usuarios" asp-action="Index" class="text-decoration-none text-dark">
+            <div class="card text-center shadow-sm h-100">
+                <div class="card-body">
+                    <div class="display-6 mb-2">👥</div>
+                    <h5>Usuários</h5>
+                    <small class="text-muted">Gerenciar usuários</small>
+                </div>
+            </div>
+            </a>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+                <a asp-controller="Usuarios" asp-action="Index" class="text-decoration-none text-dark">
+            <div class="card text-center shadow-sm h-100">
+                <div class="card-body">
+                    <div class="display-6 mb-2">📅</div>
+                    <h5>Agendamentos</h5>
+                    <small class="text-muted">Planejar operações</small>
+                </div>
+            </div>
+            </a>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+                <a asp-controller="Usuarios" asp-action="Index"class="text-decoration-none text-dark">
+            <div class="card text-center shadow-sm h-100">
+                <div class="card-body">
+                    <div class="display-6 mb-2">✅</div>
+                    <h5>Reservas</h5>
+                    <small class="text-muted">Gerenciar reservas</small>
+                </div>
+            </div>
+            </a>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+                <a asp-controller="Usuarios" asp-action="Index" class="text-decoration-none text-dark">
+            <div class="card text-center shadow-sm h-100">
+                <div class="card-body">
+                    <div class="display-6 mb-2">⏱️</div>
+                    <h5>Atividades</h5>
+                    <small class="text-muted">Ver e agendar tarefas </small>
+                </div>
+            </div>
+            </a>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+                <a asp-controller="Usuarios" asp-action="Index" class="text-decoration-none text-dark">
+            <div class="card text-center shadow-sm h-100">
+                <div class="card-body">
+                    <div class="display-6 mb-2">💳</div>
+                    <h5>Pagamentos</h5>
+                    <small class="text-muted">Gerenciar Pagamentos</small>
+                </div>
+            </div>
+            </a>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+                <a asp-controller="Usuarios" asp-action="Index"class="text-decoration-none text-dark">
+            <div class="card text-center shadow-sm h-100">
+                <div class="card-body">
+                    <div class="display-6 mb-2">🌱</div>
+                    <h5>Safras</h5>
+                    <small class="text-muted">Gerenciar Safras</small>
+                </div>
+            </div>
+            </a>
+        </div>
+    </div>
+
+    </div>
+   
+</div>

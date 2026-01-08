@@ -1,0 +1,106 @@
+﻿@{
+    ViewData["Title"] = "Gerenciar Usuários";
+}
+@model IEnumerable<dynamic>
+
+<div class="container-fluid px-0 mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 fw-bold text-dark mb-0">Gerenciar Usuários</h1>
+        <button class="btn btn-success d-flex align-items-center fw-semibold shadow-sm" type="button" onclick="document.getElementById('user-form-overlay').classList.remove('d-none')">
+            <span class="material-symbols-outlined me-2">add</span>
+            Novo Usuário
+        </button>
+    </div>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
+        @foreach (var user in Model)
+        {
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm rounded-3">
+                    <div class="card-body d-flex flex-column justify-content-between p-4">
+                        <div>
+                            <h3 class="card-title h5 fw-semibold text-dark mb-2">
+                                @user.Nome
+                            </h3>
+
+                            <p class="card-text text-secondary small mb-1 d-flex align-items-center">
+                                @if (user.Tipo == "Agencia")
+                                {
+                                    <span class="me-1 fw-medium flex-shrink-0">CNPJ:</span>
+                                    <span class="text-truncate flex-grow-1" style="min-width:0;" title="@user.CNPJ">@user.CNPJ</span>
+                                }
+                                else
+                                {
+                                    <span class="me-1 fw-medium flex-shrink-0">Email:</span>
+                                    <span class="text-truncate flex-grow-1" style="min-width:0;" title="@user.Email">@user.Email</span>
+                                }
+                            </p>
+
+                            <p class="card-text text-secondary small mb-3">
+                                Tipo:
+                                <span class="badge rounded-pill fw-medium px-2 py-1 text-dark"
+                                      style="background-color: @(user.Tipo == "Agencia" ? "#FEF9C3" : "#DCFCE7")">
+                                    @user.Tipo
+                                </span>
+                            </p>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-3 pt-2">
+                            <button class="btn btn-light btn-sm rounded-circle p-2 text-secondary d-flex align-items-center justify-content-center"
+                                    title="Ver detalhes"
+                                    style="width: 36px; height: 36px;">
+                                <span class="material-symbols-outlined fs-5">visibility</span>
+                            </button>
+
+                            <button class="btn btn-light btn-sm rounded-circle p-2 text-secondary d-flex align-items-center justify-content-center"
+                                    onclick="document.getElementById('user-form-overlay').classList.remove('d-none')"
+                                    title="Editar usuário"
+                                    style="width: 36px; height: 36px;">
+                                <span class="material-symbols-outlined fs-5">edit</span>
+                            </button>
+
+                            <button class="btn btn-light btn-sm rounded-circle p-2 text-secondary d-flex align-items-center justify-content-center"
+                                    title="Excluir usuário"
+                                    style="width: 36px; height: 36px;">
+                                <span class="material-symbols-outlined fs-5">delete</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-end mt-4">
+        <nav aria-label="Navegação de página">
+            <ul class="pagination">
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" aria-label="Anterior">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item">
+                    <a class="page-link" href="#" aria-label="Próximo">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<!-- Modal Overlay Placeholder (Hidden by default) -->
+<div id="user-form-overlay" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 z-3 d-flex justify-content-center align-items-center">
+    <div class="bg-white p-4 rounded-3 shadow-lg" style="max-width: 500px; width: 100%;">
+        <h3 class="h4 mb-3">Novo Usuário</h3>
+        <p class="text-muted">Formulário aqui...</p>
+        <div class="d-flex justify-content-end mt-4">
+            <button class="btn btn-secondary me-2" onclick="document.getElementById('user-form-overlay').classList.add('d-none')">Cancelar</button>
+            <button class="btn btn-success">Salvar</button>
+        </div>
+    </div>
+</div>
