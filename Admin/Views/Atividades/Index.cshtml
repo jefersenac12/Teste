@@ -1,0 +1,112 @@
+@{
+    ViewData["Title"] = "Gerenciar Atividades";
+}
+@model IEnumerable<Admin.Models.AtividadeViewModel>
+
+<div class="container-fluid px-0 mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 fw-bold text-dark mb-0">Gerenciar Atividades</h1>
+        <button class="btn btn-success d-flex align-items-center fw-semibold shadow-sm" type="button" onclick="document.getElementById('atividade-form-overlay').classList.remove('d-none')">
+            <span class="material-symbols-outlined me-2">add</span>
+            Nova Atividade
+        </button>
+    </div>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
+        @foreach (var atividade in Model)
+        {
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm rounded-3">
+                    <div class="card-body d-flex flex-column justify-content-between p-4">
+                        <div>
+                            <h3 class="card-title h5 fw-semibold text-dark mb-2">@atividade.Nome</h3>
+
+                            <p class="card-text text-secondary small mb-3 text-truncate" title="@atividade.Descricao">
+                                @atividade.Descricao
+                            </p>
+
+                            <p class="card-text text-secondary small mb-0">
+                                Valor: <span class="fw-medium text-dark">@atividade.ValorPorHaFormatado</span> / ha
+                            </p>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-3 pt-2">
+                            <button class="btn btn-light btn-sm rounded-circle p-2 text-secondary d-flex align-items-center justify-content-center"
+                                    title="Ver detalhes" style="width:36px;height:36px;">
+                                <span class="material-symbols-outlined fs-5">visibility</span>
+                            </button>
+
+                            <button class="btn btn-light btn-sm rounded-circle p-2 text-secondary d-flex align-items-center justify-content-center"
+                                    title="Editar atividade" onclick="document.getElementById('atividade-form-overlay').classList.remove('d-none')"
+                                    style="width:36px;height:36px;">
+                                <span class="material-symbols-outlined fs-5">edit</span>
+                            </button>
+
+                            <button class="btn btn-light btn-sm rounded-circle p-2 text-danger d-flex align-items-center justify-content-center"
+                                    title="Excluir atividade" style="width:36px;height:36px;">
+                                <span class="material-symbols-outlined fs-5">delete</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Pagination (mesma estrutura de Usuários / Safras / Reservas) -->
+    <div class="d-flex justify-content-end mt-4">
+        <nav aria-label="Navegação de página">
+            <ul class="pagination">
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" aria-label="Anterior">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item">
+                    <a class="page-link" href="#" aria-label="Próximo">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<!-- Modal Overlay Placeholder (Hidden by default) -->
+<div id="atividade-form-overlay" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 z-3 d-flex justify-content-center align-items-center">
+    <div class="bg-white p-4 rounded-3 shadow-lg" style="max-width: 600px; width: 100%;">
+        <h3 class="h4 mb-3">Nova / Editar Atividade</h3>
+        <form id="atividade-form">
+            <div class="mb-3">
+                <label for="nome" class="form-label">Nome</label>
+                <input type="text" class="form-control" id="nome" name="nome" required />
+            </div>
+
+            <div class="mb-3">
+                <label for="descricao" class="form-label">Descrição</label>
+                <textarea class="form-control" id="descricao" name="descricao" rows="3"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="valorPorHa" class="form-label">Valor por ha</label>
+                <input type="number" step="0.01" class="form-control" id="valorPorHa" name="valorPorHa" />
+            </div>
+        </form>
+
+        <div class="d-flex justify-content-end mt-3">
+            <button class="btn btn-secondary me-2" onclick="document.getElementById('atividade-form-overlay').classList.add('d-none')">Cancelar</button>
+            <button class="btn btn-success" onclick="salvarAtividade()">Salvar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function salvarAtividade() {
+        // placeholder — implementar chamada ao controller (fetch / formulário)
+        alert('Salvar atividade (implemente integração com backend).');
+        document.getElementById('atividade-form-overlay').classList.add('d-none');
+    }
+</script>

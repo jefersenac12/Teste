@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewData["Title"] = "Gerenciar Usuários";
 }
 @model IEnumerable<dynamic>
@@ -97,10 +97,120 @@
 <div id="user-form-overlay" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 z-3 d-flex justify-content-center align-items-center">
     <div class="bg-white p-4 rounded-3 shadow-lg" style="max-width: 500px; width: 100%;">
         <h3 class="h4 mb-3">Novo Usuário</h3>
-        <p class="text-muted">Formulário aqui...</p>
+        <form id="novo-usuario-form">
+            <div class="mb-3">
+                <label for="nome" class="form-label">Nome</label>
+                <input type="text" class="form-control" id="nome" name="nome" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="tipo" class="form-label">Tipo</label>
+                <select class="form-select" id="tipo" name="tipo" required onchange="toggleCamposPorTipo()">
+                    <option value="">Selecione o tipo</option>
+                    <option value="Familia">Família</option>
+                    <option value="Agencia">Agência</option>
+                </select>
+            </div>
+            
+            <div class="mb-3" id="campo-telefone">
+                <label for="telefone" class="form-label">Telefone</label>
+                <input type="tel" class="form-control" id="telefone" name="telefone" required>
+            </div>
+            
+            <div class="mb-3 d-none" id="campo-cnpj">
+                <label for="cnpj" class="form-label">CNPJ</label>
+                <input type="text" class="form-control" id="cnpj" name="cnpj" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="senha" class="form-label">Senha</label>
+                <input type="password" class="form-control" id="senha" name="senha" required>
+            </div>
+        </form>
         <div class="d-flex justify-content-end mt-4">
             <button class="btn btn-secondary me-2" onclick="document.getElementById('user-form-overlay').classList.add('d-none')">Cancelar</button>
-            <button class="btn btn-success">Salvar</button>
+            <button class="btn btn-success" onclick="salvarUsuario()">Salvar</button>
         </div>
     </div>
 </div>
+
+<script>
+    function toggleCamposPorTipo() {
+        const tipo = document.getElementById('tipo').value;
+        const campoTelefone = document.getElementById('campo-telefone');
+        const campoCnpj = document.getElementById('campo-cnpj');
+        const telefoneInput = document.getElementById('telefone');
+        const cnpjInput = document.getElementById('cnpj');
+        
+        if (tipo === 'Familia') {
+            campoTelefone.classList.remove('d-none');
+            telefoneInput.setAttribute('required', 'required');
+            campoCnpj.classList.add('d-none');
+            cnpjInput.removeAttribute('required');
+        } else if (tipo === 'Agencia') {
+            campoTelefone.classList.add('d-none');
+            telefoneInput.removeAttribute('required');
+            campoCnpj.classList.remove('d-none');
+            cnpjInput.setAttribute('required', 'required');
+        } else {
+            campoTelefone.classList.remove('d-none');
+            campoCnpj.classList.add('d-none');
+            telefoneInput.setAttribute('required', 'required');
+            cnpjInput.removeAttribute('required');
+        }
+    }
+    
+    function aplicarMascaraTelefone(value) {
+        return value
+            .replace(/\D/g, '')
+            .replace(/(\d{2})(\d)/, '($1) $2')
+            .replace(/(\d{5})(\d)/, '$1-$2')
+            .replace(/(-\d{4})\d+?$/, '$1');
+    }
+    
+    function aplicarMascaraCNPJ(value) {
+        return value
+            .replace(/\D/g, '')
+            .replace(/(\d{2})(\d)/, '$1.$2')
+            .replace(/(\d{3})(\d)/, '$1.$2')
+            .replace(/(\d{3})(\d)/, '$1/$2')
+            .replace(/(\d{4})(\d)/, '$1-$2')
+            .replace(/(-\d{2})\d+?$/, '$1');
+    }
+    
+    document.getElementById('telefone').addEventListener('input', function(e) {
+        e.target.value = aplicarMascaraTelefone(e.target.value);
+    });
+    
+    document.getElementById('cnpj').addEventListener('input', function(e) {
+        e.target.value = aplicarMascaraCNPJ(e.target.value);
+    });
+    
+    function salvarUsuario() {
+        const form = document.getElementById('novo-usuario-form');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+        
+        const formData = new FormData(form);
+        const usuario = {
+            nome: formData.get('nome'),
+            tipo: formData.get('tipo'),
+            telefone: formData.get('telefone'),
+            cnpj: formData.get('cnpj'),
+            email: formData.get('email'),
+            senha: formData.get('senha')
+        };
+        
+        console.log('Novo usuário:', usuario);
+        alert('Usuário salvo com sucesso!');
+        document.getElementById('user-form-overlay').classList.add('d-none');
+        form.reset();
+    }
+</script>

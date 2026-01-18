@@ -13,4 +13,10 @@
     <None Remove="Views\Home\Login\**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Views\Agenda\" />
+    <Folder Include="Views\Safras\" />
+    <Folder Include="Views\Pagamentos\" />
+  </ItemGroup>
+
 </Project>

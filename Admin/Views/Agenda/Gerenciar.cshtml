@@ -1,0 +1,524 @@
+@{
+    ViewData["Title"] = "Gerenciar Agenda";
+}
+
+<style>
+    .calendar-day {
+        position: relative;
+        min-height: 60px;
+        border: 1px solid #e0e0e0;
+        padding: 8px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    .calendar-day:hover {
+        background-color: #f5f5f5;
+    }
+    .calendar-day.selected {
+        background-color: #e3f2fd;
+    }
+    .calendar-day.multi-selected {
+        background-color: #bbdefb;
+        border: 2px solid #2196f3;
+    }
+    .calendar-day.other-month {
+        color: #ccc;
+        background-color: #fafafa;
+    }
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 4px;
+    }
+    .status-disponivel {
+        background-color: #10b981;
+    }
+    .status-familia {
+        background-color: #3b82f6;
+    }
+    .status-agencia {
+        background-color: #f59e0b;
+    }
+    .status-lotado {
+        background-color: #ef4444;
+    }
+    .calendar-day .status-dot {
+        position: absolute;
+        bottom: 4px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+</style>
+
+<div class="container-fluid px-0 mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 fw-bold text-dark mb-0">Gerenciar Agenda</h1>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-body p-3">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-medium">Safra</label>
+                    <select class="form-select" id="filtroSafra">
+                        <option value="">Todas as safras</option>
+                        <option value="Janeiro - uva, goiaba, morango, lichia">Janeiro - uva, goiaba, morango, lichia</option>
+                        <option value="Fevereiro - uva, goiaba, morango">Fevereiro - uva, goiaba, morango</option>
+                        <option value="Março - uva, goiaba">Março - uva, goiaba</option>
+                        <option value="Abril - goiaba, morango">Abril - goiaba, morango</option>
+                        <option value="Maio - uva, goiaba, morango">Maio - uva, goiaba, morango</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-medium">Atividade</label>
+                    <select class="form-select" id="filtroAtividade">
+                        <option value="">Todas as atividades</option>
+                        <option value="Colheita de Uva">Colheita de Uva</option>
+                        <option value="Colheita de Goiaba">Colheita de Goiaba</option>
+                        <option value="Colheita de Morango">Colheita de Morango</option>
+                        <option value="Colheita de Lichia">Colheita de Lichia</option>
+                        <option value="Plantio de Uva">Plantio de Uva</option>
+                        <option value="Plantio de Goiaba">Plantio de Goiaba</option>
+                        <option value="Plantio de Morango">Plantio de Morango</option>
+                        <option value="Aplicação de Fertilizante">Aplicação de Fertilizante</option>
+                        <option value="Irrigação">Irrigação</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Formulário de Configuração -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body">
+                    <h3 class="h5 fw-semibold mb-4">Configurar Novo Agendamento</h3>
+                    <form id="configurar-agendamento-form">
+                        <div class="mb-3">
+                            <div class="mb-3">
+                                <label for="inicio" class="form-label">Data e Hora</label>
+                                <input type="datetime-local" class="form-control" id="inicio" name="inicio" required>
+                            </div>
+                            <label for="vagasTotais" class="form-label">Vagas Totais</label>
+                            <input type="number" class="form-control" id="vagasTotais" name="vagasTotais" min="1" value="30" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="vagasDisponiveis" class="form-label">Vagas Disponíveis</label>
+                            <input type="number" class="form-control" id="vagasDisponiveis" name="vagasDisponiveis" min="0" value="30" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Público Permitido</label>
+                            <div class="d-flex gap-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="publicoPermitido" id="publicoFamilia" value="Familia">
+                                    <label class="form-check-label" for="publicoFamilia">
+                                        Família
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="publicoPermitido" id="publicoAgencia" value="Agencia">
+                                    <label class="form-check-label" for="publicoAgencia">
+                                        Agência
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-success flex-fill" onclick="agendar()">Agendar</button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="limparFormulario()">Limpar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendário -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="h5 fw-semibold mb-0" id="calendario-mes-ano">Setembro 2024</h3>
+                        <div class="d-flex gap-2 align-items-center">
+                            <div class="form-check form-switch me-3">
+                                <input class="form-check-input" type="checkbox" id="modoMultiSelecao" onchange="toggleModoMultiSelecao()">
+                                <label class="form-check-label small" for="modoMultiSelecao">
+                                    Seleção Múltipla
+                                </label>
+                            </div>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="mesAnterior()">
+                                <span class="material-symbols-outlined" translate="no">chevron_left</span>
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="mesProximo()">
+                                <span class="material-symbols-outlined" translate="no">chevron_right</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="info-selecao" class="mb-3 d-none">
+                        <div class="alert alert-info d-flex justify-content-between align-items-center py-2">
+                            <span><strong id="contador-selecionados">0</strong> dia(s) selecionado(s)</span>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-primary" onclick="abrirModalMultiplosDias()">Marcar Selecionados</button>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="limparSelecao()">Limpar Seleção</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="calendario-container">
+                        <!-- Calendário será gerado via JavaScript -->
+                    </div>
+                    
+                    <!-- Legenda -->
+                    <div class="d-flex justify-content-center gap-4 mt-4 pt-3 border-top flex-wrap">
+                        <div class="d-flex align-items-center">
+                            <span class="status-dot status-disponivel"></span>
+                            <span class="small text-muted" translate="no">Disponível</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="status-dot status-familia"></span>
+                            <span class="small text-muted" translate="no">Apenas Família</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="status-dot status-agencia"></span>
+                            <span class="small text-muted" translate="no">Apenas Agência</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="status-dot status-lotado"></span>
+                            <span class="small text-muted" translate="no">Lotado</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para marcar status do dia -->
+<div id="modal-status-dia" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 z-3 d-flex justify-content-center align-items-center">
+    <div class="bg-white p-4 rounded-3 shadow-lg" style="max-width: 400px; width: 100%;">
+        <h3 class="h5 mb-3" id="modal-titulo-status">Marcar Status do Dia</h3>
+        <p class="text-muted small mb-3" id="data-selecionada-texto"></p>
+        <div class="d-flex flex-column gap-2">
+            <button class="btn btn-outline-success d-flex align-items-center justify-content-start" onclick="marcarStatus('disponivel')">
+                <span class="status-dot status-disponivel me-2"></span>
+                Disponível
+            </button>
+            <button class="btn btn-outline-primary d-flex align-items-center justify-content-start" onclick="marcarStatus('familia')">
+                <span class="status-dot status-familia me-2"></span>
+                Apenas Família
+            </button>
+            <button class="btn btn-outline-warning d-flex align-items-center justify-content-start" onclick="marcarStatus('agencia')">
+                <span class="status-dot status-agencia me-2"></span>
+                Apenas Agência
+            </button>
+            <button class="btn btn-outline-danger d-flex align-items-center justify-content-start" onclick="marcarStatus('lotado')">
+                <span class="status-dot status-lotado me-2"></span>
+                Lotado
+            </button>
+        </div>
+        <div class="d-flex justify-content-end mt-4">
+            <button class="btn btn-secondary" onclick="fecharModalStatus()">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let mesAtual = 8; // Setembro (0-indexed)
+    let anoAtual = 2024;
+    let diaSelecionado = null;
+    let modoMultiSelecao = false;
+    let diasSelecionados = new Set(); // Para armazenar múltiplos dias selecionados
+
+    // Dados para o calendário (status das datas) - será salvo no localStorage
+    let statusDatas = {};
+    
+    // Carregar status salvos do localStorage
+    function carregarStatusDatas() {
+        const salvos = localStorage.getItem('statusDatasCalendario');
+        if (salvos) {
+            statusDatas = JSON.parse(salvos);
+        }
+    }
+    
+    // Salvar status no localStorage
+    function salvarStatusDatas() {
+        localStorage.setItem('statusDatasCalendario', JSON.stringify(statusDatas));
+    }
+    
+    // Inicializar com dados de exemplo se não houver dados salvos
+    carregarStatusDatas();
+    if (Object.keys(statusDatas).length === 0) {
+        statusDatas = {
+            '2024-09-01': 'disponivel',
+            '2024-09-02': 'agencia',
+            '2024-09-03': 'lotado',
+            '2024-09-04': 'disponivel',
+            '2024-09-06': 'lotado',
+            '2024-09-07': 'disponivel',
+            '2024-09-08': 'disponivel',
+            '2024-09-09': 'agencia',
+            '2024-09-10': 'lotado',
+            '2024-09-11': 'disponivel',
+            '2024-09-13': 'disponivel',
+            '2024-09-14': 'disponivel',
+            '2024-09-15': 'lotado',
+            '2024-09-16': 'agencia',
+            '2024-09-18': 'disponivel',
+            '2024-09-19': 'disponivel',
+            '2024-09-20': 'agencia',
+            '2024-09-21': 'lotado',
+            '2024-09-22': 'disponivel',
+            '2024-09-24': 'disponivel',
+            '2024-09-25': 'agencia',
+            '2024-09-26': 'lotado',
+            '2024-09-27': 'disponivel',
+            '2024-09-29': 'disponivel',
+            '2024-09-30': 'agencia'
+        };
+        salvarStatusDatas();
+    }
+
+    const nomesMeses = [
+        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+
+    const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+    function gerarCalendario() {
+        const container = document.getElementById('calendario-container');
+        const primeiroDia = new Date(anoAtual, mesAtual, 1);
+        const ultimoDia = new Date(anoAtual, mesAtual + 1, 0);
+        const diasNoMes = ultimoDia.getDate();
+        const diaSemanaInicio = primeiroDia.getDay();
+
+        // Atualizar título
+        document.getElementById('calendario-mes-ano').textContent = `${nomesMeses[mesAtual]} ${anoAtual}`;
+
+        let html = '<div class="row g-0">';
+        
+        // Cabeçalho dos dias da semana
+        diasSemana.forEach(dia => {
+            html += `<div class="col text-center fw-semibold small text-muted py-2 border-bottom">${dia}</div>`;
+        });
+        html += '</div>';
+
+        // Dias do calendário
+        html += '<div class="row g-0">';
+        
+        // Dias do mês anterior (se necessário)
+        const ultimoDiaMesAnterior = new Date(anoAtual, mesAtual, 0).getDate();
+        for (let i = diaSemanaInicio - 1; i >= 0; i--) {
+            const dia = ultimoDiaMesAnterior - i;
+            html += `<div class="col calendar-day other-month">${dia}</div>`;
+        }
+
+        // Dias do mês atual
+        let contadorDia = diaSemanaInicio;
+        for (let dia = 1; dia <= diasNoMes; dia++) {
+            const dataStr = `${anoAtual}-${String(mesAtual + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+            const status = statusDatas[dataStr] || 'disponivel';
+            let classeSelecionado = '';
+            
+            if (modoMultiSelecao) {
+                if (diasSelecionados.has(dataStr)) {
+                    classeSelecionado = 'multi-selected';
+                }
+            } else {
+                if (diaSelecionado === dia) {
+                    classeSelecionado = 'selected';
+                }
+            }
+            
+            html += `<div class="col calendar-day ${classeSelecionado}" onclick="selecionarDia(${dia})" data-dia="${dia}" data-data="${dataStr}">`;
+            html += `<div class="text-center">${dia}</div>`;
+            html += `<span class="status-dot status-${status}"></span>`;
+            html += `</div>`;
+            
+            contadorDia++;
+            // Quebra de linha no final da semana
+            if (contadorDia % 7 === 0 && dia < diasNoMes) {
+                html += '</div><div class="row g-0">';
+            }
+        }
+
+        // Dias do próximo mês (se necessário)
+        const diasRestantes = 42 - (diaSemanaInicio + diasNoMes);
+        for (let dia = 1; dia <= diasRestantes; dia++) {
+            html += `<div class="col calendar-day other-month">${dia}</div>`;
+        }
+
+        html += '</div>';
+        container.innerHTML = html;
+    }
+
+    let dataParaMarcar = null;
+    
+    function toggleModoMultiSelecao() {
+        modoMultiSelecao = document.getElementById('modoMultiSelecao').checked;
+        diaSelecionado = null;
+        diasSelecionados.clear();
+        atualizarInfoSelecao();
+        gerarCalendario();
+    }
+    
+    function selecionarDia(dia) {
+        const dataStr = `${anoAtual}-${String(mesAtual + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+        
+        if (modoMultiSelecao) {
+            // Modo seleção múltipla
+            if (diasSelecionados.has(dataStr)) {
+                diasSelecionados.delete(dataStr);
+            } else {
+                diasSelecionados.add(dataStr);
+            }
+            atualizarInfoSelecao();
+            gerarCalendario();
+        } else {
+            // Modo seleção única
+            diaSelecionado = dia;
+            dataParaMarcar = dataStr;
+            
+            // Mostrar modal para marcar status
+            const dataFormatada = new Date(anoAtual, mesAtual, dia).toLocaleDateString('pt-BR', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            document.getElementById('modal-titulo-status').textContent = 'Marcar Status do Dia';
+            document.getElementById('data-selecionada-texto').textContent = dataFormatada;
+            document.getElementById('modal-status-dia').classList.remove('d-none');
+        }
+    }
+    
+    function atualizarInfoSelecao() {
+        const contador = diasSelecionados.size;
+        const infoDiv = document.getElementById('info-selecao');
+        const contadorSpan = document.getElementById('contador-selecionados');
+        
+        if (contador > 0) {
+            infoDiv.classList.remove('d-none');
+            contadorSpan.textContent = contador;
+        } else {
+            infoDiv.classList.add('d-none');
+        }
+    }
+    
+    function abrirModalMultiplosDias() {
+        if (diasSelecionados.size === 0) {
+            alert('Selecione pelo menos um dia!');
+            return;
+        }
+        
+        const datasFormatadas = Array.from(diasSelecionados).map(dataStr => {
+            const [ano, mes, dia] = dataStr.split('-');
+            return new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia)).toLocaleDateString('pt-BR');
+        }).join(', ');
+        
+        document.getElementById('modal-titulo-status').textContent = `Marcar Status de ${diasSelecionados.size} Dia(s)`;
+        document.getElementById('data-selecionada-texto').textContent = datasFormatadas;
+        document.getElementById('modal-status-dia').classList.remove('d-none');
+    }
+    
+    function limparSelecao() {
+        diasSelecionados.clear();
+        atualizarInfoSelecao();
+        gerarCalendario();
+    }
+    
+    function marcarStatus(status) {
+        if (modoMultiSelecao && diasSelecionados.size > 0) {
+            // Marcar todos os dias selecionados
+            const quantidade = diasSelecionados.size;
+            diasSelecionados.forEach(dataStr => {
+                statusDatas[dataStr] = status;
+            });
+            salvarStatusDatas();
+            diasSelecionados.clear();
+            atualizarInfoSelecao();
+            gerarCalendario();
+            fecharModalStatus();
+            alert(`${quantidade} dia(s) marcado(s) com sucesso!`);
+        } else if (dataParaMarcar) {
+            // Marcar um único dia
+            statusDatas[dataParaMarcar] = status;
+            salvarStatusDatas();
+            gerarCalendario();
+            fecharModalStatus();
+            alert('Status do dia atualizado com sucesso!');
+        }
+    }
+    
+    function fecharModalStatus() {
+        document.getElementById('modal-status-dia').classList.add('d-none');
+        dataParaMarcar = null;
+        if (!modoMultiSelecao) {
+            diaSelecionado = null;
+        }
+    }
+
+    function mesAnterior() {
+        mesAtual--;
+        if (mesAtual < 0) {
+            mesAtual = 11;
+            anoAtual--;
+        }
+        diaSelecionado = null;
+        diasSelecionados.clear();
+        atualizarInfoSelecao();
+        gerarCalendario();
+    }
+
+    function mesProximo() {
+        mesAtual++;
+        if (mesAtual > 11) {
+            mesAtual = 0;
+            anoAtual++;
+        }
+        diaSelecionado = null;
+        diasSelecionados.clear();
+        atualizarInfoSelecao();
+        gerarCalendario();
+    }
+
+    function agendar() {
+        const form = document.getElementById('configurar-agendamento-form');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        const formData = new FormData(form);
+        const agendamento = {
+            nomeSafra: formData.get('nomeSafra'),
+            vagasTotais: formData.get('vagasTotais'),
+            vagasDisponiveis: formData.get('vagasDisponiveis'),
+            publicoPermitido: formData.get('publicoPermitido')
+        };
+
+        console.log('Agendar:', agendamento);
+        alert('Agendamento configurado com sucesso!');
+        limparFormulario();
+    }
+
+    function limparFormulario() {
+        document.getElementById('configurar-agendamento-form').reset();
+        document.getElementById('vagasTotais').value = 30;
+        document.getElementById('vagasDisponiveis').value = 30;
+        diaSelecionado = null;
+        gerarCalendario();
+    }
+
+    // Inicializar calendário ao carregar a página
+    document.addEventListener('DOMContentLoaded', function() {
+        carregarStatusDatas();
+        gerarCalendario();
+    });
+</script>

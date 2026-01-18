@@ -1,0 +1,380 @@
+@{
+    ViewData["Title"] = "Painel PIX";
+}
+@model IEnumerable<Admin.Models.PagamentoViewModel>
+
+<style>
+    .chart-donut-pix {
+        position: relative;
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        background: conic-gradient(
+            #10b981 0% 65%,
+            #f59e0b 65% 90%,
+            #ef4444 90% 100%
+        );
+    }
+    .chart-donut-pix::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90px;
+        height: 90px;
+        background-color: white;
+        border-radius: 50%;
+    }
+    .pix-green {
+        color: #32BCAD;
+    }
+    .bg-pix-green {
+        background-color: #32BCAD;
+    }
+    .btn-pix-green {
+        background-color: #32BCAD;
+        border-color: #32BCAD;
+        color: white;
+    }
+    .btn-pix-green:hover {
+        background-color: #2aa89a;
+        border-color: #2aa89a;
+        color: white;
+    }
+</style>
+
+<div class="container-fluid px-0 mt-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+        <div>
+            <h1 class="h2 fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                <span class="material-symbols-outlined pix-green" style="font-size: 2.5rem;" translate="no">qr_code_2</span>
+                Painel PIX
+            </h1>
+            <p class="text-muted mb-0 mt-1">Gerenciamento analítico de recebimentos via PIX</p>
+        </div>
+        <button class="btn btn-pix-green d-flex align-items-center fw-semibold shadow-sm" type="button" onclick="abrirModalPagamento()">
+            <span class="material-symbols-outlined me-2" translate="no">add_card</span>
+            Registrar Pagamento
+        </button>
+    </div>
+
+    <!-- Cards de Resumo -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-3 h-100 position-relative overflow-hidden">
+                <div class="position-absolute top-0 end-0 p-4 opacity-10">
+                    <span class="material-symbols-outlined" style="font-size: 8rem; color: #32BCAD;" translate="no">payments</span>
+                </div>
+                <div class="card-body p-4">
+                    <h2 class="text-uppercase text-muted small fw-semibold mb-2">Total Recebido (PIX)</h2>
+                    <div class="d-flex align-items-baseline gap-2 mb-4">
+                        @{
+                            var totalRecebido = Model.Where(p => p.Status == "Pago").Sum(p => p.Valor);
+                        }
+                        <span class="display-4 fw-bold text-dark">R$ @totalRecebido.ToString("N2")</span>
+                        <span class="badge bg-success-subtle text-success d-flex align-items-center">
+                            <span class="material-symbols-outlined me-1" style="font-size: 0.875rem;" translate="no">trending_up</span>
+                            +12%
+                        </span>
+                    </div>
+                    <div class="row border-top pt-4 mt-4">
+                        <div class="col-6 col-md-4">
+                            <p class="text-muted small mb-1">Transações</p>
+                            <p class="h4 fw-bold text-dark mb-0">@Model.Count()</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-body p-4 d-flex flex-column align-items-center justify-content-center">
+                    <h3 class="h5 fw-semibold text-dark mb-4 w-100 text-start border-bottom pb-2">Status dos Pagamentos</h3>
+                    <div class="d-flex align-items-center justify-content-center gap-4 w-100">
+                        <div class="chart-donut-pix shadow"></div>
+                        <div class="d-flex flex-column gap-3">
+                            @{
+                                var totalPagamentos = Model.Count();
+                                var pagoCount = Model.Count(p => p.Status == "Pago");
+                                var pendenteCount = Model.Count(p => p.Status == "Pendente");
+                                var canceladoCount = Model.Count(p => p.Status == "Cancelado");
+                                var pagoPercent = totalPagamentos > 0 ? (int)Math.Round((double)pagoCount / totalPagamentos * 100) : 0;
+                                var pendentePercent = totalPagamentos > 0 ? (int)Math.Round((double)pendenteCount / totalPagamentos * 100) : 0;
+                                var canceladoPercent = totalPagamentos > 0 ? (int)Math.Round((double)canceladoCount / totalPagamentos * 100) : 0;
+                            }
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-success rounded-circle p-2 me-2"></span>
+                                <span class="text-muted small fw-medium" translate="no">Pago (@pagoPercent%)</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-warning rounded-circle p-2 me-2"></span>
+                                <span class="text-muted small fw-medium" translate="no">Pendente (@pendentePercent%)</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-danger rounded-circle p-2 me-2"></span>
+                                <span class="text-muted small fw-medium" translate="no">Cancelado (@canceladoPercent%)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-body p-3">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <span class="material-symbols-outlined text-muted me-1" translate="no">filter_list</span>
+                    <span class="text-muted small fw-medium me-2">Status:</span>
+                    <button class="btn btn-sm btn-secondary active" onclick="filtrarStatus('Todos')">Todos</button>
+                    <button class="btn btn-sm btn-outline-warning" onclick="filtrarStatus('Pendente')">Pendente</button>
+                    <button class="btn btn-sm btn-outline-success" onclick="filtrarStatus('Pago')">Pago</button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="filtrarStatus('Cancelado')">Cancelado</button>
+                </div>
+                <div class="d-flex align-items-center gap-2 text-muted small">
+                    <span>Mostrando últimos 30 dias</span>
+                    <button class="btn btn-link btn-sm text-decoration-none p-0 pix-green">Alterar período</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela -->
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="px-4 py-3 text-uppercase small fw-semibold text-muted">ID Reserva</th>
+                            <th class="px-4 py-3 text-uppercase small fw-semibold text-muted">Cliente</th>
+                            <th class="px-4 py-3 text-uppercase small fw-semibold text-muted">Valor</th>
+                            <th class="px-4 py-3 text-uppercase small fw-semibold text-muted">Status</th>
+                            <th class="px-4 py-3 text-uppercase small fw-semibold text-muted">Data</th>
+                            <th class="px-4 py-3 text-uppercase small fw-semibold text-muted">Nº Transação</th>
+                            <th class="px-4 py-3 text-uppercase small fw-semibold text-muted text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var pagamento in Model)
+                        {
+                            <tr>
+                                <td class="px-4 py-3 small text-muted font-monospace">@pagamento.IdReserva</td>
+                                <td class="px-4 py-3 small fw-medium">@pagamento.Cliente</td>
+                                <td class="px-4 py-3 small fw-bold">R$ @pagamento.Valor.ToString("N2")</td>
+                                <td class="px-4 py-3">
+                                    @if (pagamento.Status == "Pago")
+                                    {
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle">Pago</span>
+                                    }
+                                    else if (pagamento.Status == "Pendente")
+                                    {
+                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Pendente</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Cancelado</span>
+                                    }
+                                </td>
+                                <td class="px-4 py-3 small text-muted">@pagamento.Data.ToString("dd MMM yyyy", new System.Globalization.CultureInfo("pt-BR"))</td>
+                                <td class="px-4 py-3 small text-muted font-monospace">@pagamento.NumeroTransacao</td>
+                                <td class="px-4 py-3 text-end">
+                                    <div class="btn-group dropstart">
+                                        <button class="btn btn-sm btn-link text-muted" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <span class="material-symbols-outlined" translate="no">more_vert</span>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="#" onclick="verDetalhes(@pagamento.Id)">Ver Detalhes do Pagamento</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="editarPagamento(@pagamento.Id, '@pagamento.IdReserva', '@pagamento.Cliente', @pagamento.Valor.ToString("F2", System.Globalization.CultureInfo.InvariantCulture), '@pagamento.Status', '@pagamento.Data.ToString("yyyy-MM-dd")', '@pagamento.NumeroTransacao')">Editar Pagamento</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li class="dropstart">
+                                                <a class="dropdown-item dropdown-toggle" href="#">Atualizar Status</a>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="#" onclick="atualizarStatus(@pagamento.Id, 'Pendente')">Pendente</a></li>
+                                                    <li><a class="dropdown-item" href="#" onclick="atualizarStatus(@pagamento.Id, 'Pago')">Pago</a></li>
+                                                    <li><a class="dropdown-item" href="#" onclick="atualizarStatus(@pagamento.Id, 'Cancelado')">Cancelado</a></li>
+                                                </ul>
+                                            </li>
+                                            <li><a class="dropdown-item" href="#" onclick="visualizarTransacao('@pagamento.NumeroTransacao')">Visualizar Número de Transação</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item text-danger" href="#" onclick="excluirPagamento(@pagamento.Id, '@pagamento.IdReserva')">Excluir</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer bg-light d-flex justify-content-between align-items-center">
+                <span class="text-muted small">Mostrando 1 a @Model.Count() de @Model.Count() resultados</span>
+                <nav aria-label="Navegação de página">
+                    <ul class="pagination mb-0">
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" aria-label="Anterior">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="#" aria-label="Próximo">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Overlay Placeholder (Hidden by default) -->
+<div id="pagamento-form-overlay" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 z-3 d-flex justify-content-center align-items-center">
+    <div class="bg-white p-4 rounded-3 shadow-lg" style="max-width: 500px; width: 100%;">
+        <h3 class="h4 mb-3" id="modal-titulo">Registrar Pagamento</h3>
+        <form id="novo-pagamento-form">
+            <input type="hidden" id="pagamentoId" name="pagamentoId">
+            <div class="mb-3">
+                <label for="idReserva" class="form-label">ID Reserva</label>
+                <input type="text" class="form-control" id="idReserva" name="idReserva" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="cliente" class="form-label">Cliente</label>
+                <input type="text" class="form-control" id="cliente" name="cliente" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="valor" class="form-label">Valor</label>
+                <input type="number" step="0.01" class="form-control" id="valor" name="valor" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-select" id="status" name="status" required>
+                    <option value="">Selecione o status</option>
+                    <option value="Pago">Pago</option>
+                    <option value="Pendente">Pendente</option>
+                    <option value="Cancelado">Cancelado</option>
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label for="data" class="form-label">Data</label>
+                <input type="date" class="form-control" id="data" name="data" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="numeroTransacao" class="form-label">Nº Transação</label>
+                <input type="text" class="form-control" id="numeroTransacao" name="numeroTransacao" required>
+            </div>
+        </form>
+        <div class="d-flex justify-content-end mt-4">
+            <button class="btn btn-secondary me-2" onclick="fecharModalPagamento()">Cancelar</button>
+            <button class="btn btn-pix-green" onclick="salvarPagamento()">Salvar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function abrirModalPagamento() {
+        document.getElementById('novo-pagamento-form').reset();
+        document.getElementById('pagamentoId').value = '';
+        document.getElementById('modal-titulo').textContent = 'Registrar Pagamento';
+        document.getElementById('pagamento-form-overlay').classList.remove('d-none');
+    }
+    
+    function filtrarStatus(status) {
+        // Remove active de todos os botões
+        document.querySelectorAll('.btn-sm').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.classList.contains('btn-secondary')) {
+                btn.classList.remove('btn-secondary');
+                btn.classList.add('btn-outline-secondary');
+            }
+        });
+        
+        // Adiciona active no botão clicado
+        event.target.classList.add('active');
+        if (event.target.classList.contains('btn-outline-warning') || 
+            event.target.classList.contains('btn-outline-success') || 
+            event.target.classList.contains('btn-outline-danger')) {
+            event.target.classList.remove('btn-outline-warning', 'btn-outline-success', 'btn-outline-danger');
+            event.target.classList.add('btn-secondary');
+        }
+        
+        console.log('Filtrar por:', status);
+        // Aqui você implementaria a lógica de filtro
+    }
+    
+    function verDetalhes(id) {
+        console.log('Ver detalhes do pagamento:', id);
+        alert('Detalhes do pagamento #' + id);
+    }
+    
+    function atualizarStatus(id, status) {
+        if (confirm(`Deseja atualizar o status para "${status}"?`)) {
+            console.log('Atualizar status:', id, status);
+            alert(`Status atualizado para "${status}" com sucesso!`);
+        }
+    }
+    
+    function visualizarTransacao(numero) {
+        alert('Número de transação: ' + numero);
+    }
+    
+    function excluirPagamento(id, idReserva) {
+        if (confirm(`Deseja excluir o pagamento ${idReserva}?`)) {
+            console.log('Excluir pagamento:', id);
+            alert(`Pagamento ${idReserva} excluído com sucesso!`);
+        }
+    }
+    
+    function editarPagamento(id, idReserva, cliente, valor, status, data, numeroTransacao) {
+        document.getElementById('pagamentoId').value = id;
+        document.getElementById('idReserva').value = idReserva;
+        document.getElementById('cliente').value = cliente;
+        document.getElementById('valor').value = valor;
+        document.getElementById('status').value = status;
+        document.getElementById('data').value = data;
+        document.getElementById('numeroTransacao').value = numeroTransacao;
+        document.getElementById('modal-titulo').textContent = 'Editar Pagamento';
+        document.getElementById('pagamento-form-overlay').classList.remove('d-none');
+    }
+    
+    function fecharModalPagamento() {
+        document.getElementById('pagamento-form-overlay').classList.add('d-none');
+        document.getElementById('novo-pagamento-form').reset();
+        document.getElementById('pagamentoId').value = '';
+        document.getElementById('modal-titulo').textContent = 'Registrar Pagamento';
+    }
+    
+    function salvarPagamento() {
+        const form = document.getElementById('novo-pagamento-form');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+        
+        const formData = new FormData(form);
+        const pagamentoId = formData.get('pagamentoId');
+        const pagamento = {
+            id: pagamentoId || null,
+            idReserva: formData.get('idReserva'),
+            cliente: formData.get('cliente'),
+            valor: formData.get('valor'),
+            status: formData.get('status'),
+            data: formData.get('data'),
+            numeroTransacao: formData.get('numeroTransacao')
+        };
+        
+        console.log(pagamentoId ? 'Editar pagamento:' : 'Novo pagamento:', pagamento);
+        alert(pagamentoId ? 'Pagamento atualizado com sucesso!' : 'Pagamento registrado com sucesso!');
+        fecharModalPagamento();
+    }
+</script>
