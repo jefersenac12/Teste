@@ -18,5 +18,109 @@ html {
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
+    font-family: 'Inter', sans-serif;
 }
+
+.material-symbols-outlined {
+    vertical-align: middle;
+}
+.navbar-Villagio-Michelin {
+    background-color: #8B4513 !important;
+}
+.calendar-day {
+    position: relative;
+    min-height: 60px;
+    border: 1px solid #e0e0e0;
+    padding: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+    .calendar-day:hover {
+        background-color: #f5f5f5;
+    }
+
+    .calendar-day.selected {
+        background-color: #e3f2fd;
+    }
+
+    .calendar-day.multi-selected {
+        background-color: #bbdefb;
+        border: 2px solid #2196f3;
+    }
+
+    .calendar-day.other-month {
+        color: #ccc;
+        background-color: #fafafa;
+    }
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 4px;
+}
+
+.status-disponivel {
+    background-color: #10b981;
+}
+
+.status-familia {
+    background-color: #3b82f6;
+}
+
+.status-agencia {
+    background-color: #f59e0b;
+}
+
+.status-lotado {
+    background-color: #ef4444;
+}
+
+.calendar-day .status-dot {
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+.chart-donut-pix {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: conic-gradient( #10b981 0% 65%, #f59e0b 65% 90%, #ef4444 90% 100% );
+}
+
+    .chart-donut-pix::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90px;
+        height: 90px;
+        background-color: white;
+        border-radius: 50%;
+    }
+
+.pix-green {
+    color: #32BCAD;
+}
+
+.bg-pix-green {
+    background-color: #32BCAD;
+}
+
+.btn-pix-green {
+    background-color: #32BCAD;
+    border-color: #32BCAD;
+    color: white;
+}
+
+    .btn-pix-green:hover {
+        background-color: #2aa89a;
+        border-color: #2aa89a;
+        color: white;
+    }
