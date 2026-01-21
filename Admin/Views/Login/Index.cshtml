@@ -1,5 +1,43 @@
 ﻿@{
+    Layout = "_LayoutLogin";
     ViewData["Title"] = "Login";
 }
 
+<div class="login-page d-flex align-items-center justify-content-center min-vh-100">
+    <div class="login-card shadow-lg">
+        <div class="login-avatar">
+            <i class="bi bi-person"></i>
+        </div>
 
+        <form asp-action="Entrar" asp-controller="Login" method="post">
+            @Html.AntiForgeryToken()
+
+            @if (TempData["Erro"] != null)
+            {
+                <div class="alert alert-danger small" role="alert">
+                    @TempData["Erro"]
+                </div>
+            }
+
+            <div class="form-group position-relative mb-3">
+                <i class="bi bi-building input-icon"></i>
+                <input name="cnpj" id="cnpj" type="text" class="form-control login-input" placeholder="CNPJ" />
+            </div>
+
+            <div class="form-group position-relative mb-3">
+                <i class="bi bi-lock input-icon"></i>
+                <input name="senha" id="senha" type="password" class="form-control login-input" placeholder="Senha" />
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3 login-options">
+                <div>
+                    <input type="checkbox" id="remember" />
+                    <label for="remember">Lembrar-me</label>
+                </div>
+                <a href="#">Esqueci a senha</a>
+            </div>
+
+            <button type="submit" class="btn btn-login w-100">ENTRAR</button>
+        </form>
+    </div>
+</div>
