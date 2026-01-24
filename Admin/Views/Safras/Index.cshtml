@@ -109,38 +109,3 @@
         </div>
     </div>
 </div>
-
-<script>
-    function editarSafra(id, nome, dataInicio, dataFim) {
-        document.getElementById('nome').value = nome;
-        document.getElementById('dataInicio').value = dataInicio;
-        document.getElementById('dataFim').value = dataFim;
-        document.getElementById('safra-form-overlay').classList.remove('d-none');
-    }
-    
-    function excluirSafra(id, nome) {
-        if (confirm(`Deseja excluir a safra "${nome}"?`)) {
-            alert(`Safra "${nome}" excluída com sucesso!`);
-        }
-    }
-    
-    function salvarSafra() {
-        const form = document.getElementById('nova-safra-form');
-        if (!form.checkValidity()) {
-            form.reportValidity();
-            return;
-        }
-        
-        const formData = new FormData(form);
-        const safra = {
-            nome: formData.get('nome'),
-            dataInicio: formData.get('dataInicio'),
-            dataFim: formData.get('dataFim')
-        };
-        
-        console.log('Nova safra:', safra);
-        alert('Safra salva com sucesso!');
-        document.getElementById('safra-form-overlay').classList.add('d-none');
-        form.reset();
-    }
-</script>
