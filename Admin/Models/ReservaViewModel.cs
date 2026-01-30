@@ -1,6 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.Globalization;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Admin.Models
 {
@@ -8,39 +6,46 @@ namespace Admin.Models
     {
         public int Id { get; set; }
 
-        [Required]
-        public string Titulo { get; set; } = string.Empty;
+        [Required(ErrorMessage = "A agenda é obrigatória")]
+        public int AgendaId { get; set; }
 
-        public string Safra { get; set; } = string.Empty;
+        [Required(ErrorMessage = "O usuário é obrigatório")]
+        public int UsuarioId { get; set; }
 
-        public string Usuario { get; set; } = string.Empty;
+        [Required(ErrorMessage = "A data da reserva é obrigatória")]
+        public DateTime DataReserva { get; set; }
 
-        [DataType(DataType.Date)]
-        public DateTime DataReserva { get; set; } = DateTime.Today;
+        [Required(ErrorMessage = "A quantidade é obrigatória")]
+        [Range(1, int.MaxValue, ErrorMessage = "A quantidade deve ser pelo menos 1")]
+        public int Quantidade { get; set; }
 
-        [Range(0, int.MaxValue)]
-        public int QtdInteira { get; set; }
+        public int NPEntrada { get; set; }
+        public int MeiaEntrada { get; set; }
+        public int InteiraEntrada { get; set; }
 
-        [Range(0, int.MaxValue)]
-        public int QtdMeia { get; set; }
-
-        [DataType(DataType.Currency)]
+        [Required(ErrorMessage = "O valor total é obrigatório")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "O valor total deve ser maior que zero")]
         public decimal ValorTotal { get; set; }
 
-        // Propriedade auxiliar para exibir "2 (1 inteira, 1 meia)"
+        // Propriedades de navegação/exibição
+        public string? AgendaDescricao { get; set; }
+        public string? UsuarioNome { get; set; }
+        public string? UsuarioTipo { get; set; }
+
+        // Propriedades calculadas
+        public string DataReservaFormatada => DataReserva.ToString("dd/MM/yyyy");
+        public string ValorTotalFormatado => ValorTotal.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"));
         public string QuantidadeDescricao
         {
             get
             {
-                var total = QtdInteira + QtdMeia;
-                if (total == 0) return "0";
-                if (QtdMeia > 0)
-                    return $"{total} ({QtdInteira} inteira, {QtdMeia} meia)";
-                return $"{total} ({QtdInteira} inteira)";
+                if (Quantidade <= 0) return "0";
+                if (MeiaEntrada > 0 && InteiraEntrada > 0)
+                    return $"{Quantidade} ({InteiraEntrada} inteira, {MeiaEntrada} meia)";
+                if (MeiaEntrada > 0)
+                    return $"{Quantidade} ({MeiaEntrada} meia)";
+                return $"{Quantidade} ({InteiraEntrada} inteira)";
             }
         }
-
-        // Formatação de moeda pt-BR
-        public string ValorTotalFormatado => ValorTotal.ToString("C", CultureInfo.GetCultureInfo("pt-BR"));
     }
 }

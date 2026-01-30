@@ -1,0 +1,80 @@
+@{
+    ViewData["Title"] = "Cancelar Reserva";
+}
+@model Admin.Models.ReservaViewModel
+
+<div class="container-fluid px-0 mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-white border-0 pt-4 pb-0">
+                    <h1 class="h3 fw-bold text-danger mb-0">Cancelar Reserva</h1>
+                    <p class="text-muted">Tem certeza que deseja cancelar esta reserva? Esta ação não pode ser desfeita.</p>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-warning d-flex align-items-center" role="alert">
+                        <span class="material-symbols-outlined me-2">warning</span>
+                        <div>
+                            <strong>Atenção!</strong> O cancelamento da reserva afetará a disponibilidade de vagas no agendamento e poderá gerar reembolsos se já houver pagamentos.
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5 class="fw-medium mb-3">Dados da Reserva:</h5>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <small class="text-muted">ID da Reserva:</small>
+                                <p class="fw-medium">#@Model.Id</p>
+                            </div>
+                            <div class="col-sm-6">
+                                <small class="text-muted">Atividade:</small>
+                                <p class="fw-medium">@Model.AtividadeNome</p>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-sm-6">
+                                <small class="text-muted">Usuário:</small>
+                                <p class="fw-medium">@Model.UsuarioNome</p>
+                            </div>
+                            <div class="col-sm-6">
+                                <small class="text-muted">Data da Reserva:</small>
+                                <p class="fw-medium">@Model.DataReserva.ToString("dd/MM/yyyy")</p>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-sm-6">
+                                <small class="text-muted">Total de Pessoas:</small>
+                                <p class="fw-medium">@(Model.NPEntrada + Model.MeiaEntrada + Model.InteiraEntrada)</p>
+                            </div>
+                            <div class="col-sm-6">
+                                <small class="text-muted">Valor Total:</small>
+                                <p class="fw-medium text-success">R$ @Model.ValorTotal.ToString("N2")</p>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-12">
+                                <small class="text-muted">Data/Hora do Agendamento:</small>
+                                <p class="fw-medium">@Model.DataHoraAgendamento</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form asp-action="Delete" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-light">
+                                <span class="material-symbols-outlined me-2">arrow_back</span>
+                                Voltar
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <span class="material-symbols-outlined me-2">cancel</span>
+                                Confirmar Cancelamento
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

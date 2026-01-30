@@ -8,15 +8,18 @@ namespace Admin.Models
     {
         public int Id { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "O nome da atividade é obrigatório")]
         public string Nome { get; set; } = string.Empty;
 
         public string Descricao { get; set; } = string.Empty;
 
-        [DataType(DataType.Currency)]
-        public decimal ValorPorHa { get; set; }
+        [Required(ErrorMessage = "O valor é obrigatório")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "O valor deve ser maior que zero")]
+        public decimal Valor { get; set; }
 
-        // Helper para exibir valor formatado em pt-BR
-        public string ValorPorHaFormatado => ValorPorHa.ToString("C", CultureInfo.GetCultureInfo("pt-BR"));
+        // Propriedades de exibição (mantidas para compatibilidade)
+        public decimal ValorPorHa { get => Valor; set => Valor = value; }
+        public string ValorFormatado => Valor.ToString("C", CultureInfo.GetCultureInfo("pt-BR"));
+        public string ValorPorHaFormatado => ValorFormatado;
     }
 }

@@ -1,0 +1,81 @@
+@{
+    ViewData["Title"] = "Nova Safra";
+}
+@model Admin.Models.SafraViewModel
+
+<div class="container-fluid px-0 mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-white border-0 pt-4 pb-0">
+                    <h1 class="h3 fw-bold text-dark mb-0">Nova Safra</h1>
+                    <p class="text-muted">Preencha os dados para criar uma nova safra agrícola.</p>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Nome" class="form-label fw-medium">Nome da Safra</label>
+                            <input asp-for="Nome" class="form-control" required />
+                            <span asp-validation-for="Nome" class="text-danger"></span>
+                            <small class="text-muted">Ex: "Janeiro - uva, goiaba, morango, lichia"</small>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="DataInicio" class="form-label fw-medium">Data de Início</label>
+                                    <input asp-for="DataInicio" class="form-control" type="date" required />
+                                    <span asp-validation-for="DataInicio" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="DataFim" class="form-label fw-medium">Data de Término</label>
+                                    <input asp-for="DataFim" class="form-control" type="date" required />
+                                    <span asp-validation-for="DataFim" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-light">
+                                <span class="material-symbols-outlined me-2">arrow_back</span>
+                                Voltar
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <span class="material-symbols-outlined me-2">save</span>
+                                Criar Safra
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dataInicioInput = document.getElementById('DataInicio');
+            const dataFimInput = document.getElementById('DataFim');
+            
+            // Definir data mínima como hoje
+            const hoje = new Date().toISOString().split('T')[0];
+            dataInicioInput.min = hoje;
+            dataFimInput.min = hoje;
+            
+            // Ajustar data mínima do término quando a data de início for alterada
+            dataInicioInput.addEventListener('change', function() {
+                dataFimInput.min = this.value;
+                
+                // Se a data de término for anterior à nova data de início, limpar o campo
+                if (dataFimInput.value && dataFimInput.value < this.value) {
+                    dataFimInput.value = '';
+                }
+            });
+        });
+    </script>
+}

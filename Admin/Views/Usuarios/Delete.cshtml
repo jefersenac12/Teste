@@ -1,0 +1,81 @@
+@{
+    ViewData["Title"] = "Excluir Usuário";
+}
+@model Admin.Models.UsuarioViewModel
+
+<div class="container-fluid px-0 mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-white border-0 pt-4 pb-0">
+                    <h1 class="h3 fw-bold text-danger mb-0">Excluir Usuário</h1>
+                    <p class="text-muted">Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.</p>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-warning d-flex align-items-center" role="alert">
+                        <span class="material-symbols-outlined me-2">warning</span>
+                        <div>
+                            <strong>Atenção!</strong> A exclusão do usuário removerá todos os seus dados do sistema, incluindo reservas e pagamentos associados.
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5 class="fw-medium mb-3">Dados do Usuário:</h5>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <small class="text-muted">Nome:</small>
+                                <p class="fw-medium">@Model.Nome</p>
+                            </div>
+                            <div class="col-sm-4">
+                                <small class="text-muted">Tipo:</small>
+                                <p class="fw-medium">
+                                    <span class="badge rounded-pill fw-medium px-2 py-1 text-dark"
+                                          style="background-color: @(Model.Tipo == 2 ? "#FEF9C3" : "#DCFCE7")">
+                                        @Model.TipoDescricao
+                                    </span>
+                                </p>
+                            </div>
+                            <div class="col-sm-4">
+                                <small class="text-muted">Contato:</small>
+                                <p class="fw-medium">
+                                    @if (Model.Tipo == 2)
+                                    {
+                                        @Model.CNPJ
+                                    }
+                                    else
+                                    {
+                                        @Model.Email
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.Telefone))
+                        {
+                            <div class="row mt-2">
+                                <div class="col-12">
+                                    <small class="text-muted">Telefone:</small>
+                                    <p class="fw-medium">@Model.Telefone</p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    
+                    <form asp-action="Delete" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-light">
+                                <span class="material-symbols-outlined me-2">arrow_back</span>
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <span class="material-symbols-outlined me-2">delete</span>
+                                Confirmar Exclusão
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

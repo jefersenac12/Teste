@@ -1,0 +1,69 @@
+@{
+    ViewData["Title"] = "Excluir Safra";
+}
+@model Admin.Models.SafraViewModel
+
+<div class="container-fluid px-0 mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-white border-0 pt-4 pb-0">
+                    <h1 class="h3 fw-bold text-danger mb-0">Excluir Safra</h1>
+                    <p class="text-muted">Tem certeza que deseja excluir esta safra? Esta ação não pode ser desfeita.</p>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-warning d-flex align-items-center" role="alert">
+                        <span class="material-symbols-outlined me-2">warning</span>
+                        <div>
+                            <strong>Atenção!</strong> A exclusão da safra removerá todos os agendamentos e reservas associados a este período.
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5 class="fw-medium mb-3">Dados da Safra:</h5>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <small class="text-muted">Nome:</small>
+                                <p class="fw-medium">@Model.Nome</p>
+                            </div>
+                            <div class="col-sm-6">
+                                <small class="text-muted">Duração:</small>
+                                <p class="fw-medium">
+                                    <span class="badge bg-light text-dark">
+                                        <span class="material-symbols-outlined fs-6 align-middle me-1">calendar_month</span>
+                                        @(Model.DataFim - Model.DataInicio).Days dias
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-sm-6">
+                                <small class="text-muted">Data de Início:</small>
+                                <p class="fw-medium">@Model.DataInicio.ToString("dd/MM/yyyy")</p>
+                            </div>
+                            <div class="col-sm-6">
+                                <small class="text-muted">Data de Término:</small>
+                                <p class="fw-medium">@Model.DataFim.ToString("dd/MM/yyyy")</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form asp-action="Delete" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-light">
+                                <span class="material-symbols-outlined me-2">arrow_back</span>
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <span class="material-symbols-outlined me-2">delete</span>
+                                Confirmar Exclusão
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

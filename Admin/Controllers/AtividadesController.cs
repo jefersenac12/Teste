@@ -1,4 +1,5 @@
 using Admin.Models;
+using Admin.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,27 +9,56 @@ namespace Admin.Controllers
 {
     public class AtividadesController : Controller
     {
-        // GET: /Atividades
-        public IActionResult Index()
-        {
-            // Dados de exemplo — substitua por acesso ao banco/serviço
-            var atividades = new List<AtividadeViewModel>
-            {
-                new() { Id = 1, Nome = "Preparo do Solo", Descricao = "Aragem e gradagem da área designada para o plantio da soja.", ValorPorHa = 150m },
-                new() { Id = 2, Nome = "Plantio de Sementes", Descricao = "Operação de plantadeira para semeadura da cultura de milho.", ValorPorHa = 200m },
-                new() { Id = 3, Nome = "Pulverização", Descricao = "Aplicação de defensivos agrícolas para controle de pragas e doenças.", ValorPorHa = 80m },
-                new() { Id = 4, Nome = "Adubação", Descricao = "Aplicação de fertilizantes conforme recomendação técnica.", ValorPorHa = 120m }
-            };
+        private readonly ApiService _apiService;
+        private readonly ILogger<AtividadesController> _logger;
 
-            return View(atividades);
+        public AtividadesController(ApiService apiService, ILogger<AtividadesController> logger)
+        {
+            _apiService = apiService;
+            _logger = logger;
+        }
+
+        // GET: /Atividades
+        public async Task<IActionResult> Index()
+        {
+            try
+            {
+                var atividades = await _apiService.GetAtividadesAsync();
+                
+                if (atividades == null || !atividades.Any())
+                {
+                    ViewBag.Mensagem = "Nenhuma atividade cadastrada. Cadastre a primeira atividade para comeÃ§ar a agenda.";
+                    return View(new List<AtividadeViewModel>());
+                }
+
+                return View(atividades);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao carregar atividades");
+                ViewBag.Erro = "NÃ£o foi possÃ­vel carregar a lista de atividades. Tente novamente mais tarde.";
+                return View(new List<AtividadeViewModel>());
+            }
         }
 
         // GET: /Atividades/Details/5
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
-            var atividade = GetSampleData().FirstOrDefault(a => a.Id == id);
-            if (atividade == null) return NotFound();
-            return View(atividade);
+            try
+            {
+                var atividade = await _apiService.GetAtividadeByIdAsync(id);
+                if (atividade == null)
+                {
+                    return NotFound();
+                }
+
+                return View(atividade);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao carregar detalhes da atividade {Id}", id);
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         // GET: /Atividades/Create
@@ -40,53 +70,137 @@ namespace Admin.Controllers
         // POST: /Atividades/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(AtividadeViewModel model)
+        public async Task<IActionResult> Create(AtividadeViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View(model);
+                }
 
-            // TODO: salvar no banco
-            return RedirectToAction(nameof(Index));
+                var sucesso = await _apiService.CreateAtividadeAsync(model);
+                if (sucesso)
+                {
+                    TempData["Sucesso"] = "Atividade cadastrada com sucesso!";
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    ModelState.AddModelError("", "NÃ£o foi possÃ­vel cadastrar a atividade. Verifique os dados e tente novamente.");
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao criar atividade");
+                ModelState.AddModelError("", "Ocorreu um erro ao cadastrar a atividade. Tente novamente.");
+                return View(model);
+            }
         }
 
         // GET: /Atividades/Edit/5
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id)
         {
-            var atividade = GetSampleData().FirstOrDefault(a => a.Id == id);
-            if (atividade == null) return NotFound();
-            return View(atividade);
+            try
+            {
+                var atividade = await _apiService.GetAtividadeByIdAsync(id);
+                if (atividade == null)
+                {
+                    return NotFound();
+                }
+
+                return View(atividade);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao carregar atividade para ediÃ§Ã£o {Id}", id);
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         // POST: /Atividades/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, AtividadeViewModel model)
+        public async Task<IActionResult> Edit(int id, AtividadeViewModel model)
         {
-            if (id != model.Id) return BadRequest();
-            if (!ModelState.IsValid) return View(model);
+            try
+            {
+                if (id != model.Id)
+                {
+                    return BadRequest();
+                }
 
-            // TODO: atualizar no banco
-            return RedirectToAction(nameof(Index));
+                if (!ModelState.IsValid)
+                {
+                    return View(model);
+                }
+
+                var sucesso = await _apiService.UpdateAtividadeAsync(id, model);
+                if (sucesso)
+                {
+                    TempData["Sucesso"] = "Atividade atualizada com sucesso!";
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    ModelState.AddModelError("", "NÃ£o foi possÃ­vel atualizar a atividade. Verifique os dados e tente novamente.");
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao atualizar atividade {Id}", id);
+                ModelState.AddModelError("", "Ocorreu um erro ao atualizar a atividade. Tente novamente.");
+                return View(model);
+            }
+        }
+
+        // GET: /Atividades/Delete/5
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                var atividade = await _apiService.GetAtividadeByIdAsync(id);
+                if (atividade == null)
+                {
+                    return NotFound();
+                }
+
+                return View(atividade);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao carregar atividade para exclusÃ£o {Id}", id);
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         // POST: /Atividades/Delete/5
-        [HttpPost]
+        [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            // TODO: excluir do banco
-            return RedirectToAction(nameof(Index));
-        }
-
-        // Dados de exemplo para Details/Edit quando não há DB
-        private List<AtividadeViewModel> GetSampleData()
-        {
-            return new List<AtividadeViewModel>
+            try
             {
-                new() { Id = 1, Nome = "Preparo do Solo", Descricao = "Aragem e gradagem da área designada para o plantio da soja.", ValorPorHa = 150m },
-                new() { Id = 2, Nome = "Plantio de Sementes", Descricao = "Operação de plantadeira para semeadura da cultura de milho.", ValorPorHa = 200m },
-                new() { Id = 3, Nome = "Pulverização", Descricao = "Aplicação de defensivos agrícolas para controle de pragas e doenças.", ValorPorHa = 80m },
-                new() { Id = 4, Nome = "Adubação", Descricao = "Aplicação de fertilizantes conforme recomendação técnica.", ValorPorHa = 120m }
-            };
+                var sucesso = await _apiService.DeleteAtividadeAsync(id);
+                if (sucesso)
+                {
+                    TempData["Sucesso"] = "Atividade excluÃ­da com sucesso!";
+                }
+                else
+                {
+                    TempData["Erro"] = "NÃ£o foi possÃ­vel excluir a atividade. Verifique se nÃ£o existem agendas ou reservas vinculadas.";
+                }
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao excluir atividade {Id}", id);
+                TempData["Erro"] = "Ocorreu um erro ao excluir a atividade. Tente novamente.";
+                return RedirectToAction(nameof(Index));
+            }
         }
     }
 }

@@ -1,0 +1,114 @@
+@{
+    ViewData["Title"] = "Detalhes do Agendamento";
+}
+@model Admin.Models.AgendamentoViewModel
+
+<div class="container-fluid px-0 mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-white border-0 pt-4 pb-0">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h1 class="h3 fw-bold text-dark mb-2">Detalhes do Agendamento</h1>
+                            <p class="text-muted mb-0">Informações completas do agendamento de atividade.</p>
+                        </div>
+                        <div>
+                            <span class="badge @(Model.VagasDisponiveis > 0 ? "bg-success" : "bg-danger") text-white fs-6">
+                                @(Model.VagasDisponiveis > 0 ? "Disponível" : "Esgotado")
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row mb-4">
+                        <div class="col-md-8">
+                            <h5 class="fw-medium mb-3">Informações do Agendamento</h5>
+                            <div class="mb-3">
+                                <small class="text-muted">ID do Agendamento:</small>
+                                <p class="fw-medium">#@Model.Id</p>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted">Atividade:</small>
+                                <p class="fw-medium fs-5">@Model.AtividadeNome</p>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted">Safra:</small>
+                                <p class="fw-medium">
+                                    <span class="material-symbols-outlined fs-6 align-middle me-1">agriculture</span>
+                                    @Model.SafraNome
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <h5 class="fw-medium mb-3">Data e Hora</h5>
+                            <div class="mb-3">
+                                <small class="text-muted">Data:</small>
+                                <p class="fw-medium">@Model.DataHora.ToString("dd/MM/yyyy")</p>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted">Hora:</small>
+                                <p class="fw-medium">@Model.DataHora.ToString("HH:mm")</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="border-top pt-4">
+                        <h5 class="fw-medium mb-3">Controle de Vagas</h5>
+                        <div class="row text-center mb-3">
+                            <div class="col-md-4">
+                                <div class="bg-light rounded-3 p-3">
+                                    <h4 class="fw-bold text-primary mb-1">@Model.VagasTotais</h4>
+                                    <small class="text-muted">Vagas Totais</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="bg-light rounded-3 p-3">
+                                    <h4 class="fw-bold text-success mb-1">@Model.VagasDisponiveis</h4>
+                                    <small class="text-muted">Vagas Disponíveis</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="bg-light rounded-3 p-3">
+                                    <h4 class="fw-bold text-warning mb-1">@(Model.VagasTotais - Model.VagasDisponiveis)</h4>
+                                    <small class="text-muted">Vagas Ocupadas</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Ocupação</label>
+                            @{
+                                var ocupacaoPercentual = Model.VagasTotais > 0 ? 
+                                    ((double)(Model.VagasTotais - Model.VagasDisponiveis) / Model.VagasTotais) * 100 : 0;
+                            }
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar @(ocupacaoPercentual > 80 ? "bg-danger" : ocupacaoPercentual > 50 ? "bg-warning" : "bg-success")" 
+                                     style="width: @ocupacaoPercentual.ToString("F0")%">
+                                    @ocupacaoPercentual.ToString("F1")%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4 pt-3 border-top">
+                        <a asp-action="Index" class="btn btn-light">
+                            <span class="material-symbols-outlined me-2">arrow_back</span>
+                            Voltar para Lista
+                        </a>
+                        <div class="d-flex gap-2">
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                                <span class="material-symbols-outlined me-2">edit</span>
+                                Editar
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
+                                <span class="material-symbols-outlined me-2">delete</span>
+                                Excluir
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
