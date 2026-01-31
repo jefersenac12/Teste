@@ -121,7 +121,7 @@ namespace Admin.Controllers
                     return View(model);
                 }
 
-                var sucesso = await _apiService.CreateAgendaAsync(model);
+                var sucesso = await _apiService.CreateAgendamentoAsync(model);
                 if (sucesso)
                 {
                     TempData["Sucesso"] = "Agenda cadastrada com sucesso!";

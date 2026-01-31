@@ -12,10 +12,10 @@
             </h1>
             <p class="text-muted mb-0 mt-1">Gerenciamento analítico de recebimentos via PIX</p>
         </div>
-        <button class="btn btn-pix-green d-flex align-items-center fw-semibold shadow-sm" type="button" onclick="abrirModalPagamento()">
+        <a class="btn btn-pix-green d-flex align-items-center fw-semibold shadow-sm" asp-action="Create">
             <span class="material-symbols-outlined me-2" translate="no">add_card</span>
             Registrar Pagamento
-        </button>
+        </a>
     </div>
 
     <!-- Cards de Resumo -->
@@ -121,8 +121,8 @@
                         @foreach (var pagamento in Model)
                         {
                             <tr>
-                                <td class="px-4 py-3 small text-muted font-monospace">@pagamento.IdReserva</td>
-                                <td class="px-4 py-3 small fw-medium">@pagamento.Cliente</td>
+                                <td class="px-4 py-3 small text-muted font-monospace">@pagamento.ReservaId</td>
+                                <td class="px-4 py-3 small fw-medium">@pagamento.ClienteNome</td>
                                 <td class="px-4 py-3 small fw-bold">R$ @pagamento.Valor.ToString("N2")</td>
                                 <td class="px-4 py-3">
                                     @if (pagamento.Status == "Pago")
@@ -138,28 +138,28 @@
                                         <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Cancelado</span>
                                     }
                                 </td>
-                                <td class="px-4 py-3 small text-muted">@pagamento.Data.ToString("dd MMM yyyy", new System.Globalization.CultureInfo("pt-BR"))</td>
-                                <td class="px-4 py-3 small text-muted font-monospace">@pagamento.NumeroTransacao</td>
+                                <td class="px-4 py-3 small text-muted">@pagamento.DataPagamentoFormatada</td>
+                                <td class="px-4 py-3 small text-muted font-monospace">@pagamento.QrCode</td>
                                 <td class="px-4 py-3 text-end">
                                     <div class="btn-group dropstart">
                                         <button class="btn btn-sm btn-link text-muted" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                             <span class="material-symbols-outlined" translate="no">more_vert</span>
                                         </button>
                                         <ul class="dropdown-menu">
-                                            <li><a class="dropdown-item" href="#" onclick="verDetalhes(@pagamento.Id)">Ver Detalhes do Pagamento</a></li>
-                                            <li><a class="dropdown-item" href="#" onclick="editarPagamento(@pagamento.Id, '@pagamento.IdReserva', '@pagamento.Cliente', @pagamento.Valor.ToString("F2", System.Globalization.CultureInfo.InvariantCulture), '@pagamento.Status', '@pagamento.Data.ToString("yyyy-MM-dd")', '@pagamento.NumeroTransacao')">Editar Pagamento</a></li>
+                                            <li><a class="dropdown-item" asp-action="Details" asp-route-id="@pagamento.Id">Ver Detalhes do Pagamento</a></li>
+                                            <li><a class="dropdown-item" asp-action="Edit" asp-route-id="@pagamento.Id">Editar Pagamento</a></li>
                                             <li><hr class="dropdown-divider"></li>
-                                            <li class="dropstart">
-                                                <a class="dropdown-item dropdown-toggle" href="#">Atualizar Status</a>
-                                                <ul class="dropdown-menu">
-                                                    <li><a class="dropdown-item" href="#" onclick="atualizarStatus(@pagamento.Id, 'Pendente')">Pendente</a></li>
-                                                    <li><a class="dropdown-item" href="#" onclick="atualizarStatus(@pagamento.Id, 'Pago')">Pago</a></li>
-                                                    <li><a class="dropdown-item" href="#" onclick="atualizarStatus(@pagamento.Id, 'Cancelado')">Cancelado</a></li>
-                                                </ul>
-                                            </li>
-                                            <li><a class="dropdown-item" href="#" onclick="visualizarTransacao('@pagamento.NumeroTransacao')">Visualizar Número de Transação</a></li>
+                                            @if (pagamento.Status != "Pago")
+                                            {
+                                                <li><a class="dropdown-item" asp-action="ConfirmarPagamento" asp-route-id="@pagamento.Id">Confirmar Pagamento</a></li>
+                                            }
+                                            else
+                                            {
+                                                <li><a class="dropdown-item" asp-action="Estornar" asp-route-id="@pagamento.Id">Estornar Pagamento</a></li>
+                                            }
+                                            <li><a class="dropdown-item" asp-action="Details" asp-route-id="@pagamento.Id">Visualizar Número de Transação</a></li>
                                             <li><hr class="dropdown-divider"></li>
-                                            <li><a class="dropdown-item text-danger" href="#" onclick="excluirPagamento(@pagamento.Id, '@pagamento.IdReserva')">Excluir</a></li>
+                                            <li><a class="dropdown-item text-danger" asp-action="Delete" asp-route-id="@pagamento.Id">Excluir</a></li>
                                         </ul>
                                     </div>
                                 </td>
@@ -192,50 +192,3 @@
     </div>
 </div>
 
-<!-- Modal Overlay Placeholder (Hidden by default) -->
-<div id="pagamento-form-overlay" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 z-3 d-flex justify-content-center align-items-center">
-    <div class="bg-white p-4 rounded-3 shadow-lg" style="max-width: 500px; width: 100%;">
-        <h3 class="h4 mb-3" id="modal-titulo">Registrar Pagamento</h3>
-        <form id="novo-pagamento-form">
-            <input type="hidden" id="pagamentoId" name="pagamentoId">
-            <div class="mb-3">
-                <label for="idReserva" class="form-label">ID Reserva</label>
-                <input type="text" class="form-control" id="idReserva" name="idReserva" required>
-            </div>
-            
-            <div class="mb-3">
-                <label for="cliente" class="form-label">Cliente</label>
-                <input type="text" class="form-control" id="cliente" name="cliente" required>
-            </div>
-            
-            <div class="mb-3">
-                <label for="valor" class="form-label">Valor</label>
-                <input type="number" step="0.01" class="form-control" id="valor" name="valor" required>
-            </div>
-            
-            <div class="mb-3">
-                <label for="status" class="form-label">Status</label>
-                <select class="form-select" id="status" name="status" required>
-                    <option value="">Selecione o status</option>
-                    <option value="Pago">Pago</option>
-                    <option value="Pendente">Pendente</option>
-                    <option value="Cancelado">Cancelado</option>
-                </select>
-            </div>
-            
-            <div class="mb-3">
-                <label for="data" class="form-label">Data</label>
-                <input type="date" class="form-control" id="data" name="data" required>
-            </div>
-            
-            <div class="mb-3">
-                <label for="numeroTransacao" class="form-label">Nº Transação</label>
-                <input type="text" class="form-control" id="numeroTransacao" name="numeroTransacao" required>
-            </div>
-        </form>
-        <div class="d-flex justify-content-end mt-4">
-            <button class="btn btn-secondary me-2" onclick="fecharModalPagamento()">Cancelar</button>
-            <button class="btn btn-pix-green" onclick="salvarPagamento()">Salvar</button>
-        </div>
-    </div>
-</div>

@@ -31,7 +31,7 @@
                             </div>
                             <div class="mb-3">
                                 <small class="text-muted">Atividade:</small>
-                                <p class="fw-medium fs-5">@Model.AtividadeNome</p>
+                                <p class="fw-medium fs-5">@Model.AgendaDescricao</p>
                             </div>
                             <div class="mb-3">
                                 <small class="text-muted">Usuário:</small>
@@ -45,11 +45,11 @@
                             <h5 class="fw-medium mb-3">Data e Hora</h5>
                             <div class="mb-3">
                                 <small class="text-muted">Data da Reserva:</small>
-                                <p class="fw-medium">@Model.DataReserva.ToString("dd/MM/yyyy")</p>
+                                <p class="fw-medium">@Model.DataReservaFormatada</p>
                             </div>
                             <div class="mb-3">
                                 <small class="text-muted">Data/Hora Agendamento:</small>
-                                <p class="fw-medium">@Model.DataHoraAgendamento</p>
+                                <p class="fw-medium">@Model.DataReservaFormatada</p>
                             </div>
                         </div>
                     </div>
@@ -86,7 +86,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <small class="text-muted">Valor Total:</small>
-                                <p class="fw-bold fs-4 text-success">R$ @Model.ValorTotal.ToString("N2")</p>
+                                <p class="fw-bold fs-4 text-success">@Model.ValorTotalFormatado</p>
                             </div>
                             <div class="col-md-6">
                                 <small class="text-muted">Valor por Pessoa:</small>

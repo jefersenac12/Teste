@@ -1,15 +1,15 @@
 @{
     ViewData["Title"] = "Gerenciar Usuários";
 }
-@model IEnumerable<dynamic>
+@model IEnumerable<Admin.Models.UsuarioViewModel>
 
 <div class="container-fluid px-0 mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h2 fw-bold text-dark mb-0">Gerenciar Usuários</h1>
-        <button class="btn btn-success d-flex align-items-center fw-semibold shadow-sm" type="button" onclick="document.getElementById('user-form-overlay').classList.remove('d-none')">
+        <a class="btn btn-success d-flex align-items-center fw-semibold shadow-sm" asp-action="Create">
             <span class="material-symbols-outlined me-2">add</span>
             Novo Usuário
-        </button>
+        </a>
     </div>
 
     <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
@@ -24,7 +24,7 @@
                             </h3>
 
                             <p class="card-text text-secondary small mb-1 d-flex align-items-center">
-                                @if (user.Tipo == "Agencia")
+                                @if (user.Tipo == 1)
                                 {
                                     <span class="me-1 fw-medium flex-shrink-0">CNPJ:</span>
                                     <span class="text-truncate flex-grow-1" style="min-width:0;" title="@user.CNPJ">@user.CNPJ</span>
@@ -39,31 +39,30 @@
                             <p class="card-text text-secondary small mb-3">
                                 Tipo:
                                 <span class="badge rounded-pill fw-medium px-2 py-1 text-dark"
-                                      style="background-color: @(user.Tipo == "Agencia" ? "#FEF9C3" : "#DCFCE7")">
-                                    @user.Tipo
+                                      style="background-color: @(user.Tipo == 1 ? "#FEF9C3" : "#DCFCE7")">
+                                    @user.TipoFormatado
                                 </span>
                             </p>
                         </div>
 
                         <div class="d-flex justify-content-end gap-2 mt-3 pt-2">
-                            <button class="btn btn-light btn-sm rounded-circle p-2 text-secondary d-flex align-items-center justify-content-center"
-                                    title="Ver detalhes"
-                                    style="width: 36px; height: 36px;">
+                            <a class="btn btn-light btn-sm rounded-circle p-2 text-secondary d-flex align-items-center justify-content-center"
+                               asp-action="Details" asp-route-id="@user.Id"
+                               title="Ver detalhes" style="width: 36px; height: 36px;">
                                 <span class="material-symbols-outlined fs-5">visibility</span>
-                            </button>
+                            </a>
 
-                            <button class="btn btn-light btn-sm rounded-circle p-2 text-secondary d-flex align-items-center justify-content-center"
-                                    onclick="document.getElementById('user-form-overlay').classList.remove('d-none')"
-                                    title="Editar usuário"
-                                    style="width: 36px; height: 36px;">
+                            <a class="btn btn-light btn-sm rounded-circle p-2 text-secondary d-flex align-items-center justify-content-center"
+                               asp-action="Edit" asp-route-id="@user.Id"
+                               title="Editar usuário" style="width: 36px; height: 36px;">
                                 <span class="material-symbols-outlined fs-5">edit</span>
-                            </button>
+                            </a>
 
-                            <button class="btn btn-light btn-sm rounded-circle p-2 text-secondary d-flex align-items-center justify-content-center"
-                                    title="Excluir usuário"
-                                    style="width: 36px; height: 36px;">
+                            <a class="btn btn-light btn-sm rounded-circle p-2 text-secondary d-flex align-items-center justify-content-center"
+                               asp-action="Delete" asp-route-id="@user.Id"
+                               title="Excluir usuário" style="width: 36px; height: 36px;">
                                 <span class="material-symbols-outlined fs-5">delete</span>
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -93,48 +92,3 @@
     </div>
 </div>
 
-<!-- Modal Overlay Placeholder (Hidden by default) -->
-<div id="user-form-overlay" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 z-3 d-flex justify-content-center align-items-center">
-    <div class="bg-white p-4 rounded-3 shadow-lg" style="max-width: 500px; width: 100%;">
-        <h3 class="h4 mb-3">Novo Usuário</h3>
-        <form id="novo-usuario-form">
-            <div class="mb-3">
-                <label for="nome" class="form-label">Nome</label>
-                <input type="text" class="form-control" id="nome" name="nome" required>
-            </div>
-            
-            <div class="mb-3">
-                <label for="tipo" class="form-label">Tipo</label>
-                <select class="form-select" id="tipo" name="tipo" required onchange="toggleCamposPorTipo()">
-                    <option value="">Selecione o tipo</option>
-                    <option value="Familia">Família</option>
-                    <option value="Agencia">Agência</option>
-                </select>
-            </div>
-            
-            <div class="mb-3" id="campo-telefone">
-                <label for="telefone" class="form-label">Telefone</label>
-                <input type="tel" class="form-control" id="telefone" name="telefone" required>
-            </div>
-            
-            <div class="mb-3 d-none" id="campo-cnpj">
-                <label for="cnpj" class="form-label">CNPJ</label>
-                <input type="text" class="form-control" id="cnpj" name="cnpj" required>
-            </div>
-            
-            <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" name="email" required>
-            </div>
-            
-            <div class="mb-3">
-                <label for="senha" class="form-label">Senha</label>
-                <input type="password" class="form-control" id="senha" name="senha" required>
-            </div>
-        </form>
-        <div class="d-flex justify-content-end mt-4">
-            <button class="btn btn-secondary me-2" onclick="document.getElementById('user-form-overlay').classList.add('d-none')">Cancelar</button>
-            <button class="btn btn-success" onclick="salvarUsuario()">Salvar</button>
-        </div>
-    </div>
-</div>

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace Admin.Models
 {
@@ -14,19 +14,19 @@ namespace Admin.Models
         public string Telefone { get; set; } = string.Empty;
 
         [EmailAddress(ErrorMessage = "Formato de e-mail inválido")]
-        public string Email { get; set; } = string.Empty;
+        public string? Email { get; set; }
 
-        public string CNPJ { get; set; } = string.Empty;
+        public string? CNPJ { get; set; }
 
         [Required(ErrorMessage = "A senha é obrigatória")]
         [MinLength(6, ErrorMessage = "A senha deve ter pelo menos 6 caracteres")]
         public string Senha { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "O tipo de usuário é obrigatório")]
-        public string Tipo { get; set; } = string.Empty; // "Agencia" ou "Familia"
+        public byte Tipo { get; set; } // 2=Família, 1=Agência
 
         // Propriedades de exibição
-        public string TipoFormatado => Tipo?.ToLower() == "agencia" ? "Agência" : "Família";
+        public string TipoFormatado => Tipo == 1 ? "Agência" : "Família";
         public string Identificador => string.IsNullOrWhiteSpace(CNPJ) ? Telefone : CNPJ;
     }
 }

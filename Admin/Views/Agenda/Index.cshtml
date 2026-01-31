@@ -11,10 +11,10 @@
                 <span class="material-symbols-outlined me-2" translate="no">calendar_month</span>
                 Gerenciar Agenda
             </a>
-            <button class="btn btn-success d-flex align-items-center fw-semibold shadow-sm" type="button" onclick="abrirModalAgendamento()">
+            <a class="btn btn-success d-flex align-items-center fw-semibold shadow-sm" asp-action="Create">
                 <span class="material-symbols-outlined me-2" translate="no">add</span>
                 Novo Agendamento
-            </button>
+            </a>
         </div>
     </div>
 
@@ -26,17 +26,17 @@
                     <div class="card-body d-flex flex-column justify-content-between p-4">
                         <div>
                             <h3 class="card-title h5 fw-semibold text-dark mb-2">
-                                @agendamento.Atividade
+                                @agendamento.AtividadeNome
                             </h3>
 
                             <p class="card-text text-secondary small mb-1">
                                 <span class="fw-medium" translate="no">Safra:</span>
-                                <span class="text-truncate">@agendamento.Safra</span>
+                                <span class="text-truncate">@agendamento.SafraNome</span>
                             </p>
 
                             <p class="card-text text-secondary small mb-3">
                                 <span class="fw-medium" translate="no">Data:</span>
-                                @agendamento.Data.ToString("dd/MM/yyyy") - @agendamento.Hora.ToString(@"hh\:mm")
+                                @agendamento.DataFormatada - @agendamento.HoraFormatada
                             </p>
 
                             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -52,25 +52,23 @@
                         </div>
 
                         <div class="d-flex justify-content-end gap-2 mt-3 pt-2">
-                            <button class="btn btn-light btn-sm rounded-circle p-2 text-secondary d-flex align-items-center justify-content-center"
-                                    title="Ver detalhes"
-                                    style="width: 36px; height: 36px;">
+                            <a class="btn btn-light btn-sm rounded-circle p-2 text-secondary d-flex align-items-center justify-content-center"
+                               asp-action="Details" asp-route-id="@agendamento.Id"
+                               title="Ver detalhes" style="width: 36px; height: 36px;">
                                 <span class="material-symbols-outlined fs-5" translate="no">visibility</span>
-                            </button>
+                            </a>
 
-                            <button class="btn btn-light btn-sm rounded-circle p-2 text-secondary d-flex align-items-center justify-content-center"
-                                    onclick="editarAgendamento(@agendamento.Id, '@agendamento.Atividade', '@agendamento.Safra', '@agendamento.Data.ToString("yyyy-MM-dd")', '@agendamento.Hora.ToString(@"hh\:mm")', @agendamento.VagasTotais, @agendamento.VagasDisponiveis)"
-                                    title="Editar agendamento"
-                                    style="width: 36px; height: 36px;">
+                            <a class="btn btn-light btn-sm rounded-circle p-2 text-secondary d-flex align-items-center justify-content-center"
+                               asp-action="Edit" asp-route-id="@agendamento.Id"
+                               title="Editar agendamento" style="width: 36px; height: 36px;">
                                 <span class="material-symbols-outlined fs-5" translate="no">edit</span>
-                            </button>
+                            </a>
 
-                            <button class="btn btn-light btn-sm rounded-circle p-2 text-secondary d-flex align-items-center justify-content-center"
-                                    onclick="excluirAgendamento(@agendamento.Id, '@agendamento.Atividade')"
-                                    title="Excluir agendamento"
-                                    style="width: 36px; height: 36px;">
+                            <a class="btn btn-light btn-sm rounded-circle p-2 text-secondary d-flex align-items-center justify-content-center"
+                               asp-action="Delete" asp-route-id="@agendamento.Id"
+                               title="Excluir agendamento" style="width: 36px; height: 36px;">
                                 <span class="material-symbols-outlined fs-5" translate="no">delete</span>
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -100,72 +98,4 @@
     </div>
 </div>
 
-<!-- Modal Overlay Placeholder (Hidden by default) -->
-<div id="agendamento-form-overlay" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 z-3 d-flex justify-content-center align-items-center">
-    <div class="bg-white p-4 rounded-3 shadow-lg" style="max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto;">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3 class="h4 mb-0" id="modal-titulo">Novo Agendamento</h3>
-            <button class="btn btn-link text-muted p-0" onclick="fecharModalAgendamento()" style="font-size: 1.5rem; line-height: 1;">
-                <span class="material-symbols-outlined" translate="no">close</span>
-            </button>
-        </div>
-        <form id="novo-agendamento-form">
-            <input type="hidden" id="agendamentoId" name="agendamentoId">
-            
-            <div class="mb-3">
-                <label for="atividade" class="form-label">Atividade</label>
-                <select class="form-select" id="atividade" name="atividade" required>
-                    <option value="">Selecione uma atividade</option>
-                    <option value="Colheita de Uva">Colheita de Uva</option>
-                    <option value="Colheita de Goiaba">Colheita de Goiaba</option>
-                    <option value="Colheita de Morango">Colheita de Morango</option>
-                    <option value="Colheita de Lichia">Colheita de Lichia</option>
-                    <option value="Plantio de Uva">Plantio de Uva</option>
-                    <option value="Plantio de Goiaba">Plantio de Goiaba</option>
-                    <option value="Plantio de Morango">Plantio de Morango</option>
-                    <option value="Aplicação de Fertilizante">Aplicação de Fertilizante</option>
-                    <option value="Irrigação">Irrigação</option>
-                </select>
-            </div>
-            
-            <div class="mb-3">
-                <label for="safra" class="form-label">Safra</label>
-                <select class="form-select" id="safra" name="safra" required>
-                    <option value="">Selecione uma safra</option>
-                    <option value="Janeiro - uva, goiaba, morango, lichia">Janeiro - uva, goiaba, morango, lichia</option>
-                    <option value="Fevereiro - uva, goiaba, morango">Fevereiro - uva, goiaba, morango</option>
-                    <option value="Março - uva, goiaba">Março - uva, goiaba</option>
-                    <option value="Abril - goiaba, morango">Abril - goiaba, morango</option>
-                    <option value="Maio - uva, goiaba, morango">Maio - uva, goiaba, morango</option>
-                </select>
-            </div>
-            
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="data" class="form-label">Data</label>
-                    <input type="date" class="form-control" id="data" name="data" required>
-                </div>
-                
-                <div class="col-md-6 mb-3">
-                    <label for="hora" class="form-label">Hora</label>
-                    <input type="time" class="form-control" id="hora" name="hora" required>
-                </div>
-            </div>
-            
-            <div class="mb-3">
-                <label for="vagasTotais" class="form-label">Vagas Totais</label>
-                <input type="number" class="form-control" id="vagasTotais" name="vagasTotais" min="1" placeholder="Ex: 20" required>
-            </div>
-            
-            <div class="mb-3">
-                <label for="vagasDisponiveis" class="form-label">Vagas Disponíveis</label>
-                <input type="number" class="form-control" id="vagasDisponiveis" name="vagasDisponiveis" min="0" placeholder="Ex: 5" required>
-            </div>
-        </form>
-        <div class="d-flex justify-content-end mt-4">
-            <button class="btn btn-secondary me-2" onclick="fecharModalAgendamento()">Cancelar</button>
-            <button class="btn btn-success" onclick="salvarAgendamento()">Salvar</button>
-        </div>
-    </div>
-</div>
 

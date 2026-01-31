@@ -20,7 +20,13 @@
                             <label asp-for="AgendaId" class="form-label fw-medium">Agendamento</label>
                             <select asp-for="AgendaId" class="form-select" required>
                                 <option value="">Selecione um agendamento</option>
-                                <!-- As opções serão carregadas via API -->
+                                @if (ViewBag.Agendas is IEnumerable<Admin.Models.AgendamentoViewModel> agendas && agendas.Any())
+                                {
+                                    foreach (var agenda in agendas)
+                                    {
+                                        <option value="@agenda.Id">#@agenda.Id - @agenda.AtividadeNome (@agenda.DataHoraFormatada)</option>
+                                    }
+                                }
                             </select>
                             <span asp-validation-for="AgendaId" class="text-danger"></span>
                         </div>
@@ -29,7 +35,13 @@
                             <label asp-for="UsuarioId" class="form-label fw-medium">Usuário</label>
                             <select asp-for="UsuarioId" class="form-select" required>
                                 <option value="">Selecione um usuário</option>
-                                <!-- As opções serão carregadas via API -->
+                                @if (ViewBag.Usuarios is IEnumerable<Admin.Models.UsuarioViewModel> usuarios && usuarios.Any())
+                                {
+                                    foreach (var usuario in usuarios)
+                                    {
+                                        <option value="@usuario.Id">@usuario.Nome (@usuario.Identificador)</option>
+                                    }
+                                }
                             </select>
                             <span asp-validation-for="UsuarioId" class="text-danger"></span>
                         </div>

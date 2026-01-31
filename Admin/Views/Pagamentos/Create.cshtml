@@ -19,7 +19,13 @@
                             <label asp-for="ReservaId" class="form-label fw-medium">Reserva</label>
                             <select asp-for="ReservaId" class="form-select" required>
                                 <option value="">Selecione uma reserva</option>
-                                <!-- As opções serão carregadas via API -->
+                                @if (ViewBag.Reservas is IEnumerable<Admin.Models.ReservaViewModel> reservas && reservas.Any())
+                                {
+                                    foreach (var reserva in reservas)
+                                    {
+                                        <option value="@reserva.Id">#@reserva.Id - @reserva.UsuarioNome (@reserva.AgendaDescricao)</option>
+                                    }
+                                }
                             </select>
                             <span asp-validation-for="ReservaId" class="text-danger"></span>
                         </div>

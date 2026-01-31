@@ -6,10 +6,10 @@
 <div class="container-fluid px-0 mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h2 fw-bold text-dark mb-0">Gerenciar Atividades</h1>
-        <button class="btn btn-success d-flex align-items-center fw-semibold shadow-sm" type="button" onclick="document.getElementById('atividade-form-overlay').classList.remove('d-none')">
+        <a class="btn btn-success d-flex align-items-center fw-semibold shadow-sm" asp-action="Create">
             <span class="material-symbols-outlined me-2">add</span>
             Nova Atividade
-        </button>
+        </a>
     </div>
 
     <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
@@ -26,26 +26,28 @@
                             </p>
 
                             <p class="card-text text-secondary small mb-0">
-                                Valor: <span class="fw-medium text-dark">@atividade.ValorPorHaFormatado</span> / ha
+                                Valor: <span class="fw-medium text-dark">@atividade.ValorFormatado</span>
                             </p>
                         </div>
 
                         <div class="d-flex justify-content-end gap-2 mt-3 pt-2">
-                            <button class="btn btn-light btn-sm rounded-circle p-2 text-secondary d-flex align-items-center justify-content-center"
-                                    title="Ver detalhes" style="width:36px;height:36px;">
+                            <a class="btn btn-light btn-sm rounded-circle p-2 text-secondary d-flex align-items-center justify-content-center"
+                               asp-action="Details" asp-route-id="@atividade.Id"
+                               title="Ver detalhes" style="width:36px;height:36px;">
                                 <span class="material-symbols-outlined fs-5">visibility</span>
-                            </button>
+                            </a>
 
-                            <button class="btn btn-light btn-sm rounded-circle p-2 text-secondary d-flex align-items-center justify-content-center"
-                                    title="Editar atividade" onclick="document.getElementById('atividade-form-overlay').classList.remove('d-none')"
-                                    style="width:36px;height:36px;">
+                            <a class="btn btn-light btn-sm rounded-circle p-2 text-secondary d-flex align-items-center justify-content-center"
+                               asp-action="Edit" asp-route-id="@atividade.Id"
+                               title="Editar atividade" style="width:36px;height:36px;">
                                 <span class="material-symbols-outlined fs-5">edit</span>
-                            </button>
+                            </a>
 
-                            <button class="btn btn-light btn-sm rounded-circle p-2 text-danger d-flex align-items-center justify-content-center"
-                                    title="Excluir atividade" style="width:36px;height:36px;">
+                            <a class="btn btn-light btn-sm rounded-circle p-2 text-danger d-flex align-items-center justify-content-center"
+                               asp-action="Delete" asp-route-id="@atividade.Id"
+                               title="Excluir atividade" style="width:36px;height:36px;">
                                 <span class="material-symbols-outlined fs-5">delete</span>
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -53,9 +55,9 @@
         }
     </div>
 
-    <!-- Pagination (mesma estrutura de Usuários / Safras / Reservas) -->
+    <!-- Pagination (mesma estrutura de Usuï¿½rios / Safras / Reservas) -->
     <div class="d-flex justify-content-end mt-4">
-        <nav aria-label="Navegação de página">
+        <nav aria-label="Navegaï¿½ï¿½o de pï¿½gina">
             <ul class="pagination">
                 <li class="page-item disabled">
                     <a class="page-link" href="#" aria-label="Anterior">
@@ -66,7 +68,7 @@
                 <li class="page-item"><a class="page-link" href="#">2</a></li>
                 <li class="page-item"><a class="page-link" href="#">3</a></li>
                 <li class="page-item">
-                    <a class="page-link" href="#" aria-label="Próximo">
+                    <a class="page-link" href="#" aria-label="Prï¿½ximo">
                         <span aria-hidden="true">&raquo;</span>
                     </a>
                 </li>
@@ -75,30 +77,3 @@
     </div>
 </div>
 
-<!-- Modal Overlay Placeholder (Hidden by default) -->
-<div id="atividade-form-overlay" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 z-3 d-flex justify-content-center align-items-center">
-    <div class="bg-white p-4 rounded-3 shadow-lg" style="max-width: 600px; width: 100%;">
-        <h3 class="h4 mb-3">Nova / Editar Atividade</h3>
-        <form id="atividade-form">
-            <div class="mb-3">
-                <label for="nome" class="form-label">Nome</label>
-                <input type="text" class="form-control" id="nome" name="nome" required />
-            </div>
-
-            <div class="mb-3">
-                <label for="descricao" class="form-label">Descrição</label>
-                <textarea class="form-control" id="descricao" name="descricao" rows="3"></textarea>
-            </div>
-
-            <div class="mb-3">
-                <label for="valorPorHa" class="form-label">Valor por ha</label>
-                <input type="number" step="0.01" class="form-control" id="valorPorHa" name="valorPorHa" />
-            </div>
-        </form>
-
-        <div class="d-flex justify-content-end mt-3">
-            <button class="btn btn-secondary me-2" onclick="document.getElementById('atividade-form-overlay').classList.add('d-none')">Cancelar</button>
-            <button class="btn btn-success" onclick="salvarAtividade()">Salvar</button>
-        </div>
-    </div>
-</div>

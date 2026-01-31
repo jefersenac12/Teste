@@ -25,8 +25,8 @@
                             <label asp-for="Tipo" class="form-label fw-medium">Tipo de Usuário</label>
                             <select asp-for="Tipo" class="form-select" required onchange="toggleCamposPorTipo()">
                                 <option value="">Selecione o tipo</option>
-                                <option value="Familia">Família</option>
-                                <option value="Agencia">Agência</option>
+                                <option value="2">Família</option>
+                                <option value="1">Agência</option>
                             </select>
                             <span asp-validation-for="Tipo" class="text-danger"></span>
                         </div>
@@ -45,7 +45,7 @@
                         
                         <div class="mb-3">
                             <label asp-for="Email" class="form-label fw-medium">Email</label>
-                            <input asp-for="Email" class="form-control" type="email" required />
+                            <input asp-for="Email" class="form-control" type="email" />
                             <span asp-validation-for="Email" class="text-danger"></span>
                         </div>
                         
@@ -79,7 +79,7 @@
             const campoCnpj = document.getElementById('campo-cnpj');
             const cnpjInput = document.getElementById('CNPJ');
             
-            if (tipo === 'Agencia') {
+            if (tipo === '1') {
                 campoCnpj.classList.remove('d-none');
                 cnpjInput.required = true;
             } else {

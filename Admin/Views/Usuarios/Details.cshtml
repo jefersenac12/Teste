@@ -16,7 +16,7 @@
                         <div>
                             <span class="badge rounded-pill fw-medium px-3 py-2 text-dark fs-6"
                                   style="background-color: @(Model.Tipo == 2 ? "#FEF9C3" : "#DCFCE7")">
-                                @Model.TipoDescricao
+                                @Model.TipoFormatado
                             </span>
                         </div>
                     </div>
@@ -45,15 +45,12 @@
                             <h5 class="fw-medium mb-3">Informações de Contato</h5>
                             <div class="mb-3">
                                 <small class="text-muted">Email:</small>
-                                <p class="fw-medium">@Model.Email</p>
+                                <p class="fw-medium">@(!string.IsNullOrEmpty(Model.Email) ? Model.Email : "—")</p>
                             </div>
-                            @if (Model.Tipo == 2 && !string.IsNullOrEmpty(Model.CNPJ))
-                            {
-                                <div class="mb-3">
-                                    <small class="text-muted">CNPJ:</small>
-                                    <p class="fw-medium">@Model.CNPJ</p>
-                                </div>
-                            }
+                            <div class="mb-3">
+                                <small class="text-muted">CNPJ:</small>
+                                <p class="fw-medium">@((Model.Tipo == 1 && !string.IsNullOrEmpty(Model.CNPJ)) ? Model.CNPJ : "—")</p>
+                            </div>
                         </div>
                     </div>
                     

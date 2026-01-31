@@ -28,7 +28,7 @@
                             </div>
                             <div class="col-sm-6">
                                 <small class="text-muted">Atividade:</small>
-                                <p class="fw-medium">@Model.AtividadeNome</p>
+                                <p class="fw-medium">@Model.AgendaDescricao</p>
                             </div>
                         </div>
                         <div class="row mt-2">
@@ -38,7 +38,7 @@
                             </div>
                             <div class="col-sm-6">
                                 <small class="text-muted">Data da Reserva:</small>
-                                <p class="fw-medium">@Model.DataReserva.ToString("dd/MM/yyyy")</p>
+                                <p class="fw-medium">@Model.DataReservaFormatada</p>
                             </div>
                         </div>
                         <div class="row mt-2">
@@ -48,13 +48,13 @@
                             </div>
                             <div class="col-sm-6">
                                 <small class="text-muted">Valor Total:</small>
-                                <p class="fw-medium text-success">R$ @Model.ValorTotal.ToString("N2")</p>
+                                <p class="fw-medium text-success">@Model.ValorTotalFormatado</p>
                             </div>
                         </div>
                         <div class="row mt-2">
                             <div class="col-12">
                                 <small class="text-muted">Data/Hora do Agendamento:</small>
-                                <p class="fw-medium">@Model.DataHoraAgendamento</p>
+                                <p class="fw-medium">@Model.DataReservaFormatada</p>
                             </div>
                         </div>
                     </div>

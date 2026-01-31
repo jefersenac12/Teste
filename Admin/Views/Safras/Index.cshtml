@@ -6,10 +6,10 @@
 <div class="container-fluid px-0 mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h2 fw-bold text-dark mb-0">Gerenciar Safras</h1>
-        <button class="btn btn-success d-flex align-items-center fw-semibold shadow-sm" type="button" onclick="document.getElementById('safra-form-overlay').classList.remove('d-none')">
+        <a class="btn btn-success d-flex align-items-center fw-semibold shadow-sm" asp-action="Create">
             <span class="material-symbols-outlined me-2" translate="no">add</span>
             Nova Safra
-        </button>
+        </a>
     </div>
 
     <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
@@ -35,25 +35,23 @@
                         </div>
 
                         <div class="d-flex justify-content-end gap-2 mt-3 pt-2">
-                            <button class="btn btn-light btn-sm rounded-circle p-2 text-secondary d-flex align-items-center justify-content-center"
-                                    title="Ver detalhes"
-                                    style="width: 36px; height: 36px;">
+                            <a class="btn btn-light btn-sm rounded-circle p-2 text-secondary d-flex align-items-center justify-content-center"
+                               asp-action="Details" asp-route-id="@safra.Id"
+                               title="Ver detalhes" style="width: 36px; height: 36px;">
                                 <span class="material-symbols-outlined fs-5" translate="no">visibility</span>
-                            </button>
+                            </a>
 
-                            <button class="btn btn-light btn-sm rounded-circle p-2 text-secondary d-flex align-items-center justify-content-center"
-                                    onclick="editarSafra(@safra.Id, '@safra.Nome', '@safra.DataInicio.ToString("yyyy-MM-dd")', '@safra.DataFim.ToString("yyyy-MM-dd")')"
-                                    title="Editar safra"
-                                    style="width: 36px; height: 36px;">
+                            <a class="btn btn-light btn-sm rounded-circle p-2 text-secondary d-flex align-items-center justify-content-center"
+                               asp-action="Edit" asp-route-id="@safra.Id"
+                               title="Editar safra" style="width: 36px; height: 36px;">
                                 <span class="material-symbols-outlined fs-5" translate="no">edit</span>
-                            </button>
+                            </a>
 
-                            <button class="btn btn-light btn-sm rounded-circle p-2 text-secondary d-flex align-items-center justify-content-center"
-                                    onclick="excluirSafra(@safra.Id, '@safra.Nome')"
-                                    title="Excluir safra"
-                                    style="width: 36px; height: 36px;">
+                            <a class="btn btn-light btn-sm rounded-circle p-2 text-secondary d-flex align-items-center justify-content-center"
+                               asp-action="Delete" asp-route-id="@safra.Id"
+                               title="Excluir safra" style="width: 36px; height: 36px;">
                                 <span class="material-symbols-outlined fs-5" translate="no">delete</span>
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -83,29 +81,3 @@
     </div>
 </div>
 
-<!-- Modal Overlay Placeholder (Hidden by default) -->
-<div id="safra-form-overlay" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 z-3 d-flex justify-content-center align-items-center">
-    <div class="bg-white p-4 rounded-3 shadow-lg" style="max-width: 500px; width: 100%;">
-        <h3 class="h4 mb-3">Nova Safra</h3>
-        <form id="nova-safra-form">
-            <div class="mb-3">
-                <label for="nome" class="form-label">Nome da Safra</label>
-                <input type="text" class="form-control" id="nome" name="nome" required>
-            </div>
-            
-            <div class="mb-3">
-                <label for="dataInicio" class="form-label">Data de Início</label>
-                <input type="date" class="form-control" id="dataInicio" name="dataInicio" required>
-            </div>
-            
-            <div class="mb-3">
-                <label for="dataFim" class="form-label">Data de Término</label>
-                <input type="date" class="form-control" id="dataFim" name="dataFim" required>
-            </div>
-        </form>
-        <div class="d-flex justify-content-end mt-4">
-            <button class="btn btn-secondary me-2" onclick="document.getElementById('safra-form-overlay').classList.add('d-none')">Cancelar</button>
-            <button class="btn btn-success" onclick="salvarSafra()">Salvar</button>
-        </div>
-    </div>
-</div>

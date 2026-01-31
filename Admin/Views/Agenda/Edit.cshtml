@@ -20,7 +20,13 @@
                             <label asp-for="SafraId" class="form-label fw-medium">Safra</label>
                             <select asp-for="SafraId" class="form-select" required>
                                 <option value="">Selecione uma safra</option>
-                                <!-- As opções serão carregadas via API -->
+                                @if (ViewBag.Safras is IEnumerable<Admin.Models.SafraViewModel> safras && safras.Any())
+                                {
+                                    foreach (var s in safras)
+                                    {
+                                        <option value="@s.Id">@s.Nome (@s.DataInicio.ToString("dd/MM/yyyy") - @s.DataFim.ToString("dd/MM/yyyy"))</option>
+                                    }
+                                }
                             </select>
                             <span asp-validation-for="SafraId" class="text-danger"></span>
                         </div>
@@ -29,7 +35,13 @@
                             <label asp-for="AtividadeId" class="form-label fw-medium">Atividade</label>
                             <select asp-for="AtividadeId" class="form-select" required>
                                 <option value="">Selecione uma atividade</option>
-                                <!-- As opções serão carregadas via API -->
+                                @if (ViewBag.Atividades is IEnumerable<Admin.Models.AtividadeViewModel> atividades && atividades.Any())
+                                {
+                                    foreach (var a in atividades)
+                                    {
+                                        <option value="@a.Id">@a.Nome (@a.ValorFormatado)</option>
+                                    }
+                                }
                             </select>
                             <span asp-validation-for="AtividadeId" class="text-danger"></span>
                         </div>

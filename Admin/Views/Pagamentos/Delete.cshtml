@@ -34,11 +34,11 @@
                         <div class="row mt-2">
                             <div class="col-sm-6">
                                 <small class="text-muted">Cliente:</small>
-                                <p class="fw-medium">@Model.UsuarioNome</p>
+                                <p class="fw-medium">@Model.ClienteNome</p>
                             </div>
                             <div class="col-sm-6">
                                 <small class="text-muted">Atividade:</small>
-                                <p class="fw-medium">@Model.AtividadeNome</p>
+                                <p class="fw-medium">@Model.ReservaDescricao</p>
                             </div>
                         </div>
                         <div class="row mt-2">
@@ -65,7 +65,7 @@
                         <div class="row mt-2">
                             <div class="col-12">
                                 <small class="text-muted">Data do Pagamento:</small>
-                                <p class="fw-medium">@Model.DataPagamento.ToString("dd/MM/yyyy HH:mm")</p>
+                                <p class="fw-medium">@Model.DataPagamentoFormatada</p>
                             </div>
                         </div>
                         @if (!string.IsNullOrEmpty(Model.ChavePix))

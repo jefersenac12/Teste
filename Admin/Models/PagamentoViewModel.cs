@@ -19,8 +19,7 @@ namespace Admin.Models
         [Required(ErrorMessage = "O status é obrigatório")]
         public string Status { get; set; } = string.Empty; // "Pago", "Pendente", "Cancelado"
 
-        [Required(ErrorMessage = "A data do pagamento é obrigatória")]
-        public DateTime DataPagamento { get; set; }
+        public DateTime? DataPagamento { get; set; }
 
         public string? ChavePix { get; set; }
         public string? QrCode { get; set; }
@@ -30,7 +29,7 @@ namespace Admin.Models
         public string? ClienteNome { get; set; }
 
         // Propriedades calculadas
-        public string DataPagamentoFormatada => DataPagamento.ToString("dd/MM/yyyy HH:mm");
+        public string DataPagamentoFormatada => DataPagamento.HasValue ? DataPagamento.Value.ToString("dd/MM/yyyy HH:mm") : "-";
         public string ValorFormatado => Valor.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"));
         public string StatusFormatado => Status?.ToUpper() ?? "";
         public bool EstaPago => Status?.ToLower() == "pago";
