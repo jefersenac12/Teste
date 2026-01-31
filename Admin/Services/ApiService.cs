@@ -7,587 +7,224 @@ namespace Admin.Services
     public class ApiService
     {
         private readonly HttpClient _httpClient;
-        private readonly string _baseUrl;
+        private readonly string _baseUrl = "http://tiijeferson.runasp.net/api";
 
-        public ApiService(IConfiguration configuration)
+        public ApiService(HttpClient httpClient)
         {
-            _httpClient = new HttpClient();
-            _baseUrl = configuration["ApiSettings:BaseUrl"] ?? "http://tiijeferson.runasp.net/api";
-            _httpClient.DefaultRequestHeaders.Add("User-Agent", "Admin-ASPNET");
+            _httpClient = httpClient;
         }
 
-        #region Usuarios
-        public async Task<List<UsuarioViewModel>?> GetUsuariosAsync()
+        // Usuários
+        public async Task<List<UsuarioViewModel>> GetUsuariosAsync()
         {
-            try
-            {
-                var response = await _httpClient.GetAsync($"{_baseUrl}/Usuario");
-                if (!response.IsSuccessStatusCode)
-                    return new List<UsuarioViewModel>();
+            var response = await _httpClient.GetAsync($"{_baseUrl}/Usuario");
 
-                var content = await response.Content.ReadAsStringAsync();
-                var usuariosApi = JsonSerializer.Deserialize<List<dynamic>>(content, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-
-                if (usuariosApi == null)
-                    return new List<UsuarioViewModel>();
-
-                // Mapear dados da API para nosso ViewModel
-                var usuarios = new List<UsuarioViewModel>();
-                foreach (var usuarioApi in usuariosApi)
-                {
-                    usuarios.Add(new UsuarioViewModel
-                    {
-                        Id = usuarioApi.id,
-                        Nome = usuarioApi.nome,
-                        Telefone = usuarioApi.telefone,
-                        Email = usuarioApi.email,
-                        CNPJ = usuarioApi.cnpj,
-                        Senha = usuarioApi.senha,
-                        Tipo = usuarioApi.tipo == 2 ? "Agencia" : "Familia"
-                    });
-                }
-
-                return usuarios;
-            }
-            catch
+            if (!response.IsSuccessStatusCode)
             {
                 return new List<UsuarioViewModel>();
             }
+
+            var json = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<List<UsuarioViewModel>>(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            }) ?? new List<UsuarioViewModel>();
         }
 
         public async Task<UsuarioViewModel?> GetUsuarioByIdAsync(int id)
         {
-            try
+            var response = await _httpClient.GetAsync($"{_baseUrl}/Usuario/{id}");
+            if (!response.IsSuccessStatusCode) return null;
+
+            var json = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<UsuarioViewModel>(json, new JsonSerializerOptions
             {
-                var response = await _httpClient.GetAsync($"{_baseUrl}/Usuario/{id}");
-                if (!response.IsSuccessStatusCode)
-                    return null;
-
-                var content = await response.Content.ReadAsStringAsync();
-                var usuarioApi = JsonSerializer.Deserialize<dynamic>(content, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-
-                if (usuarioApi == null)
-                    return null;
-
-                // Mapear dados da API para nosso ViewModel
-                return new UsuarioViewModel
-                {
-                    Id = usuarioApi.id,
-                    Nome = usuarioApi.nome,
-                    Telefone = usuarioApi.telefone,
-                    Email = usuarioApi.email,
-                    CNPJ = usuarioApi.cnpj,
-                    Senha = usuarioApi.senha,
-                    Tipo = usuarioApi.tipo == 2 ? "Agencia" : "Familia"
-                };
-            }
-            catch
-            {
-                return null;
-            }
+                PropertyNameCaseInsensitive = true
+            });
         }
 
         public async Task<bool> CreateUsuarioAsync(UsuarioViewModel usuario)
         {
-            try
-            {
-                // Converter ViewModel para formato da API
-                var usuarioApi = new
-                {
-                    nome = usuario.Nome,
-                    telefone = usuario.Telefone,
-                    email = usuario.Email,
-                    cnpj = usuario.CNPJ,
-                    senha = usuario.Senha,
-                    tipo = usuario.Tipo?.ToLower() == "agencia" ? 2 : 1
-                };
+            var json = JsonSerializer.Serialize(usuario);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var json = JsonSerializer.Serialize(usuarioApi);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-                
-                var endpoint = usuario.Tipo?.ToLower() == "agencia" 
-                    ? $"{_baseUrl}/Usuario/cadastrarAgencia"
-                    : $"{_baseUrl}/Usuario/cadastrarFamilia";
-
-                var response = await _httpClient.PostAsync(endpoint, content);
-                return response.IsSuccessStatusCode;
-            }
-            catch
-            {
-                return false;
-            }
+            var response = await _httpClient.PostAsync($"{_baseUrl}/Usuario/cadastrar", content);
+            return response.IsSuccessStatusCode;
         }
 
-        public async Task<bool> UpdateUsuarioAsync(int id, UsuarioViewModel usuario)
+        public async Task<bool> UpdateUsuarioAsync(UsuarioViewModel usuario)
         {
-            try
-            {
-                // Converter ViewModel para formato da API
-                var usuarioApi = new
-                {
-                    id = id,
-                    nome = usuario.Nome,
-                    telefone = usuario.Telefone,
-                    email = usuario.Email,
-                    cnpj = usuario.CNPJ,
-                    senha = usuario.Senha,
-                    tipo = usuario.Tipo?.ToLower() == "agencia" ? 2 : 1
-                };
+            var json = JsonSerializer.Serialize(usuario);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var json = JsonSerializer.Serialize(usuarioApi);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var response = await _httpClient.PutAsync($"{_baseUrl}/Usuario/{id}", content);
-                return response.IsSuccessStatusCode;
-            }
-            catch
-            {
-                return false;
-            }
+            var response = await _httpClient.PutAsync($"{_baseUrl}/Usuario/{usuario.Id}", content);
+            return response.IsSuccessStatusCode;
         }
 
         public async Task<bool> DeleteUsuarioAsync(int id)
         {
-            try
-            {
-                var response = await _httpClient.DeleteAsync($"{_baseUrl}/Usuario/{id}");
-                return response.IsSuccessStatusCode;
-            }
-            catch
-            {
-                return false;
-            }
+            var response = await _httpClient.DeleteAsync($"{_baseUrl}/Usuario/{id}");
+            return response.IsSuccessStatusCode;
         }
-        #endregion
 
-        #region Safras
-        public async Task<List<SafraViewModel>?> GetSafrasAsync()
+        // Safras
+        public async Task<List<SafraViewModel>> GetSafrasAsync()
         {
-            try
-            {
-                var response = await _httpClient.GetAsync($"{_baseUrl}/Safra");
-                if (!response.IsSuccessStatusCode)
-                    return new List<SafraViewModel>();
+            var response = await _httpClient.GetAsync($"{_baseUrl}/Safra");
 
-                var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<List<SafraViewModel>>(content, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-            }
-            catch
+            if (!response.IsSuccessStatusCode)
             {
                 return new List<SafraViewModel>();
             }
-        }
 
-        public async Task<SafraViewModel?> GetSafraByIdAsync(int id)
-        {
-            try
+            var json = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<List<SafraViewModel>>(json, new JsonSerializerOptions
             {
-                var response = await _httpClient.GetAsync($"{_baseUrl}/Safra/{id}");
-                if (!response.IsSuccessStatusCode)
-                    return null;
-
-                var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<SafraViewModel>(content, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-            }
-            catch
-            {
-                return null;
-            }
+                PropertyNameCaseInsensitive = true
+            }) ?? new List<SafraViewModel>();
         }
 
         public async Task<bool> CreateSafraAsync(SafraViewModel safra)
         {
-            try
-            {
-                var json = JsonSerializer.Serialize(safra);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var response = await _httpClient.PostAsync($"{_baseUrl}/Safra", content);
-                return response.IsSuccessStatusCode;
-            }
-            catch
-            {
-                return false;
-            }
+            var json = JsonSerializer.Serialize(safra);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync($"{_baseUrl}/Safra/cadastrar", content);
+            return response.IsSuccessStatusCode;
         }
 
-        public async Task<bool> UpdateSafraAsync(int id, SafraViewModel safra)
+        public async Task<bool> UpdateSafraAsync(SafraViewModel safra)
         {
-            try
-            {
-                var json = JsonSerializer.Serialize(safra);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var response = await _httpClient.PutAsync($"{_baseUrl}/Safra/{id}", content);
-                return response.IsSuccessStatusCode;
-            }
-            catch
-            {
-                return false;
-            }
+            var json = JsonSerializer.Serialize(safra);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PutAsync($"{_baseUrl}/Safra/{safra.Id}", content);
+            return response.IsSuccessStatusCode;
         }
 
         public async Task<bool> DeleteSafraAsync(int id)
         {
-            try
-            {
-                var response = await _httpClient.DeleteAsync($"{_baseUrl}/Safra/{id}");
-                return response.IsSuccessStatusCode;
-            }
-            catch
-            {
-                return false;
-            }
+            var response = await _httpClient.DeleteAsync($"{_baseUrl}/Safra/{id}");
+            return response.IsSuccessStatusCode;
         }
-        #endregion
 
-        #region Atividades
-        public async Task<List<AtividadeViewModel>?> GetAtividadesAsync()
+        // Atividades
+        public async Task<List<AtividadeViewModel>> GetAtividadesAsync()
         {
-            try
-            {
-                var response = await _httpClient.GetAsync($"{_baseUrl}/Atividade");
-                if (!response.IsSuccessStatusCode)
-                    return new List<AtividadeViewModel>();
+            var response = await _httpClient.GetAsync($"{_baseUrl}/Atividade");
 
-                var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<List<AtividadeViewModel>>(content, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-            }
-            catch
+            if (!response.IsSuccessStatusCode)
             {
                 return new List<AtividadeViewModel>();
             }
-        }
 
-        public async Task<AtividadeViewModel?> GetAtividadeByIdAsync(int id)
-        {
-            try
+            var json = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<List<AtividadeViewModel>>(json, new JsonSerializerOptions
             {
-                var response = await _httpClient.GetAsync($"{_baseUrl}/Atividade/{id}");
-                if (!response.IsSuccessStatusCode)
-                    return null;
-
-                var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<AtividadeViewModel>(content, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-            }
-            catch
-            {
-                return null;
-            }
+                PropertyNameCaseInsensitive = true
+            }) ?? new List<AtividadeViewModel>();
         }
 
         public async Task<bool> CreateAtividadeAsync(AtividadeViewModel atividade)
         {
-            try
-            {
-                var json = JsonSerializer.Serialize(atividade);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var response = await _httpClient.PostAsync($"{_baseUrl}/Atividade", content);
-                return response.IsSuccessStatusCode;
-            }
-            catch
-            {
-                return false;
-            }
+            var json = JsonSerializer.Serialize(atividade);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync($"{_baseUrl}/Atividade/cadastrar", content);
+            return response.IsSuccessStatusCode;
         }
 
-        public async Task<bool> UpdateAtividadeAsync(int id, AtividadeViewModel atividade)
+        public async Task<bool> UpdateAtividadeAsync(AtividadeViewModel atividade)
         {
-            try
-            {
-                var json = JsonSerializer.Serialize(atividade);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var response = await _httpClient.PutAsync($"{_baseUrl}/Atividade/{id}", content);
-                return response.IsSuccessStatusCode;
-            }
-            catch
-            {
-                return false;
-            }
+            var json = JsonSerializer.Serialize(atividade);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PutAsync($"{_baseUrl}/Atividade/{atividade.Id}", content);
+            return response.IsSuccessStatusCode;
         }
 
         public async Task<bool> DeleteAtividadeAsync(int id)
         {
-            try
-            {
-                var response = await _httpClient.DeleteAsync($"{_baseUrl}/Atividade/{id}");
-                return response.IsSuccessStatusCode;
-            }
-            catch
-            {
-                return false;
-            }
+            var response = await _httpClient.DeleteAsync($"{_baseUrl}/Atividade/{id}");
+            return response.IsSuccessStatusCode;
         }
-        #endregion
 
-        #region Agenda
-        public async Task<List<AgendamentoViewModel>?> GetAgendaAsync()
+        // Agenda
+        public async Task<List<AgendamentoViewModel>> GetAgendaAsync()
         {
-            try
-            {
-                var response = await _httpClient.GetAsync($"{_baseUrl}/agenda");
-                if (!response.IsSuccessStatusCode)
-                    return new List<AgendamentoViewModel>();
+            var response = await _httpClient.GetAsync($"{_baseUrl}/Agenda");
 
-                var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<List<AgendamentoViewModel>>(content, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-            }
-            catch
+            if (!response.IsSuccessStatusCode)
             {
                 return new List<AgendamentoViewModel>();
             }
+
+            var json = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<List<AgendamentoViewModel>>(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            }) ?? new List<AgendamentoViewModel>();
         }
 
-        public async Task<AgendamentoViewModel?> GetAgendaByIdAsync(int id)
+        public async Task<bool> CreateAgendamentoAsync(AgendamentoViewModel agendamento)
         {
-            try
-            {
-                var response = await _httpClient.GetAsync($"{_baseUrl}/agenda/{id}");
-                if (!response.IsSuccessStatusCode)
-                    return null;
+            var json = JsonSerializer.Serialize(agendamento);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<AgendamentoViewModel>(content, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-            }
-            catch
-            {
-                return null;
-            }
+            var response = await _httpClient.PostAsync($"{_baseUrl}/Agenda/cadastrar", content);
+            return response.IsSuccessStatusCode;
         }
 
-        public async Task<bool> CreateAgendaAsync(AgendamentoViewModel agenda)
+        // Reservas
+        public async Task<List<ReservaViewModel>> GetReservasAsync()
         {
-            try
-            {
-                var json = JsonSerializer.Serialize(agenda);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var response = await _httpClient.PostAsync($"{_baseUrl}/agenda", content);
-                return response.IsSuccessStatusCode;
-            }
-            catch
-            {
-                return false;
-            }
-        }
+            var response = await _httpClient.GetAsync($"{_baseUrl}/Reserva");
 
-        public async Task<bool> UpdateAgendaAsync(int id, AgendamentoViewModel agenda)
-        {
-            try
-            {
-                var json = JsonSerializer.Serialize(agenda);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var response = await _httpClient.PutAsync($"{_baseUrl}/agenda/{id}", content);
-                return response.IsSuccessStatusCode;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        public async Task<bool> DeleteAgendaAsync(int id)
-        {
-            try
-            {
-                var response = await _httpClient.DeleteAsync($"{_baseUrl}/agenda/{id}");
-                return response.IsSuccessStatusCode;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-        #endregion
-
-        #region Reservas
-        public async Task<List<ReservaViewModel>?> GetReservasAsync()
-        {
-            try
-            {
-                var response = await _httpClient.GetAsync($"{_baseUrl}/Reserva");
-                if (!response.IsSuccessStatusCode)
-                    return new List<ReservaViewModel>();
-
-                var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<List<ReservaViewModel>>(content, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-            }
-            catch
+            if (!response.IsSuccessStatusCode)
             {
                 return new List<ReservaViewModel>();
             }
+
+            var json = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<List<ReservaViewModel>>(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            }) ?? new List<ReservaViewModel>();
         }
 
-        public async Task<ReservaViewModel?> GetReservaByIdAsync(int id)
+        public async Task<bool> UpdateReservaStatusAsync(int reservaId, string status)
         {
-            try
-            {
-                var response = await _httpClient.GetAsync($"{_baseUrl}/Reserva/{id}");
-                if (!response.IsSuccessStatusCode)
-                    return null;
+            var json = JsonSerializer.Serialize(new { Status = status });
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<ReservaViewModel>(content, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-            }
-            catch
-            {
-                return null;
-            }
+            var response = await _httpClient.PutAsync($"{_baseUrl}/Reserva/{reservaId}/status", content);
+            return response.IsSuccessStatusCode;
         }
 
-        public async Task<bool> CreateReservaAsync(ReservaViewModel reserva)
+        // Pagamentos
+        public async Task<List<PagamentoViewModel>> GetPagamentosAsync()
         {
-            try
-            {
-                var json = JsonSerializer.Serialize(reserva);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var response = await _httpClient.PostAsync($"{_baseUrl}/Reserva", content);
-                return response.IsSuccessStatusCode;
-            }
-            catch
-            {
-                return false;
-            }
-        }
+            var response = await _httpClient.GetAsync($"{_baseUrl}/Pagamento");
 
-        public async Task<bool> UpdateReservaAsync(int id, ReservaViewModel reserva)
-        {
-            try
-            {
-                var json = JsonSerializer.Serialize(reserva);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var response = await _httpClient.PutAsync($"{_baseUrl}/Reserva/{id}", content);
-                return response.IsSuccessStatusCode;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        public async Task<bool> DeleteReservaAsync(int id)
-        {
-            try
-            {
-                var response = await _httpClient.DeleteAsync($"{_baseUrl}/Reserva/{id}");
-                return response.IsSuccessStatusCode;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-        #endregion
-
-        #region Pagamentos
-        public async Task<List<PagamentoViewModel>?> GetPagamentosAsync()
-        {
-            try
-            {
-                var response = await _httpClient.GetAsync($"{_baseUrl}/Pagamento");
-                if (!response.IsSuccessStatusCode)
-                    return new List<PagamentoViewModel>();
-
-                var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<List<PagamentoViewModel>>(content, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-            }
-            catch
+            if (!response.IsSuccessStatusCode)
             {
                 return new List<PagamentoViewModel>();
             }
+
+            var json = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<List<PagamentoViewModel>>(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            }) ?? new List<PagamentoViewModel>();
         }
 
-        public async Task<PagamentoViewModel?> GetPagamentoByIdAsync(int id)
+        public async Task<bool> UpdatePagamentoStatusAsync(int pagamentoId, string status)
         {
-            try
-            {
-                var response = await _httpClient.GetAsync($"{_baseUrl}/Pagamento/{id}");
-                if (!response.IsSuccessStatusCode)
-                    return null;
+            var json = JsonSerializer.Serialize(new { Status = status });
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<PagamentoViewModel>(content, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-            }
-            catch
-            {
-                return null;
-            }
+            var response = await _httpClient.PutAsync($"{_baseUrl}/Pagamento/{pagamentoId}/status", content);
+            return response.IsSuccessStatusCode;
         }
-
-        public async Task<bool> CreatePagamentoAsync(PagamentoViewModel pagamento)
-        {
-            try
-            {
-                var json = JsonSerializer.Serialize(pagamento);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var response = await _httpClient.PostAsync($"{_baseUrl}/Pagamento", content);
-                return response.IsSuccessStatusCode;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        public async Task<bool> UpdatePagamentoAsync(int id, PagamentoViewModel pagamento)
-        {
-            try
-            {
-                var json = JsonSerializer.Serialize(pagamento);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var response = await _httpClient.PutAsync($"{_baseUrl}/Pagamento/{id}", content);
-                return response.IsSuccessStatusCode;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        public async Task<bool> DeletePagamentoAsync(int id)
-        {
-            try
-            {
-                var response = await _httpClient.DeleteAsync($"{_baseUrl}/Pagamento/{id}");
-                return response.IsSuccessStatusCode;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-        #endregion
     }
 }
