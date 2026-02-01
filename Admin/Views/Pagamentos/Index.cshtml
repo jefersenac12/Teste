@@ -29,7 +29,7 @@
                     <h2 class="text-uppercase text-muted small fw-semibold mb-2">Total Recebido (PIX)</h2>
                     <div class="d-flex align-items-baseline gap-2 mb-4">
                         @{
-                            var totalRecebido = Model.Where(p => p.Status == "Pago").Sum(p => p.Valor);
+                            var totalRecebido = Model.Where(p => p.Status == "PAGO").Sum(p => p.Valor);
                         }
                         <span class="display-4 fw-bold text-dark">R$ @totalRecebido.ToString("N2")</span>
                         <span class="badge bg-success-subtle text-success d-flex align-items-center">
@@ -51,8 +51,8 @@
                 <div class="card-body p-4">
                     <h3 class="text-uppercase text-muted small fw-semibold mb-3">Status dos Pagamentos</h3>
                     @{
-                        var pagosCount = Model.Count(p => p.Status == "Pago");
-                        var pendenteCount = Model.Count(p => p.Status == "Pendente");
+                        var pagosCount = Model.Count(p => p.Status == "PAGO");
+                        var pendenteCount = Model.Count(p => p.Status == "PENDENTE");
                         var canceladoCount = Model.Count(p => p.Status == "Cancelado");
                         var totalCount = Model.Count();
                         var pagoPercent = totalCount > 0 ? Math.Round((double)pagosCount / totalCount * 100, 1) : 0;
@@ -86,9 +86,9 @@
                     <span class="material-symbols-outlined text-muted me-1" translate="no">filter_list</span>
                     <span class="text-muted small fw-medium me-2">Status:</span>
                     <button class="btn btn-sm btn-secondary active" onclick="filtrarStatus('Todos')">Todos</button>
-                    <button class="btn btn-sm btn-outline-warning" onclick="filtrarStatus('Pendente')">Pendente</button>
-                    <button class="btn btn-sm btn-outline-success" onclick="filtrarStatus('Pago')">Pago</button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="filtrarStatus('Cancelado')">Cancelado</button>
+                    <button class="btn btn-sm btn-outline-warning" onclick="filtrarStatus('PENDENTE')">Pendente</button>
+                    <button class="btn btn-sm btn-outline-success" onclick="filtrarStatus('PAGO')">Pago</button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="filtrarStatus('CANCELADO')">Cancelado</button>
                 </div>
                 <div class="d-flex align-items-center gap-2 text-muted small">
                     <span>Mostrando últimos 30 dias</span>
@@ -128,11 +128,11 @@
                                     </td>
                                     <td class="px-4 py-3 small fw-bold">R$ @pagamento.Valor.ToString("N2")</td>
                                     <td class="px-4 py-3">
-                                        @if (pagamento.Status == "Pago")
+                                        @if (pagamento.Status == "PAGO")
                                         {
                                             <span class="badge bg-success-subtle text-success border border-success-subtle">Pago</span>
                                         }
-                                        else if (pagamento.Status == "Pendente")
+                                        else if (pagamento.Status == "PENDENTE")
                                         {
                                             <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Pendente</span>
                                         }
@@ -156,13 +156,13 @@
                                                 <li><a class="dropdown-item" asp-action="Details" asp-route-id="@pagamento.Id">Ver Detalhes do Pagamento</a></li>
                                                 <li><a class="dropdown-item" asp-action="Edit" asp-route-id="@pagamento.Id">Editar Pagamento</a></li>
                                                 <li><hr class="dropdown-divider"></li>
-                                                @if (pagamento.Status != "Pago")
+                                                @if (pagamento.Status != "PAGO")
                                                 {
                                                     <li><a class="dropdown-item" asp-action="ConfirmarPagamento" asp-route-id="@pagamento.Id">Confirmar Pagamento</a></li>
                                                 }
                                                 else
                                                 {
-                                                    <li><a class="dropdown-item" asp-action="Estornar" asp-route-id="@pagamento.Id">Estornar Pagamento</a></li>
+                                                    <li><a class="dropdown-item" asp-action="CancelarReserva" asp-route-id="@pagamento.Id">Cancelar Reserva</a></li>
                                                 }
                                                 <li><a class="dropdown-item" asp-action="Details" asp-route-id="@pagamento.Id">Visualizar Número de Transação</a></li>
                                                 <li><hr class="dropdown-divider"></li>
@@ -327,3 +327,4 @@ document.addEventListener('DOMContentLoaded', function() {
     showPage(1);
 });
 </script>
+

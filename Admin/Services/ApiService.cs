@@ -247,10 +247,18 @@ namespace Admin.Services
             }
 
             var json = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<List<AgendamentoViewModel>>(json, new JsonSerializerOptions
+            var agenda = JsonSerializer.Deserialize<List<AgendamentoViewModel>>(json, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             }) ?? new List<AgendamentoViewModel>();
+
+            // Se os nomes não vierem preenchidos, buscar separadamente
+            if (agenda.Any() && (agenda.Any(a => string.IsNullOrEmpty(a.SafraNome)) || agenda.Any(a => string.IsNullOrEmpty(a.AtividadeNome))))
+            {
+                await PopulateAgendaNomesAsync(agenda);
+            }
+
+            return agenda;
         }
 
         public async Task<AgendamentoViewModel?> GetAgendaByIdAsync(int id)
@@ -258,10 +266,21 @@ namespace Admin.Services
             var response = await _httpClient.GetAsync($"{_baseUrl}/Agenda/{id}");
             if (!response.IsSuccessStatusCode) return null;
             var json = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<AgendamentoViewModel>(json, new JsonSerializerOptions
+            var agendamento = JsonSerializer.Deserialize<AgendamentoViewModel>(json, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
+
+            if (agendamento != null)
+            {
+                // Popular nomes se vierem vazios
+                if (string.IsNullOrEmpty(agendamento.SafraNome) || string.IsNullOrEmpty(agendamento.AtividadeNome))
+                {
+                    await PopulateAgendaNomesAsync(new List<AgendamentoViewModel> { agendamento });
+                }
+            }
+
+            return agendamento;
         }
 
         public async Task<bool> CreateAgendamentoAsync(AgendamentoViewModel agendamento)
@@ -287,6 +306,109 @@ namespace Admin.Services
             return response.IsSuccessStatusCode;
         }
 
+        private async Task PopulateAgendaNomesAsync(List<AgendamentoViewModel> agenda)
+        {
+            try
+            {
+                // Buscar todas as safras e atividades
+                var safras = await GetSafrasAsync();
+                var atividades = await GetAtividadesAsync();
+
+                // Criar dicionários para lookup rápido
+                var safraDict = safras.ToDictionary(s => s.Id, s => s.Nome);
+                var atividadeDict = atividades.ToDictionary(a => a.Id, a => a.Nome);
+
+                // Popular os nomes na agenda
+                foreach (var agendamento in agenda)
+                {
+                    if (agendamento.SafraId > 0 && safraDict.TryGetValue(agendamento.SafraId, out var safraNome))
+                    {
+                        agendamento.SafraNome = safraNome;
+                    }
+
+                    if (agendamento.AtividadeId > 0 && atividadeDict.TryGetValue(agendamento.AtividadeId, out var atividadeNome))
+                    {
+                        agendamento.AtividadeNome = atividadeNome;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log erro mas não interromper o fluxo
+                Console.WriteLine($"Erro ao popular nomes da agenda: {ex.Message}");
+            }
+        }
+
+        private async Task PopulateReservaNomesAsync(List<ReservaViewModel> reservas)
+        {
+            try
+            {
+                // Buscar usuários e agenda
+                var usuarios = await GetUsuariosAsync();
+                var agenda = await GetAgendaAsync();
+
+                // Criar dicionários para lookup rápido
+                var usuarioDict = usuarios.ToDictionary(u => u.Id, u => u.Nome);
+                var agendaDict = agenda.ToDictionary(a => a.Id, a => $"{a.AtividadeNome} - {a.SafraNome} ({a.DataFormatada})");
+
+                // Popular os nomes nas reservas
+                foreach (var reserva in reservas)
+                {
+                    if (reserva.UsuarioId > 0 && usuarioDict.TryGetValue(reserva.UsuarioId, out var usuarioNome))
+                    {
+                        reserva.UsuarioNome = usuarioNome;
+                    }
+
+                    if (reserva.AgendaId > 0 && agendaDict.TryGetValue(reserva.AgendaId, out var agendaDescricao))
+                    {
+                        reserva.AgendaDescricao = agendaDescricao;
+                    }
+
+                    // Popular tipo do usuário
+                    if (reserva.UsuarioId > 0 && usuarioDict.TryGetValue(reserva.UsuarioId, out var _))
+                    {
+                        var usuario = usuarios.FirstOrDefault(u => u.Id == reserva.UsuarioId);
+                        if (usuario != null)
+                        {
+                            reserva.UsuarioTipo = usuario.Tipo == 1 ? "Agência" : "Família";
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log erro mas não interromper o fluxo
+                Console.WriteLine($"Erro ao popular nomes das reservas: {ex.Message}");
+            }
+        }
+
+        private async Task PopulatePagamentoNomesAsync(List<PagamentoViewModel> pagamentos)
+        {
+            try
+            {
+                // Buscar reservas
+                var reservas = await GetReservasAsync();
+
+                // Criar dicionários para lookup rápido
+                var reservaDict = reservas.ToDictionary(r => r.Id, r => new { r.UsuarioNome, r.AgendaDescricao });
+
+                // Popular os nomes nos pagamentos
+                foreach (var pagamento in pagamentos)
+                {
+                    if (pagamento.ReservaId > 0 && reservaDict.TryGetValue(pagamento.ReservaId, out var reservaInfo))
+                    {
+                        pagamento.ClienteNome = reservaInfo.UsuarioNome;
+                        pagamento.ReservaDescricao = reservaInfo.AgendaDescricao;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log erro mas não interromper o fluxo
+                Console.WriteLine($"Erro ao popular nomes dos pagamentos: {ex.Message}");
+            }
+        }
+
         // Reservas
         public async Task<List<ReservaViewModel>> GetReservasAsync()
         {
@@ -298,10 +420,18 @@ namespace Admin.Services
             }
 
             var json = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<List<ReservaViewModel>>(json, new JsonSerializerOptions
+            var reservas = JsonSerializer.Deserialize<List<ReservaViewModel>>(json, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             }) ?? new List<ReservaViewModel>();
+
+            // Se os nomes não vierem preenchidos, buscar separadamente
+            if (reservas.Any() && (reservas.Any(r => string.IsNullOrEmpty(r.UsuarioNome)) || reservas.Any(r => string.IsNullOrEmpty(r.AgendaDescricao))))
+            {
+                await PopulateReservaNomesAsync(reservas);
+            }
+
+            return reservas;
         }
 
         public async Task<ReservaViewModel?> GetReservaByIdAsync(int id)
@@ -309,10 +439,21 @@ namespace Admin.Services
             var response = await _httpClient.GetAsync($"{_baseUrl}/Reserva/{id}");
             if (!response.IsSuccessStatusCode) return null;
             var json = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<ReservaViewModel>(json, new JsonSerializerOptions
+            var reserva = JsonSerializer.Deserialize<ReservaViewModel>(json, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
+
+            if (reserva != null)
+            {
+                // Popular nomes se vierem vazios
+                if (string.IsNullOrEmpty(reserva.UsuarioNome) || string.IsNullOrEmpty(reserva.AgendaDescricao))
+                {
+                    await PopulateReservaNomesAsync(new List<ReservaViewModel> { reserva });
+                }
+            }
+
+            return reserva;
         }
 
         public async Task<bool> CreateReservaAsync(ReservaViewModel reserva)
@@ -357,10 +498,27 @@ namespace Admin.Services
             }
 
             var json = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<List<PagamentoViewModel>>(json, new JsonSerializerOptions
+            var pagamentos = JsonSerializer.Deserialize<List<PagamentoViewModel>>(json, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             }) ?? new List<PagamentoViewModel>();
+
+            // Normalizar status para maiúsculas
+            foreach (var pagamento in pagamentos)
+            {
+                if (!string.IsNullOrEmpty(pagamento.Status))
+                {
+                    pagamento.Status = pagamento.Status.ToUpper();
+                }
+            }
+
+            // Se os nomes não vierem preenchidos, buscar separadamente
+            if (pagamentos.Any() && (pagamentos.Any(p => string.IsNullOrEmpty(p.ClienteNome)) || pagamentos.Any(p => string.IsNullOrEmpty(p.ReservaDescricao))))
+            {
+                await PopulatePagamentoNomesAsync(pagamentos);
+            }
+
+            return pagamentos;
         }
 
         public async Task<PagamentoViewModel?> GetPagamentoByIdAsync(int id)
@@ -368,10 +526,27 @@ namespace Admin.Services
             var response = await _httpClient.GetAsync($"{_baseUrl}/Pagamento/{id}");
             if (!response.IsSuccessStatusCode) return null;
             var json = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<PagamentoViewModel>(json, new JsonSerializerOptions
+            var pagamento = JsonSerializer.Deserialize<PagamentoViewModel>(json, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
+
+            if (pagamento != null)
+            {
+                // Normalizar status para maiúsculas
+                if (!string.IsNullOrEmpty(pagamento.Status))
+                {
+                    pagamento.Status = pagamento.Status.ToUpper();
+                }
+
+                // Popular nomes se vierem vazios
+                if (string.IsNullOrEmpty(pagamento.ClienteNome) || string.IsNullOrEmpty(pagamento.ReservaDescricao))
+                {
+                    await PopulatePagamentoNomesAsync(new List<PagamentoViewModel> { pagamento });
+                }
+            }
+
+            return pagamento;
         }
 
         public async Task<bool> CreatePagamentoAsync(PagamentoViewModel pagamento)
