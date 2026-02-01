@@ -25,8 +25,8 @@
                             <label asp-for="Tipo" class="form-label fw-medium">Tipo de Usuário</label>
                             <select asp-for="Tipo" class="form-select" required onchange="toggleCamposPorTipo()">
                                 <option value="">Selecione o tipo</option>
-                                <option value="2">Família</option>
-                                <option value="1">Agência</option>
+                                <option value="1">Família</option>
+                                <option value="2">Agência</option>
                             </select>
                             <span asp-validation-for="Tipo" class="text-danger"></span>
                         </div>
@@ -43,7 +43,7 @@
                             <span asp-validation-for="CNPJ" class="text-danger"></span>
                         </div>
                         
-                        <div class="mb-3">
+                        <div class="mb-3 d-none" id="campo-email">
                             <label asp-for="Email" class="form-label fw-medium">Email</label>
                             <input asp-for="Email" class="form-control" type="email" />
                             <span asp-validation-for="Email" class="text-danger"></span>
@@ -77,15 +77,22 @@
         function toggleCamposPorTipo() {
             const tipo = document.getElementById('Tipo').value;
             const campoCnpj = document.getElementById('campo-cnpj');
+            const campoEmail = document.getElementById('campo-email');
             const cnpjInput = document.getElementById('CNPJ');
+            const emailInput = document.getElementById('Email');
             
-            if (tipo === '1') {
+            if (tipo === '2') { // Agência
                 campoCnpj.classList.remove('d-none');
+                campoEmail.classList.remove('d-none');
                 cnpjInput.required = true;
-            } else {
+                emailInput.required = true;
+            } else { // Família
                 campoCnpj.classList.add('d-none');
+                campoEmail.classList.add('d-none');
                 cnpjInput.required = false;
+                emailInput.required = false;
                 cnpjInput.value = '';
+                emailInput.value = '';
             }
         }
     </script>

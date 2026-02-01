@@ -30,19 +30,11 @@
                                     <span class="text-truncate flex-grow-1" style="min-width:0;" title="@user.CNPJ">@user.CNPJ</span>
                                 </p>
                             }
-                            else if (user.Tipo == 1) // Famílias mostram Email ou Telefone
+                            else if (user.Tipo == 1) // Famílias mostram apenas Telefone
                             {
                                 <p class="card-text text-secondary small mb-1 d-flex align-items-center">
-                                    @if (!string.IsNullOrWhiteSpace(user.Email))
-                                    {
-                                        <span class="me-1 fw-medium flex-shrink-0">Email:</span>
-                                        <span class="text-truncate flex-grow-1" style="min-width:0;" title="@user.Email">@user.Email</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="me-1 fw-medium flex-shrink-0">Telefone:</span>
-                                        <span class="text-truncate flex-grow-1" style="min-width:0;" title="@user.Telefone">@user.Telefone</span>
-                                    }
+                                    <span class="me-1 fw-medium flex-shrink-0">Telefone:</span>
+                                    <span class="text-truncate flex-grow-1" style="min-width:0;" title="@user.Telefone">@user.Telefone</span>
                                 </p>
                             }
 
