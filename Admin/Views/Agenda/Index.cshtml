@@ -18,10 +18,10 @@
         </div>
     </div>
 
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
+    <div id="agenda-container" class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
         @foreach (var agendamento in Model)
         {
-            <div class="col">
+            <div class="col agenda-item" style="display: none;">
                 <div class="card h-100 border-0 shadow-sm rounded-3">
                     <div class="card-body d-flex flex-column justify-content-between p-4">
                         <div>
@@ -78,9 +78,9 @@
 
     <!-- Pagination -->
     <div class="d-flex justify-content-end mt-4">
-        <nav aria-label="NavegaÃ§Ã£o de pÃ¡gina">
-            <ul class="pagination">
-                <li class="page-item disabled">
+        <nav aria-label="Navegação de página">
+            <ul class="pagination" id="pagination">
+                <li class="page-item" id="prev-page">
                     <a class="page-link" href="#" aria-label="Anterior">
                         <span aria-hidden="true">&laquo;</span>
                     </a>
@@ -88,8 +88,8 @@
                 <li class="page-item active"><a class="page-link" href="#">1</a></li>
                 <li class="page-item"><a class="page-link" href="#">2</a></li>
                 <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item">
-                    <a class="page-link" href="#" aria-label="PrÃ³ximo">
+                <li class="page-item" id="next-page">
+                    <a class="page-link" href="#" aria-label="Próximo">
                         <span aria-hidden="true">&raquo;</span>
                     </a>
                 </li>
@@ -98,4 +98,83 @@
     </div>
 </div>
 
-
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const items = document.querySelectorAll('.agenda-item');
+    const pagination = document.getElementById('pagination');
+    const prevPage = document.getElementById('prev-page');
+    const nextPage = document.getElementById('next-page');
+    
+    const itemsPerPage = 8;
+    let currentPage = 1;
+    const totalPages = Math.ceil(items.length / itemsPerPage);
+    
+    function showPage(page) {
+        const startIndex = (page - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        
+        items.forEach((item, index) => {
+            if (index >= startIndex && index < endIndex) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        
+        updatePagination();
+    }
+    
+    function updatePagination() {
+        const pageLinks = pagination.querySelectorAll('.page-item:not(#prev-page):not(#next-page)');
+        pageLinks.forEach(link => link.remove());
+        
+        for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement('li');
+            li.className = 'page-item' + (i === currentPage ? ' active' : '');
+            
+            const a = document.createElement('a');
+            a.className = 'page-link';
+            a.href = '#';
+            a.textContent = i;
+            a.addEventListener('click', function(e) {
+                e.preventDefault();
+                currentPage = i;
+                showPage(currentPage);
+            });
+            
+            li.appendChild(a);
+            pagination.insertBefore(li, nextPage);
+        }
+        
+        if (currentPage === 1) {
+            prevPage.classList.add('disabled');
+        } else {
+            prevPage.classList.remove('disabled');
+        }
+        
+        if (currentPage === totalPages) {
+            nextPage.classList.add('disabled');
+        } else {
+            nextPage.classList.remove('disabled');
+        }
+    }
+    
+    prevPage.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (currentPage > 1) {
+            currentPage--;
+            showPage(currentPage);
+        }
+    });
+    
+    nextPage.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (currentPage < totalPages) {
+            currentPage++;
+            showPage(currentPage);
+        }
+    });
+    
+    showPage(1);
+});
+</script>

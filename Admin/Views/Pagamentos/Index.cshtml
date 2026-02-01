@@ -10,7 +10,7 @@
                 <span class="material-symbols-outlined pix-green" style="font-size: 2.5rem;" translate="no">qr_code_2</span>
                 Painel PIX
             </h1>
-            <p class="text-muted mb-0 mt-1">Gerenciamento analÃ­tico de recebimentos via PIX</p>
+            <p class="text-muted mb-0 mt-1">Gerenciamento analítico de recebimentos via PIX</p>
         </div>
         <a class="btn btn-pix-green d-flex align-items-center fw-semibold shadow-sm" asp-action="Create">
             <span class="material-symbols-outlined me-2" translate="no">add_card</span>
@@ -39,7 +39,7 @@
                     </div>
                     <div class="row border-top pt-4 mt-4">
                         <div class="col-6 col-md-4">
-                            <p class="text-muted small mb-1">TransaÃ§Ãµes</p>
+                            <p class="text-muted small mb-1">Transações</p>
                             <p class="h4 fw-bold text-dark mb-0">@Model.Count()</p>
                         </div>
                     </div>
@@ -48,32 +48,29 @@
         </div>
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm rounded-3 h-100">
-                <div class="card-body p-4 d-flex flex-column align-items-center justify-content-center">
-                    <h3 class="h5 fw-semibold text-dark mb-4 w-100 text-start border-bottom pb-2">Status dos Pagamentos</h3>
-                    <div class="d-flex align-items-center justify-content-center gap-4 w-100">
-                        <div class="chart-donut-pix shadow"></div>
-                        <div class="d-flex flex-column gap-3">
-                            @{
-                                var totalPagamentos = Model.Count();
-                                var pagoCount = Model.Count(p => p.Status == "Pago");
-                                var pendenteCount = Model.Count(p => p.Status == "Pendente");
-                                var canceladoCount = Model.Count(p => p.Status == "Cancelado");
-                                var pagoPercent = totalPagamentos > 0 ? (int)Math.Round((double)pagoCount / totalPagamentos * 100) : 0;
-                                var pendentePercent = totalPagamentos > 0 ? (int)Math.Round((double)pendenteCount / totalPagamentos * 100) : 0;
-                                var canceladoPercent = totalPagamentos > 0 ? (int)Math.Round((double)canceladoCount / totalPagamentos * 100) : 0;
-                            }
-                            <div class="d-flex align-items-center">
-                                <span class="badge bg-success rounded-circle p-2 me-2"></span>
-                                <span class="text-muted small fw-medium" translate="no">Pago (@pagoPercent%)</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <span class="badge bg-warning rounded-circle p-2 me-2"></span>
-                                <span class="text-muted small fw-medium" translate="no">Pendente (@pendentePercent%)</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <span class="badge bg-danger rounded-circle p-2 me-2"></span>
-                                <span class="text-muted small fw-medium" translate="no">Cancelado (@canceladoPercent%)</span>
-                            </div>
+                <div class="card-body p-4">
+                    <h3 class="text-uppercase text-muted small fw-semibold mb-3">Status dos Pagamentos</h3>
+                    @{
+                        var pagosCount = Model.Count(p => p.Status == "Pago");
+                        var pendenteCount = Model.Count(p => p.Status == "Pendente");
+                        var canceladoCount = Model.Count(p => p.Status == "Cancelado");
+                        var totalCount = Model.Count();
+                        var pagoPercent = totalCount > 0 ? Math.Round((double)pagosCount / totalCount * 100, 1) : 0;
+                        var pendentePercent = totalCount > 0 ? Math.Round((double)pendenteCount / totalCount * 100, 1) : 0;
+                        var canceladoPercent = totalCount > 0 ? Math.Round((double)canceladoCount / totalCount * 100, 1) : 0;
+                    }
+                    <div class="d-flex flex-column gap-3">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-success rounded-circle p-2 me-2"></span>
+                            <span class="text-muted small fw-medium" translate="no">Pago (@pagoPercent%)</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-warning rounded-circle p-2 me-2"></span>
+                            <span class="text-muted small fw-medium" translate="no">Pendente (@pendentePercent%)</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-danger rounded-circle p-2 me-2"></span>
+                            <span class="text-muted small fw-medium" translate="no">Cancelado (@canceladoPercent%)</span>
                         </div>
                     </div>
                 </div>
@@ -94,8 +91,8 @@
                     <button class="btn btn-sm btn-outline-danger" onclick="filtrarStatus('Cancelado')">Cancelado</button>
                 </div>
                 <div class="d-flex align-items-center gap-2 text-muted small">
-                    <span>Mostrando Ãºltimos 30 dias</span>
-                    <button class="btn btn-link btn-sm text-decoration-none p-0 pix-green">Alterar perÃ­odo</button>
+                    <span>Mostrando últimos 30 dias</span>
+                    <button class="btn btn-link btn-sm text-decoration-none p-0 pix-green">Alterar período</button>
                 </div>
             </div>
         </div>
@@ -113,55 +110,75 @@
                             <th class="px-4 py-3 text-uppercase small fw-semibold text-muted">Valor</th>
                             <th class="px-4 py-3 text-uppercase small fw-semibold text-muted">Status</th>
                             <th class="px-4 py-3 text-uppercase small fw-semibold text-muted">Data</th>
-                            <th class="px-4 py-3 text-uppercase small fw-semibold text-muted">NÂº TransaÃ§Ã£o</th>
-                            <th class="px-4 py-3 text-uppercase small fw-semibold text-muted text-end">AÃ§Ãµes</th>
+                            <th class="px-4 py-3 text-uppercase small fw-semibold text-muted">Nº Transação</th>
+                            <th class="px-4 py-3 text-uppercase small fw-semibold text-muted text-end">Ações</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        @foreach (var pagamento in Model)
+                    <tbody id="pagamentos-tbody">
+                        @if (Model != null && Model.Any())
+                        {
+                            int index = 0;
+                            @foreach (var pagamento in Model)
+                            {
+                                string displayStyle = index >= 10 ? "style=\"display: none;\"" : "";
+                                <tr class="pagamento-row" @Html.Raw(displayStyle) data-status="@pagamento.Status">
+                                    <td class="px-4 py-3 small text-muted font-monospace">@pagamento.ReservaId</td>
+                                    <td class="px-4 py-3 small fw-medium">
+                                        @(pagamento.ClienteNome ?? "-")
+                                    </td>
+                                    <td class="px-4 py-3 small fw-bold">R$ @pagamento.Valor.ToString("N2")</td>
+                                    <td class="px-4 py-3">
+                                        @if (pagamento.Status == "Pago")
+                                        {
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle">Pago</span>
+                                        }
+                                        else if (pagamento.Status == "Pendente")
+                                        {
+                                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Pendente</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Cancelado</span>
+                                        }
+                                    </td>
+                                    <td class="px-4 py-3 small text-muted">
+                                        @(pagamento.DataPagamento?.ToString("dd/MM/yyyy HH:mm") ?? "-")
+                                    </td>
+                                    <td class="px-4 py-3 small text-muted font-monospace">
+                                        @(string.IsNullOrEmpty(pagamento.QrCode) ? pagamento.Id.ToString() : pagamento.QrCode)
+                                    </td>
+                                    <td class="px-4 py-3 text-end">
+                                        <div class="btn-group dropstart">
+                                            <button class="btn btn-sm btn-link text-muted" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <span class="material-symbols-outlined" translate="no">more_vert</span>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" asp-action="Details" asp-route-id="@pagamento.Id">Ver Detalhes do Pagamento</a></li>
+                                                <li><a class="dropdown-item" asp-action="Edit" asp-route-id="@pagamento.Id">Editar Pagamento</a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                @if (pagamento.Status != "Pago")
+                                                {
+                                                    <li><a class="dropdown-item" asp-action="ConfirmarPagamento" asp-route-id="@pagamento.Id">Confirmar Pagamento</a></li>
+                                                }
+                                                else
+                                                {
+                                                    <li><a class="dropdown-item" asp-action="Estornar" asp-route-id="@pagamento.Id">Estornar Pagamento</a></li>
+                                                }
+                                                <li><a class="dropdown-item" asp-action="Details" asp-route-id="@pagamento.Id">Visualizar Número de Transação</a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item text-danger" asp-action="Delete" asp-route-id="@pagamento.Id">Excluir</a></li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                                index++;
+                            }
+                        }
+                        else
                         {
                             <tr>
-                                <td class="px-4 py-3 small text-muted font-monospace">@pagamento.ReservaId</td>
-                                <td class="px-4 py-3 small fw-medium">@pagamento.ClienteNome</td>
-                                <td class="px-4 py-3 small fw-bold">R$ @pagamento.Valor.ToString("N2")</td>
-                                <td class="px-4 py-3">
-                                    @if (pagamento.Status == "Pago")
-                                    {
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle">Pago</span>
-                                    }
-                                    else if (pagamento.Status == "Pendente")
-                                    {
-                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Pendente</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Cancelado</span>
-                                    }
-                                </td>
-                                <td class="px-4 py-3 small text-muted">@pagamento.DataPagamentoFormatada</td>
-                                <td class="px-4 py-3 small text-muted font-monospace">@pagamento.QrCode</td>
-                                <td class="px-4 py-3 text-end">
-                                    <div class="btn-group dropstart">
-                                        <button class="btn btn-sm btn-link text-muted" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <span class="material-symbols-outlined" translate="no">more_vert</span>
-                                        </button>
-                                        <ul class="dropdown-menu">
-                                            <li><a class="dropdown-item" asp-action="Details" asp-route-id="@pagamento.Id">Ver Detalhes do Pagamento</a></li>
-                                            <li><a class="dropdown-item" asp-action="Edit" asp-route-id="@pagamento.Id">Editar Pagamento</a></li>
-                                            <li><hr class="dropdown-divider"></li>
-                                            @if (pagamento.Status != "Pago")
-                                            {
-                                                <li><a class="dropdown-item" asp-action="ConfirmarPagamento" asp-route-id="@pagamento.Id">Confirmar Pagamento</a></li>
-                                            }
-                                            else
-                                            {
-                                                <li><a class="dropdown-item" asp-action="Estornar" asp-route-id="@pagamento.Id">Estornar Pagamento</a></li>
-                                            }
-                                            <li><a class="dropdown-item" asp-action="Details" asp-route-id="@pagamento.Id">Visualizar NÃºmero de TransaÃ§Ã£o</a></li>
-                                            <li><hr class="dropdown-divider"></li>
-                                            <li><a class="dropdown-item text-danger" asp-action="Delete" asp-route-id="@pagamento.Id">Excluir</a></li>
-                                        </ul>
-                                    </div>
+                                <td colspan="7" class="text-center py-4 text-muted">
+                                    Nenhum pagamento encontrado.
                                 </td>
                             </tr>
                         }
@@ -169,10 +186,10 @@
                 </table>
             </div>
             <div class="card-footer bg-light d-flex justify-content-between align-items-center">
-                <span class="text-muted small">Mostrando 1 a @Model.Count() de @Model.Count() resultados</span>
-                <nav aria-label="NavegaÃ§Ã£o de pÃ¡gina">
-                    <ul class="pagination mb-0">
-                        <li class="page-item disabled">
+                <span class="text-muted small" id="result-count">Mostrando 1 a 10 de @(Model?.Count() ?? 0) resultados</span>
+                <nav aria-label="Navegação de página">
+                    <ul class="pagination mb-0" id="pagination">
+                        <li class="page-item" id="prev-page">
                             <a class="page-link" href="#" aria-label="Anterior">
                                 <span aria-hidden="true">&laquo;</span>
                             </a>
@@ -180,8 +197,8 @@
                         <li class="page-item active"><a class="page-link" href="#">1</a></li>
                         <li class="page-item"><a class="page-link" href="#">2</a></li>
                         <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item">
-                            <a class="page-link" href="#" aria-label="PrÃ³ximo">
+                        <li class="page-item" id="next-page">
+                            <a class="page-link" href="#" aria-label="Próximo">
                                 <span aria-hidden="true">&raquo;</span>
                             </a>
                         </li>
@@ -192,3 +209,121 @@
     </div>
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const items = document.querySelectorAll('.pagamento-row');
+    const pagination = document.getElementById('pagination');
+    const prevPage = document.getElementById('prev-page');
+    const nextPage = document.getElementById('next-page');
+    const resultCount = document.getElementById('result-count');
+    
+    const itemsPerPage = 10;
+    let currentPage = 1;
+    let filteredItems = Array.from(items);
+    
+    function showPage(page) {
+        const startIndex = (page - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        
+        filteredItems.forEach((item, index) => {
+            if (index >= startIndex && index < endIndex) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        
+        updatePagination();
+        updateResultCount(startIndex, endIndex);
+    }
+    
+    function updateResultCount(startIndex, endIndex) {
+        const actualEndIndex = Math.min(endIndex, filteredItems.length);
+        const actualStartIndex = filteredItems.length > 0 ? Math.min(startIndex + 1, filteredItems.length) : 0;
+        resultCount.textContent = 'Mostrando ' + actualStartIndex + ' a ' + actualEndIndex + ' de ' + filteredItems.length + ' resultados';
+    }
+    
+    function updatePagination() {
+        const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+        
+        // Removes all existing page links except prev and next
+        const pageLinks = pagination.querySelectorAll('.page-item:not(#prev-page):not(#next-page)');
+        pageLinks.forEach(function(link) { link.remove(); });
+        
+        // Add page links
+        for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement('li');
+            li.className = 'page-item' + (i === currentPage ? ' active' : '');
+            
+            const a = document.createElement('a');
+            a.className = 'page-link';
+            a.href = '#';
+            a.textContent = i;
+            a.addEventListener('click', function(e) {
+                e.preventDefault();
+                currentPage = i;
+                showPage(currentPage);
+            });
+            
+            li.appendChild(a);
+            pagination.insertBefore(li, nextPage);
+        }
+        
+        // Update prev/next buttons
+        if (currentPage === 1 || filteredItems.length === 0) {
+            prevPage.classList.add('disabled');
+        } else {
+            prevPage.classList.remove('disabled');
+        }
+        
+        if (currentPage === totalPages || filteredItems.length === 0) {
+            nextPage.classList.add('disabled');
+        } else {
+            nextPage.classList.remove('disabled');
+        }
+    }
+    
+    prevPage.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (currentPage > 1) {
+            currentPage--;
+            showPage(currentPage);
+        }
+    });
+    
+    nextPage.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (currentPage < Math.ceil(filteredItems.length / itemsPerPage)) {
+            currentPage++;
+            showPage(currentPage);
+        }
+    });
+    
+    // Filter function
+    window.filtrarStatus = function(status) {
+        // Update buttons
+        document.querySelectorAll('.btn-group .btn').forEach(function(btn) {
+            btn.classList.remove('active', 'btn-secondary');
+            btn.classList.add('btn-outline-warning', 'btn-outline-success', 'btn-outline-danger');
+        });
+        
+        event.target.classList.add('active', 'btn-secondary');
+        event.target.classList.remove('btn-outline-warning', 'btn-outline-success', 'btn-outline-danger');
+        
+        // Filter items
+        if (status === 'Todos') {
+            filteredItems = Array.from(items);
+        } else {
+            filteredItems = Array.from(items).filter(function(item) {
+                return item.dataset.status === status;
+            });
+        }
+        
+        currentPage = 1;
+        showPage(currentPage);
+    };
+    
+    // Show first page
+    showPage(1);
+});
+</script>
