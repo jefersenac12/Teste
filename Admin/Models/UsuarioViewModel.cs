@@ -23,10 +23,10 @@ namespace Admin.Models
         public string Senha { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "O tipo de usuário é obrigatório")]
-        public byte Tipo { get; set; } // 2=Família, 1=Agência
+        public byte Tipo { get; set; } // 1=Família, 2=Agência
 
         // Propriedades de exibição
-        public string TipoFormatado => Tipo == 1 ? "Agência" : "Família";
+        public string TipoFormatado => Tipo == 1 ? "Família" : "Agência";
         public string Identificador => string.IsNullOrWhiteSpace(CNPJ) ? Telefone : CNPJ;
     }
 }

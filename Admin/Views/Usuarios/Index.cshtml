@@ -23,18 +23,28 @@
                                 @user.Nome
                             </h3>
 
-                            <p class="card-text text-secondary small mb-1 d-flex align-items-center">
-                                @if (user.Tipo == 1)
-                                {
+                            @if (user.Tipo == 2) // Agências mostram apenas CNPJ
+                            {
+                                <p class="card-text text-secondary small mb-1 d-flex align-items-center">
                                     <span class="me-1 fw-medium flex-shrink-0">CNPJ:</span>
                                     <span class="text-truncate flex-grow-1" style="min-width:0;" title="@user.CNPJ">@user.CNPJ</span>
-                                }
-                                else
-                                {
-                                    <span class="me-1 fw-medium flex-shrink-0">Email:</span>
-                                    <span class="text-truncate flex-grow-1" style="min-width:0;" title="@user.Email">@user.Email</span>
-                                }
-                            </p>
+                                </p>
+                            }
+                            else if (user.Tipo == 1) // Famílias mostram Email ou Telefone
+                            {
+                                <p class="card-text text-secondary small mb-1 d-flex align-items-center">
+                                    @if (!string.IsNullOrWhiteSpace(user.Email))
+                                    {
+                                        <span class="me-1 fw-medium flex-shrink-0">Email:</span>
+                                        <span class="text-truncate flex-grow-1" style="min-width:0;" title="@user.Email">@user.Email</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="me-1 fw-medium flex-shrink-0">Telefone:</span>
+                                        <span class="text-truncate flex-grow-1" style="min-width:0;" title="@user.Telefone">@user.Telefone</span>
+                                    }
+                                </p>
+                            }
 
                             <p class="card-text text-secondary small mb-3">
                                 Tipo:
