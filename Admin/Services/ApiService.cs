@@ -89,7 +89,21 @@ namespace Admin.Services
             var json = JsonSerializer.Serialize(usuario);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync($"{_baseUrl}/usuario", content);
+            string endpoint;
+            if (usuario.Tipo == 1)
+            {
+                endpoint = $"{_baseUrl}/Usuario/cadastrarFamilia";
+            }
+            else if (usuario.Tipo == 2)
+            {
+                endpoint = $"{_baseUrl}/Usuario/cadastrarAgencia";
+            }
+            else
+            {
+                return false; // Tipo inválido
+            }
+
+            var response = await _httpClient.PostAsync(endpoint, content);
             return response.IsSuccessStatusCode;
         }
 
@@ -564,7 +578,12 @@ namespace Admin.Services
 
         public async Task<bool> DeletePagamentoAsync(int id)
         {
-            var response = await _httpClient.DeleteAsync($"{_baseUrl}/Pagamento/{id}");
+            // A API não permite DELETE de pagamentos, apenas alteração de status
+            // Vamos usar o endpoint PUT /status para cancelar o pagamento
+            var json = JsonSerializer.Serialize(new { status = "CANCELADO" });
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PutAsync($"{_baseUrl}/Pagamento/{id}/status", content);
             return response.IsSuccessStatusCode;
         }
 

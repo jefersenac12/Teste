@@ -260,6 +260,12 @@ namespace Admin.Controllers
                     return NotFound();
                 }
 
+                // Verificar informações importantes para o alerta
+                ViewBag.PagamentoEstaPago = pagamento.Status?.ToLower() == "pago";
+                ViewBag.PagamentoEstaPendente = pagamento.Status?.ToLower() == "pendente";
+                ViewBag.TemChavePix = !string.IsNullOrEmpty(pagamento.ChavePix);
+                ViewBag.ValorFormatado = pagamento.Valor.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"));
+
                 return View(pagamento);
             }
             catch (Exception ex)
@@ -276,14 +282,50 @@ namespace Admin.Controllers
         {
             try
             {
+                // Obter informações do pagamento antes de excluir
+                var pagamento = await _apiService.GetPagamentoByIdAsync(id);
+                if (pagamento == null)
+                {
+                    TempData["Erro"] = "Pagamento não encontrado.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Verificar se há outras entidades que dependem deste pagamento
+                // Pagamentos geralmente não têm dependências diretas além da reserva
+                // Mas vamos verificar se há algum log ou registro financeiro vinculado
+                
                 var sucesso = await _apiService.DeletePagamentoAsync(id);
                 if (sucesso)
                 {
-                    TempData["Sucesso"] = "Pagamento excluído com sucesso!";
+                    var mensagem = "Pagamento cancelado com sucesso!";
+                    if (pagamento.Status?.ToLower() == "pago")
+                    {
+                        mensagem += $" Estorno de {pagamento.ValorFormatado} processado para a reserva #{pagamento.ReservaId}.";
+                    }
+                    else
+                    {
+                        mensagem += $" Solicitação de pagamento cancelada para a reserva #{pagamento.ReservaId}.";
+                    }
+                    
+                    TempData["Sucesso"] = mensagem;
                 }
                 else
                 {
-                    TempData["Erro"] = "Não foi possível excluir o pagamento. Verifique se não existem outros registros dependentes.";
+                    // Tentar identificar o motivo da falha
+                    var reserva = await _apiService.GetReservaByIdAsync(pagamento.ReservaId);
+                    var motivoFalha = "";
+                    
+                    if (reserva != null)
+                    {
+                        motivoFalha = $" Não foi possível cancelar o pagamento pois a reserva #{pagamento.ReservaId} pode estar em um estado que impede o cancelamento. ";
+                        motivoFalha += "Verifique se a reserva precisa ser tratada primeiro.";
+                    }
+                    else
+                    {
+                        motivoFalha = " Não foi possível cancelar o pagamento. Tente novamente mais tarde.";
+                    }
+                    
+                    TempData["Erro"] = motivoFalha;
                 }
 
                 return RedirectToAction(nameof(Index));

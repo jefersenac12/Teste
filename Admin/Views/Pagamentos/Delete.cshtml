@@ -9,15 +9,52 @@
             <div class="card border-0 shadow-sm rounded-3">
                 <div class="card-header bg-white border-0 pt-4 pb-0">
                     <h1 class="h3 fw-bold text-danger mb-0">Cancelar Pagamento</h1>
-                    <p class="text-muted">Tem certeza que deseja cancelar/estornar este pagamento? Esta ação não pode ser desfeita.</p>
+                    <p class="text-muted">Tem certeza que deseja cancelar este pagamento? Esta ação não pode ser desfeita.</p>
                 </div>
                 <div class="card-body p-4">
-                    <div class="alert alert-warning d-flex align-items-center" role="alert">
-                        <span class="material-symbols-outlined me-2">warning</span>
-                        <div>
-                            <strong>Atenção!</strong> O cancelamento do pagamento afetará a reserva associada e poderá gerar reembolsos se o valor já tiver sido compensado.
+                    @if (ViewBag.PagamentoEstaPago == true)
+                    {
+                        <div class="alert alert-danger d-flex align-items-center" role="alert">
+                            <span class="material-symbols-outlined me-2">error</span>
+                            <div>
+                                <strong>Atenção!</strong> Este pagamento já está <strong>confirmado como PAGO</strong>. 
+                                Ao excluí-lo, você estará <strong>cancelando/estornando</strong> este pagamento. 
+                                Esta ação pode afetar a reserva associada e gerar necessidade de reembolso ao cliente.
+                            </div>
                         </div>
-                    </div>
+                    }
+                    else if (ViewBag.PagamentoEstaPendente == true)
+                    {
+                        <div class="alert alert-warning d-flex align-items-center" role="alert">
+                            <span class="material-symbols-outlined me-2">warning</span>
+                            <div>
+                                <strong>Atenção!</strong> Este pagamento está <strong>pendente</strong>. 
+                                Ao excluí-lo, você estará <strong>cancelando</strong> a solicitação de pagamento. 
+                                A reserva associada poderá ser afetada.
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info d-flex align-items-center" role="alert">
+                            <span class="material-symbols-outlined me-2">info</span>
+                            <div>
+                                <strong>Informação!</strong> Este pagamento está com status <strong>@Model.Status</strong>. 
+                                Verifique o impacto da exclusão na reserva associada antes de confirmar.
+                            </div>
+                        </div>
+                    }
+
+                    @if (ViewBag.TemChavePix == true)
+                    {
+                        <div class="alert alert-warning d-flex align-items-center" role="alert">
+                            <span class="material-symbols-outlined me-2">payments</span>
+                            <div>
+                                <strong>Pagamento PIX detectado!</strong> Este pagamento foi gerado via PIX. 
+                                Ao excluí-lo, verifique se há necessidade de estornos ou cancelamentos junto às instituições financeiras.
+                            </div>
+                        </div>
+                    }
                     
                     <div class="mb-4">
                         <h5 class="fw-medium mb-3">Dados do Pagamento:</h5>
@@ -44,7 +81,7 @@
                         <div class="row mt-2">
                             <div class="col-sm-6">
                                 <small class="text-muted">Valor:</small>
-                                <p class="fw-medium text-danger">R$ @Model.Valor.ToString("N2")</p>
+                                <p class="fw-medium text-danger">@ViewBag.ValorFormatado</p>
                             </div>
                             <div class="col-sm-6">
                                 <small class="text-muted">Status Atual:</small>

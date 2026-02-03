@@ -467,7 +467,55 @@ namespace Admin.Controllers
 
                 }
 
+                // Verificar reservas associadas a esta agenda
 
+                var reservas = await _apiService.GetReservasAsync();
+
+                var reservasAssociadas = reservas?.Where(r => r.AgendaId == id).ToList() ?? new List<ReservaViewModel>();
+
+                // Verificar pagamentos associados às reservas
+
+                var pagamentos = await _apiService.GetPagamentosAsync();
+
+                var pagamentosAssociados = new List<PagamentoViewModel>();
+
+                if (reservasAssociadas.Any())
+
+                {
+
+                    var reservaIds = reservasAssociadas.Select(r => r.Id).ToList();
+
+                    pagamentosAssociados = pagamentos?.Where(p => reservaIds.Contains(p.ReservaId)).ToList() ?? new List<PagamentoViewModel>();
+
+                }
+
+                ViewBag.TemReservas = reservasAssociadas.Any();
+
+                ViewBag.QuantidadeReservas = reservasAssociadas.Count;
+
+                ViewBag.TemPagamentos = pagamentosAssociados.Any();
+
+                ViewBag.QuantidadePagamentos = pagamentosAssociados.Count;
+
+                ViewBag.PagamentosPagos = pagamentosAssociados.Count(p => p.Status?.ToLower() == "pago");
+
+                ViewBag.ValorTotalPagamentos = pagamentosAssociados.Where(p => p.Status?.ToLower() == "pago").Sum(p => p.Valor);
+
+                ViewBag.ValorTotalFormatado = ViewBag.ValorTotalPagamentos?.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"));
+
+                // Calcular impacto nas vagas
+
+                ViewBag.VagasOcupadas = reservasAssociadas.Sum(r => r.Quantidade);
+
+                ViewBag.TaxaOcupacao = agendamento.VagasTotais > 0 ? (double)ViewBag.VagasOcupadas / agendamento.VagasTotais * 100 : 0;
+
+                // Verificar se a agenda está no passado, presente ou futuro
+
+                ViewBag.AgendaPassada = agendamento.DataHora < DateTime.Now;
+
+                ViewBag.DiasParaAgenda = agendamento.DataHora > DateTime.Now ? (agendamento.DataHora - DateTime.Now).Days : 0;
+
+                ViewBag.HorasParaAgenda = agendamento.DataHora > DateTime.Now ? (agendamento.DataHora - DateTime.Now).Hours : 0;
 
                 return View(agendamento);
 

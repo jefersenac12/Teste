@@ -12,12 +12,60 @@
                     <p class="text-muted">Tem certeza que deseja cancelar esta reserva? Esta ação não pode ser desfeita.</p>
                 </div>
                 <div class="card-body p-4">
-                    <div class="alert alert-warning d-flex align-items-center" role="alert">
-                        <span class="material-symbols-outlined me-2">warning</span>
-                        <div>
-                            <strong>Atenção!</strong> O cancelamento da reserva afetará a disponibilidade de vagas no agendamento e poderá gerar reembolsos se já houver pagamentos.
+                    @if (ViewBag.TemPagamentos == true)
+                    {
+                        <div class="alert alert-danger d-flex align-items-center" role="alert">
+                            <span class="material-symbols-outlined me-2">error</span>
+                            <div>
+                                <strong>Atenção!</strong> Esta reserva possui <strong>@ViewBag.QuantidadePagamentos pagamento(s)</strong> associado(s). 
+                                @if (ViewBag.PagamentosPagos > 0)
+                                {
+                                    <text>Destes, <strong>@ViewBag.PagamentosPagos já estão pagos</strong> totalizando <strong>@ViewBag.ValorTotalFormatado</strong>. </text>
+                                }
+                                Ao excluir esta reserva, todos os pagamentos serão <strong>cancelados/estornados</strong> e as vagas serão liberadas na agenda.
+                            </div>
                         </div>
-                    </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning d-flex align-items-center" role="alert">
+                            <span class="material-symbols-outlined me-2">warning</span>
+                            <div>
+                                <strong>Atenção!</strong> Esta reserva não possui pagamentos registrados, mas ao excluí-la as <strong>@Model.Quantidade vaga(s)</strong> serão liberadas na agenda.
+                            </div>
+                        </div>
+                    }
+
+                    @if (ViewBag.AgendaPassada == true)
+                    {
+                        <div class="alert alert-info d-flex align-items-center" role="alert">
+                            <span class="material-symbols-outlined me-2">info</span>
+                            <div>
+                                <strong>Informação!</strong> Esta agenda já ocorreu em <strong>@ViewBag.DataAgendaFormatada</strong>. 
+                                A exclusão desta reserva será apenas para fins de <strong>limpeza de histórico</strong> e auditoria.
+                            </div>
+                        </div>
+                    }
+                    else if (ViewBag.DiasParaAgenda <= 1)
+                    {
+                        <div class="alert alert-warning d-flex align-items-center" role="alert">
+                            <span class="material-symbols-outlined me-2">schedule</span>
+                            <div>
+                                <strong>Atenção!</strong> Esta agenda está prevista para <strong>@ViewBag.DataAgendaFormatada</strong> 
+                                (@ViewBag.DiasParaAgenda dia(s)). A exclusão em curto prazo pode afetar o planejamento do cliente.
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-success d-flex align-items-center" role="alert">
+                            <span class="material-symbols-outlined me-2">event_available</span>
+                            <div>
+                                <strong>Bom!</strong> Esta agenda está prevista para <strong>@ViewBag.DataAgendaFormatada</strong> 
+                                (@ViewBag.DiasParaAgenda dias). As vagas serão liberadas com antecedência para outros clientes.
+                            </div>
+                        </div>
+                    }
                     
                     <div class="mb-4">
                         <h5 class="fw-medium mb-3">Dados da Reserva:</h5>
@@ -52,9 +100,23 @@
                             </div>
                         </div>
                         <div class="row mt-2">
-                            <div class="col-12">
+                            <div class="col-sm-6">
+                                <small class="text-muted">NP Entrada:</small>
+                                <p class="fw-medium">@Model.NPEntrada</p>
+                            </div>
+                            <div class="col-sm-6">
+                                <small class="text-muted">Meia Entrada:</small>
+                                <p class="fw-medium">@Model.MeiaEntrada</p>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-sm-6">
+                                <small class="text-muted">Inteira Entrada:</small>
+                                <p class="fw-medium">@Model.InteiraEntrada</p>
+                            </div>
+                            <div class="col-sm-6">
                                 <small class="text-muted">Data/Hora do Agendamento:</small>
-                                <p class="fw-medium">@Model.DataReservaFormatada</p>
+                                <p class="fw-medium">@ViewBag.DataAgendaFormatada</p>
                             </div>
                         </div>
                     </div>

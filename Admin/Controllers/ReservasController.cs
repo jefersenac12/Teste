@@ -379,7 +379,7 @@ namespace Admin.Controllers
 
                     ModelState.AddModelError("Quantidade", "A quantidade total deve ser igual à soma das entradas (NP + Meia + Inteira).");
 
-                    
+
 
                     var agendas = await _apiService.GetAgendaAsync() ?? new List<AgendamentoViewModel>();
 
@@ -413,7 +413,7 @@ namespace Admin.Controllers
 
                     ModelState.AddModelError("", "Não foi possível atualizar a reserva. Verifique os dados e tente novamente.");
 
-                    
+
 
                     var agendas = await _apiService.GetAgendaAsync() ?? new List<AgendamentoViewModel>();
 
@@ -437,7 +437,7 @@ namespace Admin.Controllers
 
                 ModelState.AddModelError("", "Ocorreu um erro ao atualizar a reserva. Tente novamente.");
 
-                
+
 
                 var agendas = await _apiService.GetAgendaAsync() ?? new List<AgendamentoViewModel>();
 
@@ -450,53 +450,48 @@ namespace Admin.Controllers
                 return View(model);
 
             }
-
         }
-
 
 
         // GET: /Reservas/Delete/5
-
         public async Task<IActionResult> Delete(int id)
-
         {
-
             try
-
             {
-
                 var reserva = await _apiService.GetReservaByIdAsync(id);
-
                 if (reserva == null)
-
                 {
-
                     return NotFound();
-
                 }
 
+                // Verificar pagamentos associados a esta reserva
+                var pagamentos = await _apiService.GetPagamentosAsync();
+                var pagamentosAssociados = pagamentos?.Where(p => p.ReservaId == id).ToList() ?? new List<Admin.Models.PagamentoViewModel>();
 
+                // Verificar informações da agenda para calcular impacto
+                var agenda = await _apiService.GetAgendaByIdAsync(reserva.AgendaId);
+
+                ViewBag.TemPagamentos = pagamentosAssociados.Any();
+                ViewBag.QuantidadePagamentos = pagamentosAssociados.Count;
+                ViewBag.PagamentosPagos = pagamentosAssociados.Count(p => p.Status?.ToLower() == "pago");
+                ViewBag.ValorTotalPagamentos = pagamentosAssociados.Where(p => p.Status?.ToLower() == "pago").Sum(p => p.Valor);
+                ViewBag.ValorTotalFormatado = ViewBag.ValorTotalPagamentos?.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"));
+                
+                ViewBag.DataAgenda = agenda?.DataHora;
+                ViewBag.DataAgendaFormatada = agenda?.DataHora.ToString("dd/MM/yyyy HH:mm");
+                ViewBag.DiasParaAgenda = agenda?.DataHora > DateTime.Now ? (agenda.DataHora - DateTime.Now).Days : 0;
+                ViewBag.AgendaPassada = agenda?.DataHora < DateTime.Now;
 
                 return View(reserva);
-
             }
-
             catch (Exception ex)
-
             {
-
                 _logger.LogError(ex, "Erro ao carregar reserva para exclusão {Id}", id);
-
                 return RedirectToAction(nameof(Index));
-
             }
-
         }
 
-
-
         // POST: /Reservas/Delete/5
-
         [HttpPost, ActionName("Delete")]
 
         [ValidateAntiForgeryToken]

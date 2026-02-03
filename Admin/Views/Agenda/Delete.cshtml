@@ -12,12 +12,60 @@
                     <p class="text-muted">Tem certeza que deseja excluir este agendamento? Esta ação não pode ser desfeita.</p>
                 </div>
                 <div class="card-body p-4">
-                    <div class="alert alert-warning d-flex align-items-center" role="alert">
-                        <span class="material-symbols-outlined me-2">warning</span>
-                        <div>
-                            <strong>Atenção!</strong> A exclusão do agendamento removerá todas as reservas associadas a este evento.
+                    @if (ViewBag.TemReservas == true)
+                    {
+                        <div class="alert alert-danger d-flex align-items-center" role="alert">
+                            <span class="material-symbols-outlined me-2">error</span>
+                            <div>
+                                <strong>Atenção!</strong> Esta agenda possui <strong>@ViewBag.QuantidadeReservas reserva(s)</strong> confirmadas.
+                                @if (ViewBag.TemPagamentos == true)
+                                {
+                                    <text>Existem <strong>@ViewBag.QuantidadePagamentos pagamento(s)</strong>, dos quais <strong>@ViewBag.PagamentosPagos já estão pagos</strong> totalizando <strong>@ViewBag.ValorTotalFormatado</strong>. </text>
+                                }
+                                Ao excluir esta agenda, <strong>TODAS as reservas serão canceladas</strong> e os pagamentos estornados.
+                            </div>
                         </div>
-                    </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning d-flex align-items-center" role="alert">
+                            <span class="material-symbols-outlined me-2">warning</span>
+                            <div>
+                                <strong>Atenção!</strong> Esta agenda não possui reservas, mas a exclusão é permanente.
+                            </div>
+                        </div>
+                    }
+
+                    @if (ViewBag.AgendaPassada == true)
+                    {
+                        <div class="alert alert-info d-flex align-items-center" role="alert">
+                            <span class="material-symbols-outlined me-2">history</span>
+                            <div>
+                                <strong>Informação!</strong> Esta agenda já ocorreu em <strong>@Model.DataHora.ToString("dd/MM/yyyy HH:mm")</strong>. 
+                                A exclusão será apenas para <strong>limpeza de histórico</strong> e auditoria dos dados.
+                            </div>
+                        </div>
+                    }
+                    else if (ViewBag.DiasParaAgenda == 0 && ViewBag.HorasParaAgenda <= 24)
+                    {
+                        <div class="alert alert-danger d-flex align-items-center" role="alert">
+                            <span class="material-symbols-outlined me-2">event_busy</span>
+                            <div>
+                                <strong>Cuidado!</strong> Esta agenda está prevista para <strong>hoje</strong> ou nas próximas 24 horas! 
+                                A exclusão afetará <strong>planejamento imediato</strong> e poderá causar problemas logísticos.
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-success d-flex align-items-center" role="alert">
+                            <span class="material-symbols-outlined me-2">event_available</span>
+                            <div>
+                                <strong>Bom!</strong> Esta agenda está prevista para <strong>@ViewBag.DiasParaAgenda dia(s)</strong>. 
+                                A exclusão com antecedência permite remanejar os clientes para outras datas.
+                            </div>
+                        </div>
+                    }
                     
                     <div class="mb-4">
                         <h5 class="fw-medium mb-3">Dados do Agendamento:</h5>
@@ -55,6 +103,48 @@
                                 <p class="fw-medium">@Model.VagasDisponiveis</p>
                             </div>
                         </div>
+                        @if (ViewBag.TemReservas == true)
+                        {
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <div class="card border-warning bg-light">
+                                        <div class="card-body p-3">
+                                            <h6 class="fw-bold text-warning mb-2">
+                                                <span class="material-symbols-outlined me-1">warning</span>
+                                                Impacto da Exclusão:
+                                            </h6>
+                                            <div class="row">
+                                                <div class="col-sm-4">
+                                                    <small class="text-muted">Reservas:</small>
+                                                    <p class="fw-bold text-danger">@ViewBag.QuantidadeReservas</p>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <small class="text-muted">Vagas Ocupadas:</small>
+                                                    <p class="fw-bold text-danger">@ViewBag.VagasOcupadas</p>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <small class="text-muted">Taxa Ocupação:</small>
+                                                    <p class="fw-bold text-danger">@string.Format("{0:F1}%", ViewBag.TaxaOcupacao)</p>
+                                                </div>
+                                            </div>
+                                            @if (ViewBag.TemPagamentos == true)
+                                            {
+                                                <div class="row mt-2">
+                                                    <div class="col-sm-6">
+                                                        <small class="text-muted">Pagamentos:</small>
+                                                        <p class="fw-bold text-danger">@ViewBag.QuantidadePagamentos</p>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <small class="text-muted">Valor Total:</small>
+                                                        <p class="fw-bold text-danger">@ViewBag.ValorTotalFormatado</p>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
                     </div>
                     
                     <form asp-action="Delete" method="post">

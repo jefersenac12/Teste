@@ -178,6 +178,44 @@ namespace Admin.Controllers
                     return NotFound();
                 }
 
+                // Verificar agendas associadas a esta safra
+                var agendas = await _apiService.GetAgendaAsync();
+                var agendasAssociadas = agendas?.Where(a => a.SafraId == id).ToList() ?? new List<AgendamentoViewModel>();
+
+                // Verificar reservas e pagamentos associados
+                var reservas = await _apiService.GetReservasAsync();
+                var pagamentos = await _apiService.GetPagamentosAsync();
+
+                var reservasAssociadas = new List<ReservaViewModel>();
+                var pagamentosAssociados = new List<PagamentoViewModel>();
+
+                if (agendasAssociadas.Any())
+                {
+                    var agendaIds = agendasAssociadas.Select(a => a.Id).ToList();
+                    reservasAssociadas = reservas?.Where(r => agendaIds.Contains(r.AgendaId)).ToList() ?? new List<ReservaViewModel>();
+                    
+                    if (reservasAssociadas.Any())
+                    {
+                        var reservaIds = reservasAssociadas.Select(r => r.Id).ToList();
+                        pagamentosAssociados = pagamentos?.Where(p => reservaIds.Contains(p.ReservaId)).ToList() ?? new List<PagamentoViewModel>();
+                    }
+                }
+
+                ViewBag.TemAgendas = agendasAssociadas.Any();
+                ViewBag.QuantidadeAgendas = agendasAssociadas.Count;
+                ViewBag.TemReservas = reservasAssociadas.Any();
+                ViewBag.QuantidadeReservas = reservasAssociadas.Count;
+                ViewBag.TemPagamentos = pagamentosAssociados.Any();
+                ViewBag.QuantidadePagamentos = pagamentosAssociados.Count;
+                ViewBag.PagamentosPagos = pagamentosAssociados.Count(p => p.Status?.ToLower() == "pago");
+                ViewBag.ValorTotalPagamentos = pagamentosAssociados.Where(p => p.Status?.ToLower() == "pago").Sum(p => p.Valor);
+                ViewBag.ValorTotalFormatado = ViewBag.ValorTotalPagamentos?.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"));
+
+                // Verificar se a safra está no passado, presente ou futuro
+                ViewBag.SafraPassada = safra.DataFim < DateTime.Today;
+                ViewBag.SafraEmAndamento = safra.DataInicio <= DateTime.Today && safra.DataFim >= DateTime.Today;
+                ViewBag.DiasParaInicio = safra.DataInicio > DateTime.Today ? (safra.DataInicio - DateTime.Today).Days : 0;
+
                 return View(safra);
             }
             catch (Exception ex)

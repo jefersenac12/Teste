@@ -59,9 +59,18 @@ namespace Admin.Controllers
         }
 
         // GET: /Usuarios/Create
-        public IActionResult Create()
+        public IActionResult Create(int? tipo)
         {
-            return View();
+            if (!tipo.HasValue || (tipo.Value != 1 && tipo.Value != 2))
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            var model = new UsuarioViewModel();
+            model.Tipo = (byte)tipo.Value;
+            ViewBag.TipoPreSelecionado = tipo.Value;
+            
+            return View(model);
         }
 
         // POST: /Usuarios/Create
@@ -71,6 +80,9 @@ namespace Admin.Controllers
         {
             try
             {
+                // Manter o ViewBag.TipoPreSelecionado para a view
+                ViewBag.TipoPreSelecionado = model.Tipo;
+
                 if (!ModelState.IsValid)
                 {
                     return View(model);
@@ -91,6 +103,7 @@ namespace Admin.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao criar usuário");
+                ViewBag.TipoPreSelecionado = model.Tipo; // Manter o tipo mesmo em caso de erro
                 ModelState.AddModelError("", "Ocorreu um erro ao cadastrar o usuário. Tente novamente.");
                 return View(model);
             }

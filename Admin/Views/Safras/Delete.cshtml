@@ -12,12 +12,64 @@
                     <p class="text-muted">Tem certeza que deseja excluir esta safra? Esta ação não pode ser desfeita.</p>
                 </div>
                 <div class="card-body p-4">
-                    <div class="alert alert-warning d-flex align-items-center" role="alert">
-                        <span class="material-symbols-outlined me-2">warning</span>
-                        <div>
-                            <strong>Atenção!</strong> A exclusão da safra removerá todos os agendamentos e reservas associados a este período.
+                    @if (ViewBag.TemAgendas == true)
+                    {
+                        <div class="alert alert-danger d-flex align-items-center" role="alert">
+                            <span class="material-symbols-outlined me-2">error</span>
+                            <div>
+                                <strong>Atenção!</strong> Esta safra possui <strong>@ViewBag.QuantidadeAgendas agenda(s)</strong> associadas.
+                                @if (ViewBag.TemReservas == true)
+                                {
+                                    <text>Essas agendas têm <strong>@ViewBag.QuantidadeReservas reserva(s)</strong> no total. </text>
+                                }
+                                @if (ViewBag.TemPagamentos == true)
+                                {
+                                    <text>Existem <strong>@ViewBag.QuantidadePagamentos pagamento(s)</strong>, dos quais <strong>@ViewBag.PagamentosPagos já estão pagos</strong> totalizando <strong>@ViewBag.ValorTotalFormatado</strong>. </text>
+                                }
+                                Ao excluir esta safra, <strong>TODOS os dados serão perdidos</strong> incluindo agendas, reservas e pagamentos.
+                            </div>
                         </div>
-                    </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning d-flex align-items-center" role="alert">
+                            <span class="material-symbols-outlined me-2">warning</span>
+                            <div>
+                                <strong>Atenção!</strong> Esta safra não possui agendas associadas, mas a exclusão é permanente.
+                            </div>
+                        </div>
+                    }
+
+                    @if (ViewBag.SafraPassada == true)
+                    {
+                        <div class="alert alert-info d-flex align-items-center" role="alert">
+                            <span class="material-symbols-outlined me-2">history</span>
+                            <div>
+                                <strong>Informação!</strong> Esta safra já foi finalizada em <strong>@Model.DataFim.ToString("dd/MM/yyyy")</strong>. 
+                                A exclusão será apenas para <strong>limpeza de histórico</strong> e auditoria dos dados.
+                            </div>
+                        </div>
+                    }
+                    else if (ViewBag.SafraEmAndamento == true)
+                    {
+                        <div class="alert alert-danger d-flex align-items-center" role="alert">
+                            <span class="material-symbols-outlined me-2">event_busy</span>
+                            <div>
+                                <strong>Cuidado!</strong> Esta safra está <strong>em andamento</strong> no momento! 
+                                A exclusão afetará operações ativas e poderá causar problemas nos agendamentos futuros.
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-success d-flex align-items-center" role="alert">
+                            <span class="material-symbols-outlined me-2">event_available</span>
+                            <div>
+                                <strong>Informação!</strong> Esta safra está prevista para começar em <strong>@ViewBag.DiasParaInicio dia(s)</strong> 
+                                (@Model.DataInicio.ToString("dd/MM/yyyy")). A exclusão afetará apenas o planejamento futuro.
+                            </div>
+                        </div>
+                    }
                     
                     <div class="mb-4">
                         <h5 class="fw-medium mb-3">Dados da Safra:</h5>
@@ -46,6 +98,44 @@
                                 <p class="fw-medium">@Model.DataFim.ToString("dd/MM/yyyy")</p>
                             </div>
                         </div>
+                        @if (ViewBag.TemAgendas == true)
+                        {
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <div class="card border-warning bg-light">
+                                        <div class="card-body p-3">
+                                            <h6 class="fw-bold text-warning mb-2">
+                                                <span class="material-symbols-outlined me-1">warning</span>
+                                                Impacto da Exclusão:
+                                            </h6>
+                                            <div class="row">
+                                                <div class="col-sm-4">
+                                                    <small class="text-muted">Agendas:</small>
+                                                    <p class="fw-bold text-danger">@ViewBag.QuantidadeAgendas</p>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <small class="text-muted">Reservas:</small>
+                                                    <p class="fw-bold text-danger">@ViewBag.QuantidadeReservas</p>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <small class="text-muted">Pagamentos:</small>
+                                                    <p class="fw-bold text-danger">@ViewBag.QuantidadePagamentos</p>
+                                                </div>
+                                            </div>
+                                            @if (ViewBag.ValorTotalPagamentos > 0)
+                                            {
+                                                <div class="row mt-2">
+                                                    <div class="col-12">
+                                                        <small class="text-muted">Valor Total em Pagamentos:</small>
+                                                        <p class="fw-bold text-danger">@ViewBag.ValorTotalFormatado</p>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
                     </div>
                     
                     <form asp-action="Delete" method="post">
