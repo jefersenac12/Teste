@@ -12,12 +12,40 @@
                     <p class="text-muted">Tem certeza que deseja excluir esta atividade? Esta ação não pode ser desfeita.</p>
                 </div>
                 <div class="card-body p-4">
-                    <div class="alert alert-warning d-flex align-items-center" role="alert">
-                        <span class="material-symbols-outlined me-2">warning</span>
-                        <div>
-                            <strong>Atenção!</strong> A exclusão da atividade removerá todos os agendamentos e reservas associados a ela.
+                    @if (ViewBag.TemDependencias == true)
+                    {
+                        <div class="alert alert-danger d-flex align-items-start" role="alert">
+                            <span class="material-symbols-outlined me-2 mt-1">error</span>
+                            <div>
+                                <strong>⚠️ ATENÇÃO! Esta atividade possui dependências!</strong><br>
+                                <div class="mt-2">
+                                    <strong>Dependências encontradas:</strong><br>
+                                    • <strong>@ViewBag.QuantidadeAgendas</strong> agenda(s) vinculada(s)<br>
+                                    • <strong>@ViewBag.QuantidadeReservas</strong> reserva(s) vinculada(s)<br><br>
+                                    <small>Para excluir esta atividade, você precisará excluir manualmente as reservas e agendas vinculadas primeiro.</small>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                        
+                        <div class="alert alert-warning d-flex align-items-center" role="alert">
+                            <span class="material-symbols-outlined me-2">info</span>
+                            <div>
+                                <strong>Ordem recomendada para exclusão:</strong><br>
+                                1️⃣ Primeiro exclua as <strong>reservas</strong> vinculadas<br>
+                                2️⃣ Depois exclua as <strong>agendas</strong> vinculadas<br>
+                                3️⃣ Por fim, exclua a <strong>atividade</strong>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning d-flex align-items-center" role="alert">
+                            <span class="material-symbols-outlined me-2">warning</span>
+                            <div>
+                                <strong>Atenção!</strong> A exclusão da atividade removerá todos os agendamentos e reservas associados a ela.
+                            </div>
+                        </div>
+                    }
                     
                     <div class="mb-4">
                         <h5 class="fw-medium mb-3">Dados da Atividade:</h5>
@@ -55,10 +83,21 @@
                                 <span class="material-symbols-outlined me-2">arrow_back</span>
                                 Cancelar
                             </a>
-                            <button type="submit" class="btn btn-danger">
-                                <span class="material-symbols-outlined me-2">delete</span>
-                                Confirmar Exclusão
-                            </button>
+                            @if (ViewBag.TemDependencias == true)
+                            {
+                                <button type="submit" class="btn btn-danger" disabled
+                                        title="Exclua as dependências primeiro">
+                                    <span class="material-symbols-outlined me-2">block</span>
+                                    Excluir Dependências Primeiro
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="submit" class="btn btn-danger">
+                                    <span class="material-symbols-outlined me-2">delete</span>
+                                    Confirmar Exclusão
+                                </button>
+                            }
                         </div>
                     </form>
                 </div>

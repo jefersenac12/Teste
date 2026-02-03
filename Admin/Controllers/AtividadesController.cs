@@ -167,6 +167,21 @@ namespace Admin.Controllers
                     return NotFound();
                 }
 
+                // Verificar dependências antes de mostrar a página de exclusão
+                var agendas = await _apiService.GetAgendaAsync();
+                var agendasVinculadas = agendas.Where(a => a.AtividadeId == id).ToList();
+                
+                var reservasCount = 0;
+                if (agendasVinculadas.Any())
+                {
+                    var reservas = await _apiService.GetReservasAsync();
+                    reservasCount = reservas.Count(r => agendasVinculadas.Any(a => a.Id == r.AgendaId));
+                }
+
+                ViewBag.TemDependencias = agendasVinculadas.Any();
+                ViewBag.QuantidadeAgendas = agendasVinculadas.Count;
+                ViewBag.QuantidadeReservas = reservasCount;
+
                 return View(atividade);
             }
             catch (Exception ex)
