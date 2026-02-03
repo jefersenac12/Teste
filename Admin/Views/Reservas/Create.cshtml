@@ -23,7 +23,7 @@
                                 {
                                     foreach (var agenda in agendas)
                                     {
-                                        <option value="@agenda.Id">#@agenda.Id - @agenda.AtividadeNome (@agenda.DataHoraFormatada)</option>
+                                        <option value="@agenda.Id">#@agenda.Id</option>
                                     }
                                 }
                             </select>
@@ -38,7 +38,7 @@
                                 {
                                     foreach (var usuario in usuarios)
                                     {
-                                        <option value="@usuario.Id">@usuario.Nome (@usuario.Identificador)</option>
+                                        <option value="@usuario.Id">@usuario.Nome</option>
                                     }
                                 }
                             </select>
@@ -49,6 +49,12 @@
                             <label asp-for="DataReserva" class="form-label fw-medium">Data da Reserva</label>
                             <input asp-for="DataReserva" class="form-control" type="date" required />
                             <span asp-validation-for="DataReserva" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Quantidade" class="form-label fw-medium">Quantidade</label>
+                            <input asp-for="Quantidade" class="form-control" type="number" min="1" required />
+                            <span asp-validation-for="Quantidade" class="text-danger"></span>
                         </div>
                         
                         <div class="row">
@@ -75,7 +81,7 @@
                             </div>
                         </div>
                         
-                        <div class="mb-4">
+                        <div class="mb-3">
                             <label asp-for="ValorTotal" class="form-label fw-medium">Valor Total</label>
                             <div class="input-group">
                                 <span class="input-group-text">R$</span>
@@ -101,6 +107,3 @@
     </div>
 </div>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}

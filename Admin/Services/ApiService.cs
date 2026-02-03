@@ -9,25 +9,28 @@ namespace Admin.Services
     {
         private readonly HttpClient _httpClient;
         private readonly string _baseUrl = "http://tiijeferson.runasp.net/api";
+        private readonly JsonSerializerOptions _jsonOptions;
 
         public ApiService(HttpClient httpClient)
         {
             _httpClient = httpClient;
+            _jsonOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                PropertyNameCaseInsensitive = true
+            };
         }
 
         // Usuarios
         public async Task<List<UsuarioViewModel>> GetUsuariosAsync()
         {
-            var response = await _httpClient.GetAsync($"{_baseUrl}/Usuario");
+            var response = await _httpClient.GetAsync($"{_baseUrl}/usuario");
             if (!response.IsSuccessStatusCode) return new List<UsuarioViewModel>();
             var json = await response.Content.ReadAsStringAsync();
             List<UsuarioViewModel>? baseLista = null;
             try
             {
-                baseLista = JsonSerializer.Deserialize<List<UsuarioViewModel>>(json, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                baseLista = JsonSerializer.Deserialize<List<UsuarioViewModel>>(json, _jsonOptions);
                 if (baseLista != null && !baseLista.Any(u => u.Tipo == 1 && string.IsNullOrWhiteSpace(u.CNPJ)))
                 {
                     return baseLista;
@@ -74,14 +77,11 @@ namespace Admin.Services
 
         public async Task<UsuarioViewModel?> GetUsuarioByIdAsync(int id)
         {
-            var response = await _httpClient.GetAsync($"{_baseUrl}/Usuario/{id}");
+            var response = await _httpClient.GetAsync($"{_baseUrl}/usuario/{id}");
             if (!response.IsSuccessStatusCode) return null;
 
             var json = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<UsuarioViewModel>(json, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
+            return JsonSerializer.Deserialize<UsuarioViewModel>(json, _jsonOptions);
         }
 
         public async Task<bool> CreateUsuarioAsync(UsuarioViewModel usuario)
@@ -89,7 +89,7 @@ namespace Admin.Services
             var json = JsonSerializer.Serialize(usuario);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync($"{_baseUrl}/Usuario/cadastrar", content);
+            var response = await _httpClient.PostAsync($"{_baseUrl}/usuario", content);
             return response.IsSuccessStatusCode;
         }
 
@@ -98,7 +98,7 @@ namespace Admin.Services
             var json = JsonSerializer.Serialize(usuario);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PutAsync($"{_baseUrl}/Usuario/{usuario.Id}", content);
+            var response = await _httpClient.PutAsync($"{_baseUrl}/usuario/{usuario.Id}", content);
             return response.IsSuccessStatusCode;
         }
 
@@ -106,20 +106,20 @@ namespace Admin.Services
         {
             var json = JsonSerializer.Serialize(usuario);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await _httpClient.PutAsync($"{_baseUrl}/Usuario/{id}", content);
+            var response = await _httpClient.PutAsync($"{_baseUrl}/usuario/{id}", content);
             return response.IsSuccessStatusCode;
         }
 
         public async Task<bool> DeleteUsuarioAsync(int id)
         {
-            var response = await _httpClient.DeleteAsync($"{_baseUrl}/Usuario/{id}");
+            var response = await _httpClient.DeleteAsync($"{_baseUrl}/usuario/{id}");
             return response.IsSuccessStatusCode;
         }
 
         // Safras
         public async Task<List<SafraViewModel>> GetSafrasAsync()
         {
-            var response = await _httpClient.GetAsync($"{_baseUrl}/Safra");
+            var response = await _httpClient.GetAsync($"{_baseUrl}/safra");
 
             if (!response.IsSuccessStatusCode)
             {
@@ -127,15 +127,12 @@ namespace Admin.Services
             }
 
             var json = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<List<SafraViewModel>>(json, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            }) ?? new List<SafraViewModel>();
+            return JsonSerializer.Deserialize<List<SafraViewModel>>(json, _jsonOptions) ?? new List<SafraViewModel>();
         }
 
         public async Task<SafraViewModel?> GetSafraByIdAsync(int id)
         {
-            var response = await _httpClient.GetAsync($"{_baseUrl}/Safra/{id}");
+            var response = await _httpClient.GetAsync($"{_baseUrl}/safra/{id}");
             if (!response.IsSuccessStatusCode) return null;
             var json = await response.Content.ReadAsStringAsync();
             return JsonSerializer.Deserialize<SafraViewModel>(json, new JsonSerializerOptions
@@ -149,7 +146,7 @@ namespace Admin.Services
             var json = JsonSerializer.Serialize(safra);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync($"{_baseUrl}/Safra/cadastrar", content);
+            var response = await _httpClient.PostAsync($"{_baseUrl}/safra", content);
             return response.IsSuccessStatusCode;
         }
 
@@ -158,7 +155,7 @@ namespace Admin.Services
             var json = JsonSerializer.Serialize(safra);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PutAsync($"{_baseUrl}/Safra/{safra.Id}", content);
+            var response = await _httpClient.PutAsync($"{_baseUrl}/safra/{safra.Id}", content);
             return response.IsSuccessStatusCode;
         }
 
@@ -166,13 +163,13 @@ namespace Admin.Services
         {
             var json = JsonSerializer.Serialize(safra);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await _httpClient.PutAsync($"{_baseUrl}/Safra/{id}", content);
+            var response = await _httpClient.PutAsync($"{_baseUrl}/safra/{id}", content);
             return response.IsSuccessStatusCode;
         }
 
         public async Task<bool> DeleteSafraAsync(int id)
         {
-            var response = await _httpClient.DeleteAsync($"{_baseUrl}/Safra/{id}");
+            var response = await _httpClient.DeleteAsync($"{_baseUrl}/safra/{id}");
             return response.IsSuccessStatusCode;
         }
 
@@ -206,10 +203,10 @@ namespace Admin.Services
 
         public async Task<bool> CreateAtividadeAsync(AtividadeViewModel atividade)
         {
-            var json = JsonSerializer.Serialize(atividade);
+            var json = JsonSerializer.Serialize(atividade, _jsonOptions);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync($"{_baseUrl}/Atividade/cadastrar", content);
+            var response = await _httpClient.PostAsync($"{_baseUrl}/Atividade", content);
             return response.IsSuccessStatusCode;
         }
 
@@ -288,7 +285,7 @@ namespace Admin.Services
             var json = JsonSerializer.Serialize(agendamento);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync($"{_baseUrl}/Agenda/cadastrar", content);
+            var response = await _httpClient.PostAsync($"{_baseUrl}/Agenda", content);
             return response.IsSuccessStatusCode;
         }
 
@@ -460,7 +457,7 @@ namespace Admin.Services
         {
             var json = JsonSerializer.Serialize(reserva);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync($"{_baseUrl}/Reserva/cadastrar", content);
+            var response = await _httpClient.PostAsync($"{_baseUrl}/Reserva", content);
             return response.IsSuccessStatusCode;
         }
 
@@ -553,7 +550,7 @@ namespace Admin.Services
         {
             var json = JsonSerializer.Serialize(pagamento);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync($"{_baseUrl}/Pagamento/cadastrar", content);
+            var response = await _httpClient.PostAsync($"{_baseUrl}/Pagamento", content);
             return response.IsSuccessStatusCode;
         }
 

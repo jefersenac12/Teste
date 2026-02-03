@@ -23,16 +23,11 @@ namespace Admin.Models
         [Range(0, int.MaxValue, ErrorMessage = "Vagas disponíveis não podem ser negativas")]
         public int VagasDisponiveis { get; set; }
 
-        // Propriedades de navegação/exibição
+        // Propriedades de navegação (para compatibilidade com views existentes)
         public string? SafraNome { get; set; }
         public string? AtividadeNome { get; set; }
-
-        // Propriedades calculadas
         public string DataFormatada => DataHora.ToString("dd/MM/yyyy");
         public string HoraFormatada => DataHora.ToString("HH:mm");
         public string DataHoraFormatada => DataHora.ToString("dd/MM/yyyy HH:mm");
-        public bool Disponivel => VagasDisponiveis > 0;
-        public double PercentualOcupado => VagasTotais > 0 ? (double)(VagasTotais - VagasDisponiveis) / VagasTotais * 100 : 0;
-        public string Status => VagasDisponiveis == 0 ? "Esgotado" : VagasDisponiveis < VagasTotais * 0.2 ? "Poucas vagas" : "Disponível";
     }
 }

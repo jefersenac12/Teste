@@ -66,13 +66,15 @@ namespace Admin.Controllers
                 // Carregar reservas para o dropdown
                 var reservas = await _apiService.GetReservasAsync() ?? new List<ReservaViewModel>();
 
+                // Permitir criação mesmo sem dados (removido bloqueio)
+                ViewBag.Reservas = reservas;
+                
+                // Mensagem informativa se não houver dados
                 if (!reservas.Any())
                 {
-                    ViewBag.Erro = "É necessário cadastrar reservas antes de criar pagamentos.";
-                    return RedirectToAction("Index", "Reservas");
+                    ViewBag.Aviso = "Nenhuma reserva cadastrada. Você pode criar pagamentos, mas precisará cadastrar reservas primeiro.";
                 }
-
-                ViewBag.Reservas = reservas;
+                
                 return View();
             }
             catch (Exception ex)
