@@ -115,12 +115,14 @@ namespace Teste
                 }
                 else
                 {
-                    CriarAtividadesFicticias();
+                    await DisplayAlert("Erro", "Não foi possível carregar as atividades. Tente novamente mais tarde.", "OK");
+                    return;
                 }
             }
             catch
             {
-                CriarAtividadesFicticias();
+                await DisplayAlert("Erro", "Falha na conexão com o servidor. Verifique sua internet e tente novamente.", "OK");
+                return;
             }
 
             AtividadesCollectionView.ItemsSource = _atividades;
@@ -131,25 +133,24 @@ namespace Teste
                 atividade.PropertyChanged += (s, e) =>
                 {
                     if (e.PropertyName == nameof(Atividade.IsSelecionada))
+                    {
+                        var atividadeAlterada = (Atividade)s;
+                        
+                        // Se selecionou uma atividade, desmarca todas as outras
+                        if (atividadeAlterada.IsSelecionada)
+                        {
+                            foreach (var a in _atividades.Where(a => a.Id != atividadeAlterada.Id))
+                            {
+                                a.IsSelecionada = false;
+                            }
+                        }
+                        
                         AtualizarTotal();
+                    }
                 };
             }
 
             AtualizarTotal();
-        }
-
-        private void CriarAtividadesFicticias()
-        {
-            var todas = new List<Atividade>
-            {
-                new() { Id = 1, Nome = "Café Caipira Completo", Descricao = "Pacote completo: Família, Café Caipira e Taxa do Passeio 12 Reais", Valor = 87m, IsSelecionada = false },
-                new() { Id = 2, Nome = "Só o Passeio", Descricao = "Passeio sem adicionais", Valor = 15m, IsSelecionada = false },
-                new() { Id = 3, Nome = "Pacote Café Caipira Completo", Descricao = "Pacote Café caipira completo com itens típicos + Taxa do Passeio 12 Reais", Valor = 75m, IsSelecionada = false },
-                new() { Id = 4, Nome = "Café Rural (Reduzido)", Descricao = "Café rural reduzido com itens básicos", Valor = 60m, IsSelecionada = false }
-            };
-
-            var filtradas = FiltrarPorTipoUsuario(todas);
-            _atividades = new ObservableCollection<Atividade>(filtradas);
         }
 
         private static string RemoverAcentos(string s)
@@ -179,8 +180,8 @@ namespace Teste
             var tipo = GetUsuarioTipo();
             if (string.IsNullOrEmpty(tipo)) return atividades;
 
-            var mapaFamilia = new HashSet<int> { 1, 2 };
-            var mapaAgencia = new HashSet<int> { 1, 4, 2 };
+            var mapaFamilia = new HashSet<int> { 1, 2, 3 };
+            var mapaAgencia = new HashSet<int> { 1, 2, 3 };
 
             IEnumerable<Atividade> fonte = atividades;
             if (tipo == "Familia") fonte = atividades.Where(a => mapaFamilia.Contains(a.Id));
@@ -191,8 +192,8 @@ namespace Teste
                 .Select(g => g.First());
 
             List<int>? order = null;
-            if (tipo == "Familia") order = new List<int> { 1, 2 };
-            else if (tipo == "Agencia") order = new List<int> { 1, 4, 2 };
+            if (tipo == "Familia") order = new List<int> { 1, 2, 3 };
+            else if (tipo == "Agencia") order = new List<int> { 1, 2, 3 };
 
             if (order != null)
             {
@@ -304,7 +305,6 @@ namespace Teste
                 return;
             }
 
-            if (horarioSelecionado == null)
                 horarioSelecionado = horarioCapturado;
 
             var selecionadas = _atividades.Where(a => a.IsSelecionada).ToList();
@@ -312,6 +312,14 @@ namespace Teste
             if (selecionadas.Count == 0)
             {
                 await DisplayAlert("Aviso", "Selecione pelo menos uma atividade.", "OK");
+                return;
+            }
+
+            // Validação: não permite selecionar Café Caipira Completo + Só o Passeio juntos
+            var idsSelecionados = selecionadas.Select(a => a.Id).ToHashSet();
+            if (idsSelecionados.Contains(1) && idsSelecionados.Contains(2))
+            {
+                await DisplayAlert("Aviso", "Para escolher Café Caipira Completo + Passeio, selecione o pacote 'Pacote Café Caipira +Passeio'.", "OK");
                 return;
             }
 
