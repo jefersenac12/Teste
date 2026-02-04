@@ -578,14 +578,10 @@ namespace Admin.Services
 
         public async Task<bool> DeletePagamentoAsync(int id)
         {
-            // A API não permite DELETE de pagamentos, apenas alteração de status
-            // Vamos usar o endpoint PUT /status para cancelar o pagamento
-            var json = JsonSerializer.Serialize(new { status = "CANCELADO" });
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            var response = await _httpClient.PutAsync($"{_baseUrl}/Pagamento/{id}/status", content);
+            var response = await _httpClient.DeleteAsync($"{_baseUrl}/Pagamento/{id}");
             return response.IsSuccessStatusCode;
         }
+
 
         public async Task<bool> UpdatePagamentoStatusAsync(int pagamentoId, string status)
         {

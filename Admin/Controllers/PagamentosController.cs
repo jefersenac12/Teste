@@ -297,14 +297,14 @@ namespace Admin.Controllers
                 var sucesso = await _apiService.DeletePagamentoAsync(id);
                 if (sucesso)
                 {
-                    var mensagem = "Pagamento cancelado com sucesso!";
+                    var mensagem = "Pagamento excluído com sucesso!";
                     if (pagamento.Status?.ToLower() == "pago")
                     {
                         mensagem += $" Estorno de {pagamento.ValorFormatado} processado para a reserva #{pagamento.ReservaId}.";
                     }
                     else
                     {
-                        mensagem += $" Solicitação de pagamento cancelada para a reserva #{pagamento.ReservaId}.";
+                        mensagem += $" Solicitação de pagamento removida para a reserva #{pagamento.ReservaId}.";
                     }
                     
                     TempData["Sucesso"] = mensagem;
@@ -317,12 +317,12 @@ namespace Admin.Controllers
                     
                     if (reserva != null)
                     {
-                        motivoFalha = $" Não foi possível cancelar o pagamento pois a reserva #{pagamento.ReservaId} pode estar em um estado que impede o cancelamento. ";
+                        motivoFalha = $" Não foi possível excluir o pagamento pois a reserva #{pagamento.ReservaId} pode estar em um estado que impede a exclusão. ";
                         motivoFalha += "Verifique se a reserva precisa ser tratada primeiro.";
                     }
                     else
                     {
-                        motivoFalha = " Não foi possível cancelar o pagamento. Tente novamente mais tarde.";
+                        motivoFalha = " Não foi possível excluir o pagamento. Tente novamente mais tarde.";
                     }
                     
                     TempData["Erro"] = motivoFalha;

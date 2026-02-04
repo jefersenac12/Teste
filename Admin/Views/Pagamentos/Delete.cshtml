@@ -1,5 +1,5 @@
 @{
-    ViewData["Title"] = "Cancelar Pagamento";
+    ViewData["Title"] = "Excluir Pagamento";
 }
 @model Admin.Models.PagamentoViewModel
 
@@ -8,8 +8,8 @@
         <div class="col-lg-6">
             <div class="card border-0 shadow-sm rounded-3">
                 <div class="card-header bg-white border-0 pt-4 pb-0">
-                    <h1 class="h3 fw-bold text-danger mb-0">Cancelar Pagamento</h1>
-                    <p class="text-muted">Tem certeza que deseja cancelar este pagamento? Esta ação não pode ser desfeita.</p>
+                    <h1 class="h3 fw-bold text-danger mb-0">Excluir Pagamento</h1>
+                    <p class="text-muted">Tem certeza que deseja excluir este pagamento? Esta ação não pode ser desfeita.</p>
                 </div>
                 <div class="card-body p-4">
                     @if (ViewBag.PagamentoEstaPago == true)
@@ -125,8 +125,8 @@
                                 Voltar
                             </a>
                             <button type="submit" class="btn btn-danger">
-                                <span class="material-symbols-outlined me-2">cancel</span>
-                                Confirmar Cancelamento
+                                <span class="material-symbols-outlined me-2">delete</span>
+                                Confirmar Exclusão
                             </button>
                         </div>
                     </form>
