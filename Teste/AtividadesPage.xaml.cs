@@ -5,7 +5,7 @@ using System.Text.Json;
 using System.Linq;
 using Microsoft.Maui.Storage;
 using System.Text;
-using System.Globalization;
+using Teste.Services;
 
 namespace Teste
 {
@@ -35,9 +35,7 @@ namespace Teste
 
     public partial class AtividadesPage : ContentPage
     {
-        private static readonly HttpClient client = new HttpClient();
-        private readonly string apiUrlAtividade = "http://tiijeferson.runasp.net/api/Atividade";
-
+        private readonly ApiService _apiService = new ApiService();
         private ObservableCollection<Atividade> _atividades = new();
         private DateTime dataSelecionada;
         private TimeSpan? horarioSelecionado;
@@ -94,34 +92,27 @@ namespace Teste
         {
             try
             {
-                var response = await client.GetAsync(apiUrlAtividade);
-                if (response.IsSuccessStatusCode)
+                var atividades = await _apiService.GetAllAsync<Atividade>("/Atividade");
+                
+                if (atividades.Count == 0)
                 {
-                    var json = await response.Content.ReadAsStringAsync();
-                    var atividades = JsonSerializer.Deserialize<List<Atividade>>(json, new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    }) ?? new List<Atividade>();
-
-                    var filtradas = FiltrarPorTipoUsuario(atividades);
-
-                    _atividades = new ObservableCollection<Atividade>(
-                        filtradas.Select(a =>
-                        {
-                            a.IsSelecionada = false;
-                            return a;
-                        })
-                    );
-                }
-                else
-                {
-                    await DisplayAlert("Erro", "Não foi possível carregar as atividades. Tente novamente mais tarde.", "OK");
+                    await DisplayAlert("Aviso", "Nenhuma atividade disponível no momento.", "OK");
                     return;
                 }
+
+                var filtradas = FiltrarPorTipoUsuario(atividades);
+
+                _atividades = new ObservableCollection<Atividade>(
+                    filtradas.Select(a =>
+                    {
+                        a.IsSelecionada = false;
+                        return a;
+                    })
+                );
             }
-            catch
+            catch (Exception ex)
             {
-                await DisplayAlert("Erro", "Falha na conexão com o servidor. Verifique sua internet e tente novamente.", "OK");
+                await DisplayAlert("Erro", $"Falha ao carregar atividades: {ex.Message}", "OK");
                 return;
             }
 
