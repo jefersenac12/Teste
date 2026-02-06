@@ -18,7 +18,7 @@ using Microsoft.Maui.Storage;
 
 
 
-namespace Teste
+namespace Teste.Views
 
 {
 

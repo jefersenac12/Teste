@@ -7,7 +7,7 @@ using Microsoft.Maui.Storage;
 using System.Text;
 using Teste.Services;
 
-namespace Teste
+namespace Teste.Views
 {
     public class Atividade : INotifyPropertyChanged
     {

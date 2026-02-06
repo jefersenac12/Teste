@@ -1,36 +1,26 @@
-﻿namespace Teste
+﻿namespace Teste.Views
 {
-    public partial class MainPage : ContentPage
+    public partial class InicioPage : ContentPage
     {
-
-        public MainPage()
+        public InicioPage()
         {
             InitializeComponent();
         }
 
-        private void OnAgenciaClicked(object sender, EventArgs e)
-        {
-            Navigation.PushAsync(new CadastroAgenciaPage());
-        }
-
         private void OnFamiliaClicked(object sender, EventArgs e)
         {
-            Navigation.PushAsync(new CadastroFamiliaPage());
+            // Navegação será tratada pelo ViewModel
+        }
+
+        private void OnAgenciaClicked(object sender, EventArgs e)
+        {
+            // Navegação será tratada pelo ViewModel
         }
 
         private void OnLoginClicked(object sender, EventArgs e)
         {
-            Navigation.PushAsync(new LoginPage());
-
+            // Navegação será tratada pelo ViewModel
         }
-
-
-
-
-        //private void OnCounterClicked(object sender, EventArgs e)
-        //{
-        //    count++;
-
         //    if (count == 1)
         //        CounterBtn.Text = $"Clicked {count} time";
         //    else

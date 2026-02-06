@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Teste.Services;
 using Teste.ViewModels;
+using Teste.Views;
 
 namespace Teste
 {
@@ -34,7 +35,7 @@ namespace Teste
             builder.Services.AddTransient<ReservasViewModel>();
 
             // Registrar Pages
-            builder.Services.AddSingleton<MainPage>();
+            builder.Services.AddSingleton<InicioPage>();
             builder.Services.AddTransient<LoginPage>();
             builder.Services.AddTransient<CadastroFamiliaPage>();
             builder.Services.AddTransient<CadastroAgenciaPage>();
@@ -42,7 +43,6 @@ namespace Teste
             builder.Services.AddTransient<AtividadesPage>();
             builder.Services.AddTransient<PagamentoPage>();
             builder.Services.AddTransient<ReservasPage>();
-            builder.Services.AddTransient<PerfilPage>();
 
 #if DEBUG
             builder.Logging.AddDebug();

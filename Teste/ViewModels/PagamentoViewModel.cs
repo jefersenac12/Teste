@@ -170,7 +170,7 @@ namespace Teste.ViewModels
                     AgendaId = agendaId,
                     UsuarioId = usuarioId,
                     Quantidade = Quantidade,
-                    NPEntrada = NpEntrada,
+                    NpEntrada = NpEntrada,
                     MeiaEntrada = MeiaEntrada,
                     InteiraEntrada = InteiraEntrada,
                     DataReserva = DateTime.Now,

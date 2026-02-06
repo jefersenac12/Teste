@@ -11,7 +11,7 @@ using Microsoft.Maui.Controls.Shapes;
 using Microsoft.Maui.Graphics;
 using Microsoft.Maui.Storage;
 
-namespace Teste
+namespace Teste.Views
 {
     public class AtividadePagamento
     {

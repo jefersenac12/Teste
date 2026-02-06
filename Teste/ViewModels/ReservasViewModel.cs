@@ -147,7 +147,7 @@ namespace Teste.ViewModels
                               $"Atividade: {atividade?.Nome ?? "N/A"}\n" +
                               $"Data/Hora: {agenda?.DataHora:dd/MM/yyyy HH:mm}\n" +
                               $"Quantidade: {reserva.Quantidade}\n" +
-                              $"NP: {reserva.NPEntrada} | Meia: {reserva.MeiaEntrada} | Inteira: {reserva.InteiraEntrada}\n" +
+                              $"NP: {reserva.NpEntrada} | Meia: {reserva.MeiaEntrada} | Inteira: {reserva.InteiraEntrada}\n" +
                               $"Status: {reserva.Status}\n" +
                               $"Data Reserva: {reserva.DataReserva:dd/MM/yyyy HH:mm}";
 

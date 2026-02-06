@@ -1,10 +1,9 @@
-
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Text.Json;
 
-namespace Teste
+namespace Teste.Views
 {
     public class FrutaPeriodo
     {

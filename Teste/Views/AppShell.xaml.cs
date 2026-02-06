@@ -1,6 +1,6 @@
 ﻿using Microsoft.Maui.Controls;
 
-namespace Teste
+namespace Teste.Views
 {
     public partial class AppShell : Shell
     {
@@ -9,7 +9,7 @@ namespace Teste
             InitializeComponent();
             
             // Registrar rotas programaticamente
-            Routing.RegisterRoute("MainPage", typeof(MainPage));
+            Routing.RegisterRoute("MainPage", typeof(InicioPage));
             Routing.RegisterRoute("CadastroFamilia", typeof(CadastroFamiliaPage));
             Routing.RegisterRoute("CadastroAgencia", typeof(CadastroAgenciaPage));
             Routing.RegisterRoute("Login", typeof(LoginPage));
@@ -17,7 +17,6 @@ namespace Teste
             Routing.RegisterRoute("Atividades", typeof(AtividadesPage));
             Routing.RegisterRoute("Pagamento", typeof(PagamentoPage));
             Routing.RegisterRoute("Reservas", typeof(ReservasPage));
-            Routing.RegisterRoute("Perfil", typeof(PerfilPage));
         }
     }
 }

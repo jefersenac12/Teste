@@ -2,7 +2,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-namespace Teste
+namespace Teste.Views
 {
     public partial class LoginPage : ContentPage
     {

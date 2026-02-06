@@ -1,4 +1,4 @@
-﻿namespace Teste
+﻿namespace Teste.Views
 {
     public partial class App : Application
     {

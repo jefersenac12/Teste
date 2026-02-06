@@ -1,60 +1,54 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Shell
-    x:Class="Teste.AppShell"
+    x:Class="Teste.Views.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:Teste"
+    xmlns:views="clr-namespace:Teste.Views"
     Shell.FlyoutBehavior="Disabled"
     Title="Teste">
 
     <!-- Página Inicial -->
     <ShellContent
         Title="Início"
-        ContentTemplate="{DataTemplate local:MainPage}"
+        ContentTemplate="{DataTemplate views:InicioPage}"
         Route="MainPage" />
 
     <!-- Cadastros -->
     <ShellContent
         Title="Cadastro Família"
-        ContentTemplate="{DataTemplate local:CadastroFamiliaPage}"
+        ContentTemplate="{DataTemplate views:CadastroFamiliaPage}"
         Route="CadastroFamilia" />
 
     <ShellContent
         Title="Cadastro Agência"
-        ContentTemplate="{DataTemplate local:CadastroAgenciaPage}"
+        ContentTemplate="{DataTemplate views:CadastroAgenciaPage}"
         Route="CadastroAgencia" />
 
     <!-- Login -->
     <ShellContent
         Title="Login"
-        ContentTemplate="{DataTemplate local:LoginPage}"
+        ContentTemplate="{DataTemplate views:LoginPage}"
         Route="Login" />
 
     <!-- Fluxo Principal -->
     <ShellContent
         Title="Agendamento"
-        ContentTemplate="{DataTemplate local:AgendamentoPage}"
+        ContentTemplate="{DataTemplate views:AgendamentoPage}"
         Route="Agendamento" />
 
     <ShellContent
         Title="Atividades"
-        ContentTemplate="{DataTemplate local:AtividadesPage}"
+        ContentTemplate="{DataTemplate views:AtividadesPage}"
         Route="Atividades" />
 
     <ShellContent
         Title="Pagamento"
-        ContentTemplate="{DataTemplate local:PagamentoPage}"
+        ContentTemplate="{DataTemplate views:PagamentoPage}"
         Route="Pagamento" />
 
     <ShellContent
         Title="Reservas"
-        ContentTemplate="{DataTemplate local:ReservasPage}"
+        ContentTemplate="{DataTemplate views:ReservasPage}"
         Route="Reservas" />
-
-    <!-- Perfil -->
-    <ShellContent
-        Title="Perfil"
-        ContentTemplate="{DataTemplate local:PerfilPage}"
-        Route="Perfil" />
 
 </Shell>

@@ -2,7 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:shapes="clr-namespace:Microsoft.Maui.Controls.Shapes;assembly=Microsoft.Maui.Controls"
-             x:Class="Teste.ReservasPage"
+             x:Class="Teste.Views.ReservasPage"
              BackgroundColor="#FAF6F3"
              Title="Reservas Ativas">
 

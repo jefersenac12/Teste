@@ -1,4 +1,4 @@
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" x:Class="Teste.AgendamentoPage" xmlns:local="clr-namespace:Teste" BackgroundColor="#F6EEE7" Title="Agendamento">
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" x:Class="Teste.Views.AgendamentoPage" xmlns:views="clr-namespace:Teste.Views" BackgroundColor="#F6EEE7" Title="Agendamento">
     <ContentPage.Resources>
         <ResourceDictionary>
             <Color x:Key="PrimaryColor">#891633</Color>
@@ -74,7 +74,7 @@
                             <GridItemsLayout Orientation="Vertical" Span="5" HorizontalItemSpacing="6" VerticalItemSpacing="6"/>
                         </CollectionView.ItemsLayout>
                         <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="local:DiaCalendario">
+                            <DataTemplate x:DataType="views:DiaCalendario">
                                 <Border x:Name="DayBorder" StrokeShape="RoundRectangle 6" BackgroundColor="#FFFFFF" StrokeThickness="1" Stroke="#E0D5CC" HeightRequest="38" WidthRequest="38" Padding="0" HorizontalOptions="Center" VerticalOptions="Center">
                                     <Label Text="{Binding Numero}" TextColor="#891633" FontSize="13" FontAttributes="Bold" LineBreakMode="NoWrap" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" HorizontalOptions="Center" VerticalOptions="Center">
                                         <Label.Triggers>

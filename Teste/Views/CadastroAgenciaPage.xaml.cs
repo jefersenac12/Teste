@@ -1,37 +1,48 @@
-using System.Text;
 using System.Text.Json;
+using System.Text;
 
-namespace Teste;
+namespace Teste.Views;
 
-public partial class CadastroFamiliaPage : ContentPage
+public partial class CadastroAgenciaPage : ContentPage
 {
-    private HttpClient client = new HttpClient();
-    private readonly string apiUrl = "http://tiijeferson.runasp.net/api/Usuario/cadastrarFamilia";
+    private static readonly HttpClient client = new HttpClient();
+    private readonly string apiUrl = "http://tiijeferson.runasp.net/api/Usuario/cadastrarAgencia";
+    //private readonly string apiUrl = "https://localhost:7064/api/Usuario/cadastrarAgencia";
 
-    public CadastroFamiliaPage()
+    public CadastroAgenciaPage()
     {
         InitializeComponent();
     }
 
-    private async void OnCadastrarFamiliaClicked(object sender, EventArgs e)
+    private async void OnCadastrarAgenciaClicked(object sender, EventArgs e)
     {
         // Validação dos campos obrigatórios
         if (string.IsNullOrWhiteSpace(nomeEntry.Text) ||
             string.IsNullOrWhiteSpace(telefoneEntry.Text) ||
-            string.IsNullOrWhiteSpace(senhaEntry.Text))
+            string.IsNullOrWhiteSpace(emailEntry.Text) ||
+            string.IsNullOrWhiteSpace(senhaEntry.Text) ||
+            string.IsNullOrWhiteSpace(cnpjEntry.Text))
         {
             await DisplayAlert("Erro", "Todos os campos são obrigatórios.", "OK");
             return;
         }
 
-        var novaFamilia = new
+        if (!emailEntry.Text.Contains("@") || !emailEntry.Text.Contains("."))
+        {
+            await DisplayAlert("Erro", "E-mail inválido.", "OK");
+            return;
+        }
+
+        var novoUsuario = new
         {
             Nome = nomeEntry.Text,
             Telefone = telefoneEntry.Text,
+            Email = emailEntry.Text,
             Senha = senhaEntry.Text,
+            CNPJ = cnpjEntry.Text
         };
 
-        var json = JsonSerializer.Serialize(novaFamilia);
+        var json = JsonSerializer.Serialize(novoUsuario);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
         try
@@ -48,6 +59,7 @@ public partial class CadastroFamiliaPage : ContentPage
                     int usuarioId = 0;
                     string nome = "";
                     string telefone = "";
+                    string email = "";
 
                     if (root.ValueKind == JsonValueKind.Object)
                     {
@@ -58,11 +70,13 @@ public partial class CadastroFamiliaPage : ContentPage
                             if (usuarioEl.TryGetProperty("id", out var nestedId) && nestedId.ValueKind == JsonValueKind.Number) usuarioId = nestedId.GetInt32();
                             nome = usuarioEl.TryGetProperty("nome", out var n) && n.ValueKind == JsonValueKind.String ? (n.GetString() ?? "") : "";
                             telefone = usuarioEl.TryGetProperty("telefone", out var t) && t.ValueKind == JsonValueKind.String ? (t.GetString() ?? "") : "";
+                            email = usuarioEl.TryGetProperty("email", out var emailEl) && emailEl.ValueKind == JsonValueKind.String ? (emailEl.GetString() ?? "") : "";
                         }
                         else
                         {
                             nome = root.TryGetProperty("nome", out var n) && n.ValueKind == JsonValueKind.String ? (n.GetString() ?? "") : "";
                             telefone = root.TryGetProperty("telefone", out var t) && t.ValueKind == JsonValueKind.String ? (t.GetString() ?? "") : "";
+                            email = root.TryGetProperty("email", out var emailEl2) && emailEl2.ValueKind == JsonValueKind.String ? (emailEl2.GetString() ?? "") : "";
                         }
                     }
 
@@ -72,16 +86,18 @@ public partial class CadastroFamiliaPage : ContentPage
                         Preferences.Set("ClienteId", usuarioId);
                         Preferences.Set("UsuarioNome", string.IsNullOrEmpty(nome) ? nomeEntry.Text : nome);
                         Preferences.Set("UsuarioTelefone", string.IsNullOrEmpty(telefone) ? telefoneEntry.Text : telefone);
-                        Preferences.Set("UsuarioTipo", "Familia");
+                        Preferences.Set("UsuarioEmail", string.IsNullOrEmpty(email) ? emailEntry.Text : email);
+                        Preferences.Set("UsuarioTipo", "Agência");
                     }
                 }
                 catch { }
 
-                await DisplayAlert("Sucesso", "Família cadastrada com sucesso!", "OK");
-
+                await DisplayAlert("Sucesso", "Agência cadastrada com sucesso!", "OK");
                 nomeEntry.Text = string.Empty;
                 telefoneEntry.Text = string.Empty;
+                emailEntry.Text = string.Empty;
                 senhaEntry.Text = string.Empty;
+                cnpjEntry.Text = string.Empty;
 
                 await Navigation.PushAsync(new AgendamentoPage());
             }
@@ -97,9 +113,9 @@ public partial class CadastroFamiliaPage : ContentPage
         }
     }
 
-    private void OnAgenciaClicked(object sender, EventArgs e)
+    private void OnFamiliaClicked(object sender, EventArgs e)
     {
-        Navigation.PushAsync(new CadastroAgenciaPage());
+        Navigation.PushAsync(new CadastroFamiliaPage());
     }
 
     private void OnEntrarClicked(object sender, EventArgs e)
@@ -109,6 +125,11 @@ public partial class CadastroFamiliaPage : ContentPage
 
     private void OnCadastrarClicked(object sender, EventArgs e)
     {
-        // Já está na página de cadastro de família
+        // Navega para a página de cadastro de família
+    }
+
+    private void OnAgenciaClicked(object sender, EventArgs e)
+    {
+        // Já está na página de cadastro de agência
     }
 }
