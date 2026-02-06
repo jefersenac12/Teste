@@ -7,32 +7,19 @@
             InitializeComponent();
         }
 
-        private void OnFamiliaClicked(object sender, EventArgs e)
+        private async void OnFamiliaClicked(object sender, EventArgs e)
         {
-            // Navegação será tratada pelo ViewModel
+            await Shell.Current.GoToAsync("CadastroFamilia");
         }
 
-        private void OnAgenciaClicked(object sender, EventArgs e)
+        private async void OnAgenciaClicked(object sender, EventArgs e)
         {
-            // Navegação será tratada pelo ViewModel
+            await Shell.Current.GoToAsync("CadastroAgencia");
         }
 
-        private void OnLoginClicked(object sender, EventArgs e)
+        private async void OnLoginClicked(object sender, EventArgs e)
         {
-            // Navegação será tratada pelo ViewModel
+            await Shell.Current.GoToAsync("Login");
         }
-        //    if (count == 1)
-        //        CounterBtn.Text = $"Clicked {count} time";
-        //    else
-        //        CounterBtn.Text = $"Clicked {count} times";
-
-        //    SemanticScreenReader.Announce(CounterBtn.Text);
-        //}
-
-        //private void Aula1_Clicked(object sender, EventArgs e)
-        //{
-        //    Receber.Text = Entrada.Text;
-        //}
     }
-
 }
