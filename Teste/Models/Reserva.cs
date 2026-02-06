@@ -16,7 +16,7 @@ namespace Teste.Models
         [JsonPropertyName("quantidade")]
         public int Quantidade { get; set; }
 
-        [JsonPropertyName("npEntrada")]
+        [JsonPropertyName("NpEntrada")]
         public int NpEntrada { get; set; }
 
         [JsonPropertyName("meiaEntrada")]
@@ -31,7 +31,6 @@ namespace Teste.Models
         [JsonPropertyName("status")]
         public string Status { get; set; } = string.Empty;
 
-        // Propriedades de navegação (opcional)
         [JsonIgnore]
         public Agenda? Agenda { get; set; }
 

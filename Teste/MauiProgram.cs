@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
+using Teste.Services;
+using Teste.ViewModels;
 
 namespace Teste
 {
@@ -17,8 +19,33 @@ namespace Teste
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
+            // Registrar serviços
+            builder.Services.AddSingleton<ApiService>();
+            builder.Services.AddSingleton<ShellNavigationService>(); // Serviço de navegação moderno
+
+            // Registrar ViewModels
+            builder.Services.AddSingleton<InicioViewModel>();
+            builder.Services.AddTransient<LoginViewModel>();
+            builder.Services.AddTransient<CadastroFamiliaViewModel>();
+            builder.Services.AddTransient<CadastroAgenciaViewModel>();
+            builder.Services.AddTransient<AgendamentoViewModel>();
+            builder.Services.AddTransient<AtividadesViewModel>();
+            builder.Services.AddTransient<PagamentoViewModel>();
+            builder.Services.AddTransient<ReservasViewModel>();
+
+            // Registrar Pages
+            builder.Services.AddSingleton<MainPage>();
+            builder.Services.AddTransient<LoginPage>();
+            builder.Services.AddTransient<CadastroFamiliaPage>();
+            builder.Services.AddTransient<CadastroAgenciaPage>();
+            builder.Services.AddTransient<AgendamentoPage>();
+            builder.Services.AddTransient<AtividadesPage>();
+            builder.Services.AddTransient<PagamentoPage>();
+            builder.Services.AddTransient<ReservasPage>();
+            builder.Services.AddTransient<PerfilPage>();
+
 #if DEBUG
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
 
             return builder.Build();

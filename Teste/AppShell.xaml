@@ -4,12 +4,57 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:Teste"
-    Shell.FlyoutBehavior="Flyout"
+    Shell.FlyoutBehavior="Disabled"
     Title="Teste">
 
+    <!-- Página Inicial -->
     <ShellContent
-        Title="Home"
+        Title="Início"
         ContentTemplate="{DataTemplate local:MainPage}"
         Route="MainPage" />
+
+    <!-- Cadastros -->
+    <ShellContent
+        Title="Cadastro Família"
+        ContentTemplate="{DataTemplate local:CadastroFamiliaPage}"
+        Route="CadastroFamilia" />
+
+    <ShellContent
+        Title="Cadastro Agência"
+        ContentTemplate="{DataTemplate local:CadastroAgenciaPage}"
+        Route="CadastroAgencia" />
+
+    <!-- Login -->
+    <ShellContent
+        Title="Login"
+        ContentTemplate="{DataTemplate local:LoginPage}"
+        Route="Login" />
+
+    <!-- Fluxo Principal -->
+    <ShellContent
+        Title="Agendamento"
+        ContentTemplate="{DataTemplate local:AgendamentoPage}"
+        Route="Agendamento" />
+
+    <ShellContent
+        Title="Atividades"
+        ContentTemplate="{DataTemplate local:AtividadesPage}"
+        Route="Atividades" />
+
+    <ShellContent
+        Title="Pagamento"
+        ContentTemplate="{DataTemplate local:PagamentoPage}"
+        Route="Pagamento" />
+
+    <ShellContent
+        Title="Reservas"
+        ContentTemplate="{DataTemplate local:ReservasPage}"
+        Route="Reservas" />
+
+    <!-- Perfil -->
+    <ShellContent
+        Title="Perfil"
+        ContentTemplate="{DataTemplate local:PerfilPage}"
+        Route="Perfil" />
 
 </Shell>
