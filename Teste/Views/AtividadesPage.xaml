@@ -76,15 +76,19 @@
                                 <Grid Padding="10" ColumnDefinitions="Auto,*">
                                     <CheckBox IsChecked="{Binding IsSelecionada}"
                                   VerticalOptions="Center"
-                                  Color="#891633" />
+                                  Color="#891633"
+                                  MinimumWidthRequest="40"
+                                  WidthRequest="40"
+                                  Margin="0,0,10,0" />
                                     <VerticalStackLayout Grid.Column="1"
-                                             Margin="10,0,0,0">
+                                             Margin="0,0,0,0"
+                                             VerticalOptions="Center">
                                         <Label Text="{Binding Nome}"
                                    FontAttributes="Bold"
                                    FontSize="15"
                                    TextColor="#891633"
                                    Style="{StaticResource BodyText}" />
-                                        <Label Text="{Binding Valor, StringFormat='R${0:F2}'}"
+                                        <Label Text="{Binding Valor, StringFormat='R${0:F2} por pessoa'}"
                                    FontSize="13"
                                    TextColor="#A42D45"
                                    Style="{StaticResource BodyText}" />
