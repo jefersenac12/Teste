@@ -1,4 +1,4 @@
-@{
+ï»¿@{
     ViewData["Title"] = "Painel PIX";
 }
 @model IEnumerable<Admin.Models.PagamentoViewModel>
@@ -10,7 +10,7 @@
                 <span class="material-symbols-outlined pix-green" style="font-size: 2.5rem;" translate="no">qr_code_2</span>
                 Painel PIX
             </h1>
-            <p class="text-muted mb-0 mt-1">Gerenciamento analítico de recebimentos via PIX</p>
+            <p class="text-muted mb-0 mt-1">Gerenciamento analÃ­tico de recebimentos via PIX</p>
         </div>
         <a class="btn btn-pix-green d-flex align-items-center fw-semibold shadow-sm" asp-action="Create">
             <span class="material-symbols-outlined me-2" translate="no">add_card</span>
@@ -39,7 +39,7 @@
                     </div>
                     <div class="row border-top pt-4 mt-4">
                         <div class="col-6 col-md-4">
-                            <p class="text-muted small mb-1">Transações</p>
+                            <p class="text-muted small mb-1">TransaÃ§Ãµes</p>
                             <p class="h4 fw-bold text-dark mb-0">@Model.Count()</p>
                         </div>
                     </div>
@@ -85,14 +85,14 @@
                 <div class="d-flex flex-wrap align-items-center gap-2">
                     <span class="material-symbols-outlined text-muted me-1" translate="no">filter_list</span>
                     <span class="text-muted small fw-medium me-2">Status:</span>
-                    <button class="btn btn-sm btn-secondary active" onclick="filtrarStatus('Todos')">Todos</button>
-                    <button class="btn btn-sm btn-outline-warning" onclick="filtrarStatus('PENDENTE')">Pendente</button>
-                    <button class="btn btn-sm btn-outline-success" onclick="filtrarStatus('PAGO')">Pago</button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="filtrarStatus('CANCELADO')">Cancelado</button>
+                    <button class="btn btn-sm btn-secondary active">Todos</button>
+                    <button class="btn btn-sm btn-outline-warning">Pendente</button>
+                    <button class="btn btn-sm btn-outline-success">Pago</button>
+                    <button class="btn btn-sm btn-outline-danger">Cancelado</button>
                 </div>
                 <div class="d-flex align-items-center gap-2 text-muted small">
-                    <span>Mostrando últimos 30 dias</span>
-                    <button class="btn btn-link btn-sm text-decoration-none p-0 pix-green">Alterar período</button>
+                    <span>Mostrando Ãºltimos 30 dias</span>
+                    <button class="btn btn-link btn-sm text-decoration-none p-0 pix-green">Alterar perÃ­odo</button>
                 </div>
             </div>
         </div>
@@ -110,18 +110,16 @@
                             <th class="px-4 py-3 text-uppercase small fw-semibold text-muted">Valor</th>
                             <th class="px-4 py-3 text-uppercase small fw-semibold text-muted">Status</th>
                             <th class="px-4 py-3 text-uppercase small fw-semibold text-muted">Data</th>
-                            <th class="px-4 py-3 text-uppercase small fw-semibold text-muted">Nº Transação</th>
-                            <th class="px-4 py-3 text-uppercase small fw-semibold text-muted text-end">Ações</th>
+                            <th class="px-4 py-3 text-uppercase small fw-semibold text-muted">NÂº TransaÃ§Ã£o</th>
+                            <th class="px-4 py-3 text-uppercase small fw-semibold text-muted text-end">AÃ§Ãµes</th>
                         </tr>
                     </thead>
-                    <tbody id="pagamentos-tbody">
+                    <tbody>
                         @if (Model != null && Model.Any())
                         {
-                            int index = 0;
                             @foreach (var pagamento in Model)
                             {
-                                string displayStyle = index >= 10 ? "style=\"display: none;\"" : "";
-                                <tr class="pagamento-row" @Html.Raw(displayStyle) data-status="@pagamento.Status">
+                                <tr class="pagamento-row" data-status="@pagamento.Status">
                                     <td class="px-4 py-3 small text-muted font-monospace">@pagamento.ReservaId</td>
                                     <td class="px-4 py-3 small fw-medium">
                                         @(pagamento.ClienteNome ?? "-")
@@ -164,14 +162,13 @@
                                                 {
                                                     <li><a class="dropdown-item" asp-action="CancelarReserva" asp-route-id="@pagamento.Id">Cancelar Reserva</a></li>
                                                 }
-                                                <li><a class="dropdown-item" asp-action="Details" asp-route-id="@pagamento.Id">Visualizar Número de Transação</a></li>
+                                                <li><a class="dropdown-item" asp-action="Details" asp-route-id="@pagamento.Id">Visualizar NÃºmero de TransaÃ§Ã£o</a></li>
                                                 <li><hr class="dropdown-divider"></li>
                                                 <li><a class="dropdown-item text-danger" asp-action="Delete" asp-route-id="@pagamento.Id">Excluir</a></li>
                                             </ul>
                                         </div>
                                     </td>
                                 </tr>
-                                index++;
                             }
                         }
                         else
@@ -185,146 +182,56 @@
                     </tbody>
                 </table>
             </div>
-            <div class="card-footer bg-light d-flex justify-content-between align-items-center">
-                <span class="text-muted small" id="result-count">Mostrando 1 a 10 de @(Model?.Count() ?? 0) resultados</span>
-                <nav aria-label="Navegação de página">
-                    <ul class="pagination mb-0" id="pagination">
-                        <li class="page-item" id="prev-page">
-                            <a class="page-link" href="#" aria-label="Anterior">
-                                <span aria-hidden="true">&laquo;</span>
-                            </a>
-                        </li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item" id="next-page">
-                            <a class="page-link" href="#" aria-label="Próximo">
-                                <span aria-hidden="true">&raquo;</span>
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
         </div>
     </div>
+
+    <!-- PaginaÃ§Ã£o igual as outras views -->
+    @{
+        var paginaAtual = ViewBag.PaginaAtual is int ? (int)ViewBag.PaginaAtual : 1;
+        var tamanhoPagina = ViewBag.TamanhoPagina is int ? (int)ViewBag.TamanhoPagina : 8;
+        var totalPaginas = ViewBag.TotalPaginas is int ? (int)ViewBag.TotalPaginas : 1;
+        if (totalPaginas < 1) { totalPaginas = 1; }
+        if (paginaAtual < 1) { paginaAtual = 1; }
+        if (paginaAtual > totalPaginas) { paginaAtual = totalPaginas; }
+        var paginaAnterior = paginaAtual > 1 ? paginaAtual - 1 : 1;
+        var proximaPagina = paginaAtual < totalPaginas ? paginaAtual + 1 : totalPaginas;
+        var totalItens = ViewBag.TotalItens is int ? (int)ViewBag.TotalItens : (Model?.Count() ?? 0);
+        var inicio = totalItens == 0 ? 0 : ((paginaAtual - 1) * tamanhoPagina) + 1;
+        var fim = totalItens == 0 ? 0 : inicio + (Model?.Count() ?? 0) - 1;
+    }
+    
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <span class="text-muted small">Mostrando @inicio a @fim de @totalItens resultados</span>
+        <nav aria-label="NavegaÃ§Ã£o de pÃ¡gina">
+            <ul class="pagination mb-0">
+                <li class="page-item @(paginaAtual == 1 ? "disabled" : "")">
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-pagina="@paginaAnterior"
+                       asp-route-tamanhoPagina="@tamanhoPagina"
+                       aria-label="Anterior">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                @for (var i = 1; i <= totalPaginas; i++)
+                {
+                    <li class="page-item @(i == paginaAtual ? "active" : "")">
+                        <a class="page-link"
+                           asp-action="Index"
+                           asp-route-pagina="@i"
+                           asp-route-tamanhoPagina="@tamanhoPagina">@i</a>
+                    </li>
+                }
+                <li class="page-item @(paginaAtual == totalPaginas ? "disabled" : "")">
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-pagina="@proximaPagina"
+                       asp-route-tamanhoPagina="@tamanhoPagina"
+                       aria-label="PrÃ³ximo">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const items = document.querySelectorAll('.pagamento-row');
-    const pagination = document.getElementById('pagination');
-    const prevPage = document.getElementById('prev-page');
-    const nextPage = document.getElementById('next-page');
-    const resultCount = document.getElementById('result-count');
-    
-    const itemsPerPage = 10;
-    let currentPage = 1;
-    let filteredItems = Array.from(items);
-    
-    function showPage(page) {
-        const startIndex = (page - 1) * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
-        
-        filteredItems.forEach((item, index) => {
-            if (index >= startIndex && index < endIndex) {
-                item.style.display = '';
-            } else {
-                item.style.display = 'none';
-            }
-        });
-        
-        updatePagination();
-        updateResultCount(startIndex, endIndex);
-    }
-    
-    function updateResultCount(startIndex, endIndex) {
-        const actualEndIndex = Math.min(endIndex, filteredItems.length);
-        const actualStartIndex = filteredItems.length > 0 ? Math.min(startIndex + 1, filteredItems.length) : 0;
-        resultCount.textContent = 'Mostrando ' + actualStartIndex + ' a ' + actualEndIndex + ' de ' + filteredItems.length + ' resultados';
-    }
-    
-    function updatePagination() {
-        const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
-        
-        // Removes all existing page links except prev and next
-        const pageLinks = pagination.querySelectorAll('.page-item:not(#prev-page):not(#next-page)');
-        pageLinks.forEach(function(link) { link.remove(); });
-        
-        // Add page links
-        for (let i = 1; i <= totalPages; i++) {
-            const li = document.createElement('li');
-            li.className = 'page-item' + (i === currentPage ? ' active' : '');
-            
-            const a = document.createElement('a');
-            a.className = 'page-link';
-            a.href = '#';
-            a.textContent = i;
-            a.addEventListener('click', function(e) {
-                e.preventDefault();
-                currentPage = i;
-                showPage(currentPage);
-            });
-            
-            li.appendChild(a);
-            pagination.insertBefore(li, nextPage);
-        }
-        
-        // Update prev/next buttons
-        if (currentPage === 1 || filteredItems.length === 0) {
-            prevPage.classList.add('disabled');
-        } else {
-            prevPage.classList.remove('disabled');
-        }
-        
-        if (currentPage === totalPages || filteredItems.length === 0) {
-            nextPage.classList.add('disabled');
-        } else {
-            nextPage.classList.remove('disabled');
-        }
-    }
-    
-    prevPage.addEventListener('click', function(e) {
-        e.preventDefault();
-        if (currentPage > 1) {
-            currentPage--;
-            showPage(currentPage);
-        }
-    });
-    
-    nextPage.addEventListener('click', function(e) {
-        e.preventDefault();
-        if (currentPage < Math.ceil(filteredItems.length / itemsPerPage)) {
-            currentPage++;
-            showPage(currentPage);
-        }
-    });
-    
-    // Filter function
-    window.filtrarStatus = function(status) {
-        // Update buttons
-        document.querySelectorAll('.btn-group .btn').forEach(function(btn) {
-            btn.classList.remove('active', 'btn-secondary');
-            btn.classList.add('btn-outline-warning', 'btn-outline-success', 'btn-outline-danger');
-        });
-        
-        event.target.classList.add('active', 'btn-secondary');
-        event.target.classList.remove('btn-outline-warning', 'btn-outline-success', 'btn-outline-danger');
-        
-        // Filter items
-        if (status === 'Todos') {
-            filteredItems = Array.from(items);
-        } else {
-            filteredItems = Array.from(items).filter(function(item) {
-                return item.dataset.status === status;
-            });
-        }
-        
-        currentPage = 1;
-        showPage(currentPage);
-    };
-    
-    // Show first page
-    showPage(1);
-});
-</script>
-

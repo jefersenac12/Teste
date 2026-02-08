@@ -19,7 +19,7 @@ namespace Admin.Controllers
         }
 
         // GET: /Atividades
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int pagina = 1, int tamanhoPagina = 8)
         {
             try
             {
@@ -31,7 +31,27 @@ namespace Admin.Controllers
                     return View(new List<AtividadeViewModel>());
                 }
 
-                return View(atividades);
+                // Aplicar paginação
+                var totalItens = atividades.Count;
+                var totalPaginas = (int)Math.Ceiling((double)totalItens / tamanhoPagina);
+                
+                // Validar página atual
+                if (pagina < 1) pagina = 1;
+                if (pagina > totalPaginas) pagina = totalPaginas;
+                
+                var itensPagina = atividades
+                    .OrderBy(x => x.Nome)
+                    .Skip((pagina - 1) * tamanhoPagina)
+                    .Take(tamanhoPagina)
+                    .ToList();
+
+                // ViewBag para paginação
+                ViewBag.PaginaAtual = pagina;
+                ViewBag.TamanhoPagina = tamanhoPagina;
+                ViewBag.TotalItens = totalItens;
+                ViewBag.TotalPaginas = totalPaginas;
+
+                return View(itensPagina);
             }
             catch (Exception ex)
             {

@@ -34,7 +34,7 @@ namespace Admin.Controllers
 
         // GET: /Agenda
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int pagina = 1, int tamanhoPagina = 8)
 
         {
 
@@ -58,7 +58,47 @@ namespace Admin.Controllers
 
 
 
-                return View(agenda);
+                // Aplicar paginação
+
+                var totalItens = agenda.Count;
+
+                var totalPaginas = (int)Math.Ceiling((double)totalItens / tamanhoPagina);
+
+                
+
+                // Validar página atual
+
+                if (pagina < 1) pagina = 1;
+
+                if (pagina > totalPaginas) pagina = totalPaginas;
+
+                
+
+                var itensPagina = agenda
+
+                    .OrderBy(x => x.DataHora)
+
+                    .Skip((pagina - 1) * tamanhoPagina)
+
+                    .Take(tamanhoPagina)
+
+                    .ToList();
+
+
+
+                // Passar dados de paginação para a View
+
+                ViewBag.PaginaAtual = pagina;
+
+                ViewBag.TamanhoPagina = tamanhoPagina;
+
+                ViewBag.TotalItens = totalItens;
+
+                ViewBag.TotalPaginas = totalPaginas;
+
+
+
+                return View(itensPagina);
 
             }
 
