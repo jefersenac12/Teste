@@ -28,25 +28,6 @@
     <ScrollView>
         <VerticalStackLayout Padding="20,20,20,0" Spacing="20" HorizontalOptions="Center" WidthRequest="350">
 
-            <!-- TOPO -->
-            <Grid ColumnDefinitions="Auto,*,Auto" VerticalOptions="Center" HeightRequest="40" WidthRequest="310">
-                <ImageButton Source="seta_voltar.png"
-                             WidthRequest="28"
-                             HeightRequest="28"
-                             BackgroundColor="Transparent"
-                             Clicked="BtnVoltar_Clicked" />
-
-                <Label Grid.Column="1"
-                       Text=""
-                       HorizontalOptions="Center"
-                       VerticalOptions="Center" />
-
-                <ImageButton Grid.Column="2"
-                             Source="icone_perfil.png"
-                             WidthRequest="28"
-                             HeightRequest="28"
-                             BackgroundColor="Transparent" />
-            </Grid>
 
             <!-- TÍTULO -->
             <Label Text="Escolha suas atividades"
