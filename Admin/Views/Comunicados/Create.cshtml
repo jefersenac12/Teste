@@ -1,0 +1,84 @@
+@model Admin.Models.ComunicadoViewModel
+@{
+    ViewData["Title"] = "Novo Comunicado";
+}
+
+<div class="container my-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="bi bi-plus-circle"></i> Novo Comunicado</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Tipo" class="form-label"></label>
+                            <select asp-for="Tipo" class="form-select" asp-items="Html.GetEnumSelectList<Admin.Models.TipoComunicado>()">
+                                <option value="">Selecione o tipo...</option>
+                            </select>
+                            <span asp-validation-for="Tipo" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Titulo" class="form-label"></label>
+                            <input asp-for="Titulo" class="form-control" placeholder="Digite o título do comunicado" />
+                            <span asp-validation-for="Titulo" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Conteudo" class="form-label"></label>
+                            <textarea asp-for="Conteudo" class="form-control" rows="6" placeholder="Digite o conteúdo completo do comunicado"></textarea>
+                            <span asp-validation-for="Conteudo" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="DataInicio" class="form-label"></label>
+                                    <input asp-for="DataInicio" class="form-control" type="datetime-local" />
+                                    <span asp-validation-for="DataInicio" class="text-danger"></span>
+                                    <small class="form-text text-muted">Data de início da exibição (opcional)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="DataFim" class="form-label"></label>
+                                    <input asp-for="DataFim" class="form-control" type="datetime-local" />
+                                    <span asp-validation-for="DataFim" class="text-danger"></span>
+                                    <small class="form-text text-muted">Data de fim da exibição (opcional)</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Autor" class="form-label"></label>
+                            <input asp-for="Autor" class="form-control" placeholder="Nome do autor (opcional)" />
+                            <span asp-validation-for="Autor" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input asp-for="Ativo" class="form-check-input" type="checkbox" checked />
+                            <label asp-for="Ativo" class="form-check-label"></label>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Voltar
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-save"></i> Cadastrar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

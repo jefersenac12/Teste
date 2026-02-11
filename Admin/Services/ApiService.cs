@@ -629,5 +629,144 @@ namespace Admin.Services
             }
             return 0;
         }
+
+        static bool TryGetBool(JsonElement el, params string[] names)
+        {
+            foreach (var n in names)
+            {
+                if (el.TryGetProperty(n, out var p))
+                {
+                    if (p.ValueKind == JsonValueKind.True || p.ValueKind == JsonValueKind.False) return p.GetBoolean();
+                    if (p.ValueKind == JsonValueKind.String && bool.TryParse(p.GetString(), out var v2)) return v2;
+                }
+            }
+            return false;
+        }
+
+        static DateTime? TryGetDateTime(JsonElement el, params string[] names)
+        {
+            foreach (var n in names)
+            {
+                if (el.TryGetProperty(n, out var p))
+                {
+                    if (p.ValueKind == JsonValueKind.String && DateTime.TryParse(p.GetString(), out var dt)) return dt;
+                }
+            }
+            return null;
+        }
+
+        // Comunicados
+        public async Task<List<ComunicadoViewModel>> GetComunicadosAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"{_baseUrl}/comunicado");
+                if (!response.IsSuccessStatusCode) return new List<ComunicadoViewModel>();
+
+                var json = await response.Content.ReadAsStringAsync();
+                var comunicados = new List<ComunicadoViewModel>();
+
+                using var doc = JsonDocument.Parse(json);
+                if (doc.RootElement.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var el in doc.RootElement.EnumerateArray())
+                    {
+                        var comunicado = new ComunicadoViewModel
+                        {
+                            Id = TryGetInt(el, "id"),
+                            Titulo = TryGetString(el, "titulo") ?? "",
+                            Conteudo = TryGetString(el, "conteudo") ?? "",
+                            Tipo = (TipoComunicado)TryGetByte(el, "tipo"),
+                            DataCriacao = TryGetDateTime(el, "dataCriacao") ?? DateTime.Now,
+                            DataInicio = TryGetDateTime(el, "dataInicio"),
+                            DataFim = TryGetDateTime(el, "dataFim"),
+                            Ativo = TryGetBool(el, "ativo"),
+                            Autor = TryGetString(el, "autor")
+                        };
+                        comunicados.Add(comunicado);
+                    }
+                }
+
+                return comunicados;
+            }
+            catch
+            {
+                return new List<ComunicadoViewModel>();
+            }
+        }
+
+        public async Task<ComunicadoViewModel?> GetComunicadoByIdAsync(int id)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"{_baseUrl}/comunicado/{id}");
+                if (!response.IsSuccessStatusCode) return null;
+
+                var json = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(json);
+
+                var comunicado = new ComunicadoViewModel
+                {
+                    Id = TryGetInt(doc.RootElement, "id"),
+                    Titulo = TryGetString(doc.RootElement, "titulo") ?? "",
+                    Conteudo = TryGetString(doc.RootElement, "conteudo") ?? "",
+                    Tipo = (TipoComunicado)TryGetByte(doc.RootElement, "tipo"),
+                    DataCriacao = TryGetDateTime(doc.RootElement, "dataCriacao") ?? DateTime.Now,
+                    DataInicio = TryGetDateTime(doc.RootElement, "dataInicio"),
+                    DataFim = TryGetDateTime(doc.RootElement, "dataFim"),
+                    Ativo = TryGetBool(doc.RootElement, "ativo"),
+                    Autor = TryGetString(doc.RootElement, "autor")
+                };
+
+                return comunicado;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public async Task<bool> CreateComunicadoAsync(ComunicadoViewModel comunicado)
+        {
+            try
+            {
+                var json = JsonSerializer.Serialize(comunicado, _jsonOptions);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await _httpClient.PostAsync($"{_baseUrl}/comunicado", content);
+                return response.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateComunicadoAsync(int id, ComunicadoViewModel comunicado)
+        {
+            try
+            {
+                var json = JsonSerializer.Serialize(comunicado, _jsonOptions);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await _httpClient.PutAsync($"{_baseUrl}/comunicado/{id}", content);
+                return response.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> DeleteComunicadoAsync(int id)
+        {
+            try
+            {
+                var response = await _httpClient.DeleteAsync($"{_baseUrl}/comunicado/{id}");
+                return response.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }

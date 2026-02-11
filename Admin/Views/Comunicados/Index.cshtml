@@ -1,0 +1,136 @@
+@model IEnumerable<Admin.Models.ComunicadoViewModel>
+@{
+    ViewData["Title"] = "Comunicados";
+}
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold text-success">Comunicados</h1>
+        <a asp-action="Create" class="btn btn-success">
+            <i class="bi bi-plus-circle"></i> Novo Comunicado
+        </a>
+    </div>
+
+    @if (TempData["Sucesso"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Sucesso"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Erro"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Erro"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (ViewBag.Erro != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @ViewBag.Erro
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (ViewBag.Mensagem != null)
+    {
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            @ViewBag.Mensagem
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="row g-3">
+            @foreach (var item in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card shadow-sm h-100 @(item.Ativo ? "" : "border-secondary")">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span class="badge bg-@(GetTipoBadgeClass(item.Tipo))">@item.TipoDescricao</span>
+                            @if (!item.Ativo)
+                            {
+                                <span class="badge bg-secondary">Inativo</span>
+                            }
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">@item.Titulo</h5>
+                            <p class="card-text text-muted">
+                                @(item.Conteudo.Length > 100 ? item.Conteudo.Substring(0, 100) + "..." : item.Conteudo)
+                            </p>
+                            <div class="small text-muted mb-2">
+                                <div><i class="bi bi-calendar"></i> @item.DataCriacaoFormatada</div>
+                                @if (!string.IsNullOrEmpty(item.Autor))
+                                {
+                                    <div><i class="bi bi-person"></i> @item.Autor</div>
+                                }
+                                <div><i class="bi bi-clock"></i> @item.PeriodoExibicao</div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <div class="btn-group w-100" role="group">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-eye"></i> Ver
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-warning btn-sm">
+                                    <i class="bi bi-pencil"></i> Editar
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger btn-sm">
+                                    <i class="bi bi-trash"></i> Excluir
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Paginação -->
+        @if (ViewBag.TotalPaginas > 1)
+        {
+            <nav aria-label="Paginação" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    @if (ViewBag.PaginaAtual > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" asp-action="Index" asp-route-pagina="@(ViewBag.PaginaAtual - 1)">Anterior</a>
+                        </li>
+                    }
+
+                    @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
+                    {
+                        <li class="page-item @(i == ViewBag.PaginaAtual ? "active" : "")">
+                            <a class="page-link" asp-action="Index" asp-route-pagina="@i">@i</a>
+                        </li>
+                    }
+
+                    @if (ViewBag.PaginaAtual < ViewBag.TotalPaginas)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" asp-action="Index" asp-route-pagina="@(ViewBag.PaginaAtual + 1)">Próximo</a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    }
+</div>
+
+@{
+    string GetTipoBadgeClass(Admin.Models.TipoComunicado tipo)
+    {
+        return tipo switch
+        {
+            Admin.Models.TipoComunicado.Comunicado => "primary",
+            Admin.Models.TipoComunicado.Noticia => "info",
+            Admin.Models.TipoComunicado.Aviso => "warning",
+            Admin.Models.TipoComunicado.Atualizacao => "success",
+            Admin.Models.TipoComunicado.Evento => "danger",
+            _ => "secondary"
+        };
+    }
+}

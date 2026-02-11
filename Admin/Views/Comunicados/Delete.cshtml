@@ -1,0 +1,64 @@
+@model Admin.Models.ComunicadoViewModel
+@{
+    ViewData["Title"] = "Excluir Comunicado";
+}
+
+<div class="container my-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Confirmar Exclusão</h4>
+                </div>
+                <div class="card-body">
+                    <h5 class="text-danger">Tem certeza que deseja excluir este comunicado?</h5>
+                    <p class="text-muted">Esta ação não poderá ser desfeita.</p>
+
+                    <div class="card bg-light mb-3">
+                        <div class="card-header">
+                            <span class="badge bg-@(GetTipoBadgeClass(Model.Tipo))">@Model.TipoDescricao</span>
+                            <span class="float-end">@Model.DataCriacaoFormatada</span>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title">@Model.Titulo</h6>
+                            <p class="card-text">
+                                @(Model.Conteudo.Length > 200 ? Model.Conteudo.Substring(0, 200) + "..." : Model.Conteudo)
+                            </p>
+                            @if (!string.IsNullOrEmpty(Model.Autor))
+                            {
+                                <small class="text-muted">Autor: @Model.Autor</small>
+                            }
+                        </div>
+                    </div>
+
+                    <form asp-action="Delete">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Confirmar Exclusão
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@{
+    string GetTipoBadgeClass(Admin.Models.TipoComunicado tipo)
+    {
+        return tipo switch
+        {
+            Admin.Models.TipoComunicado.Comunicado => "primary",
+            Admin.Models.TipoComunicado.Noticia => "info",
+            Admin.Models.TipoComunicado.Aviso => "warning",
+            Admin.Models.TipoComunicado.Atualizacao => "success",
+            Admin.Models.TipoComunicado.Evento => "danger",
+            _ => "secondary"
+        };
+    }
+}
